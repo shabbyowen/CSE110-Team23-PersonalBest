@@ -12,8 +12,9 @@ import android.widget.Button;
 
 public class DailyGoalFragment extends Fragment {
 
-    private Activity parentActivity;
     private Button recordBtn;
+    private Button changeGoalBtn;
+    private Button addStepsBtn;
 
     public DailyGoalFragment() {
         // Required empty public constructor
@@ -23,19 +24,29 @@ public class DailyGoalFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_daily_goal, container, false);
-    }
+        View fragmentView = inflater.inflate(R.layout.fragment_daily_goal, container, false);
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        parentActivity = getActivity();
-        recordBtn = parentActivity.findViewById(R.id.daily_goal_record_btn);
+        recordBtn = fragmentView.findViewById(R.id.daily_goal_record_btn);
         recordBtn.setOnClickListener(this::onRecordBtnClicked);
+
+        changeGoalBtn = fragmentView.findViewById(R.id.daily_goal_change_goal_btn);
+        changeGoalBtn.setOnClickListener(this::onChangeGoalBtnClicked);
+
+        addStepsBtn = fragmentView.findViewById(R.id.daily_goal_add_steps_btn);
+        addStepsBtn.setOnClickListener(this::onAddStepsBtnClicked);
+
+        return fragmentView;
     }
 
     public void onRecordBtnClicked(View view) {
+
+    }
+
+    public void onChangeGoalBtnClicked(View view) {
+
+    }
+
+    public void onAddStepsBtnClicked(View view) {
 
     }
 }
