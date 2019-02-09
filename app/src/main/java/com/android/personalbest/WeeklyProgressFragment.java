@@ -27,6 +27,4 @@ public class WeeklyProgressFragment extends Fragment {
     }
 
 
-
-
 }
