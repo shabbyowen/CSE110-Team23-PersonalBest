@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +21,11 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class DailyGoalFragment extends Fragment {
 
-    private Activity parentActivity;
     private Button recordBtn;
     private EditText new_goal;
     private AlertDialog changeGoalDialog;
-
+    private Button changeGoalBtn;
+    private Button addStepsBtn;
 
     public DailyGoalFragment() {
         // Required empty public constructor
@@ -34,30 +35,35 @@ public class DailyGoalFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_daily_goal, container, false);
+        View fragmentView = inflater.inflate(R.layout.fragment_daily_goal, container, false);
+
+        recordBtn = fragmentView.findViewById(R.id.daily_goal_record_btn);
+        recordBtn.setOnClickListener(this::onRecordBtnClicked);
+
+        changeGoalBtn = fragmentView.findViewById(R.id.daily_goal_change_goal_btn);
+        changeGoalBtn.setOnClickListener(this::onChangeGoalBtnClicked);
+
+        addStepsBtn = fragmentView.findViewById(R.id.daily_goal_add_steps_btn);
+        addStepsBtn.setOnClickListener(this::onAddStepsBtnClicked);
+
+        return fragmentView;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
+    public void onRecordBtnClicked(View view) {
 
-        parentActivity = getActivity();
-        recordBtn = parentActivity.findViewById(R.id.daily_goal_record_btn);
-        recordBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onRecordBtnClicked(view);
-            }
-        });
     }
 
-    private void onRecordBtnClicked(View v) {
+    public void onChangeGoalBtnClicked(View view) {
+
+    }
+
+    public void onAddStepsBtnClicked(View view) {
 
     }
 
     public void editDailyGoal(){
-        final AlertDialog.Builder builder = new AlertDialog.Builder(parentActivity);
-        LayoutInflater inflater = parentActivity.getLayoutInflater();
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
 
         View rootView = inflater.inflate(R.layout.dialog_set_goal, null, false );
 
@@ -72,7 +78,7 @@ public class DailyGoalFragment extends Fragment {
                     builder.setMessage("Please use your fucking brain");
                 }else{
                     SharedPreferences sharedPreferences =
-                        parentActivity.getSharedPreferences("user_name", MODE_PRIVATE);
+                        getActivity().getSharedPreferences("user_name", MODE_PRIVATE);
 
                     SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -80,7 +86,7 @@ public class DailyGoalFragment extends Fragment {
 
                     editor.apply();
 
-                    Toast.makeText(parentActivity, "Saved", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "Saved", Toast.LENGTH_LONG).show();
 
                     dialog.dismiss();
                 }
