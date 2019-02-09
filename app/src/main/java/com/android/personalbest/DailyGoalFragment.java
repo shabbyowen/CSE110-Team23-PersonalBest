@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.content.SharedPreferences;
 
@@ -23,6 +24,7 @@ public class DailyGoalFragment extends Fragment {
 
     private Button recordBtn;
     private EditText new_goal;
+    private TextView change_goal_instruction;
     private AlertDialog changeGoalDialog;
     private Button changeGoalBtn;
     private Button addStepsBtn;
@@ -54,7 +56,7 @@ public class DailyGoalFragment extends Fragment {
     }
 
     public void onChangeGoalBtnClicked(View view) {
-
+        editDailyGoal();
     }
 
     public void onAddStepsBtnClicked(View view) {
@@ -73,23 +75,6 @@ public class DailyGoalFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int i) {
 
-
-                if(Integer.valueOf(new_goal.toString()) < 0){
-                    builder.setMessage("Please use your fucking brain");
-                }else{
-                    SharedPreferences sharedPreferences =
-                        getActivity().getSharedPreferences("user_name", MODE_PRIVATE);
-
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                    editor.putString("daily_goal", new_goal.getText().toString());
-
-                    editor.apply();
-
-                    Toast.makeText(getActivity(), "Saved", Toast.LENGTH_LONG).show();
-
-                    dialog.dismiss();
-                }
             }
         });
 
@@ -103,9 +88,34 @@ public class DailyGoalFragment extends Fragment {
 
         changeGoalDialog = builder.create();
 
-        new_goal = rootView.findViewById();
+        new_goal = rootView.findViewById(R.id.new_goal);
 
+        change_goal_instruction = rootView.findViewById(R.id.change_daily_goal_instruction);
 
         changeGoalDialog.show();
+
+        changeGoalDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v)
+            {
+
+                if(Integer.valueOf(new_goal.getText().toString()) < 0){
+                    change_goal_instruction.setText(R.string.change_goal_instruction_failed);
+                }else{
+                    SharedPreferences sharedPreferences =
+                        getActivity().getSharedPreferences("user_name", MODE_PRIVATE);
+
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                    editor.putString("daily_goal", new_goal.getText().toString());
+
+                    editor.apply();
+
+                    Toast.makeText(getActivity(), "Saved", Toast.LENGTH_LONG).show();
+
+                    changeGoalDialog.dismiss();
+                }
+            }
+        });
     }
 }
