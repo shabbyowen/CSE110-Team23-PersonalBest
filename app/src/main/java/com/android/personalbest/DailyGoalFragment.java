@@ -99,9 +99,22 @@ public class DailyGoalFragment extends Fragment {
             public void onClick(View v)
             {
 
-                if(Integer.valueOf(new_goal.getText().toString()) < 0){
-                    change_goal_instruction.setText(R.string.change_goal_instruction_failed);
-                }else{
+                Boolean isValid = true;
+
+                //The try catch is user to catch potential overflow errors
+                try{
+                    Integer value = Integer.valueOf(new_goal.getText().toString());
+
+                    if (value < 0){
+                        isValid = false;
+                    }
+
+                }catch (NumberFormatException e){
+                    isValid = false;
+                }
+
+                if(isValid){
+
                     SharedPreferences sharedPreferences =
                         getActivity().getSharedPreferences("user_name", MODE_PRIVATE);
 
@@ -114,6 +127,11 @@ public class DailyGoalFragment extends Fragment {
                     Toast.makeText(getActivity(), "Saved", Toast.LENGTH_LONG).show();
 
                     changeGoalDialog.dismiss();
+
+                }else{
+
+                    change_goal_instruction.setText(R.string.change_goal_instruction_failed);
+
                 }
             }
         });
