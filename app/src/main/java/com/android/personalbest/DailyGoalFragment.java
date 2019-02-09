@@ -64,7 +64,7 @@ public class DailyGoalFragment extends Fragment {
     }
 
     public void editDailyGoal(){
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
         View rootView = inflater.inflate(R.layout.dialog_set_goal, null, false );
