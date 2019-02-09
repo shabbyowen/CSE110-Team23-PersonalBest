@@ -4,6 +4,7 @@ package com.android.personalbest;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,15 +32,10 @@ public class DailyGoalFragment extends Fragment {
 
         parentActivity = getActivity();
         recordBtn = parentActivity.findViewById(R.id.daily_goal_record_btn);
-        recordBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onRecordBtnClicked(view);
-            }
-        });
+        recordBtn.setOnClickListener(this::onRecordBtnClicked);
     }
 
-    private void onRecordBtnClicked(View v) {
+    public void onRecordBtnClicked(View view) {
 
     }
 }
