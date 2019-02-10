@@ -51,7 +51,7 @@ public class HomeScreenActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         putFragment(new DailyGoalFragment());
 
-        // stub
+        // set up bottom navigation menu
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }

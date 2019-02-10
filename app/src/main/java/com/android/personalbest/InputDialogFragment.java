@@ -28,8 +28,6 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public class InputDialogFragment extends DialogFragment {
 
-    private static final String LISTENER_OBJ = "listener_obj";
-
     private TextView promptTextView;
     private EditText inputEditText;
     private InputDialogListener listener;
@@ -40,12 +38,17 @@ public class InputDialogFragment extends DialogFragment {
         // Required empty public constructor
     }
 
+    // implement this interface to get the result from the dialog
     public interface InputDialogListener{
         boolean onInputResult(String tag, String result, TextView view);
     }
 
     public static InputDialogFragment newInstance(InputDialogListener listener, String tag, int prompt) {
+
+        // initialize a new input dialog fragment
         InputDialogFragment fragment = new InputDialogFragment();
+
+        // preset the listener for callback, tag for , prompt for asking user for inputs
         fragment.listener = listener;
         fragment.tag = tag;
         fragment.prompt = prompt;
@@ -73,6 +76,7 @@ public class InputDialogFragment extends DialogFragment {
         builder.setPositiveButton(R.string.ok, null);
         builder.setNegativeButton(R.string.cancel, this::onCancelBtnClicked);
 
+        // over write the default closing action after pressing the confirm button
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> {
             Button button = ((AlertDialog) d).getButton(AlertDialog.BUTTON_POSITIVE);
@@ -82,6 +86,8 @@ public class InputDialogFragment extends DialogFragment {
     }
 
     public void onConfirmBtnClicked(DialogInterface dialog, int i) {
+
+        // callback, if listener says true, dismiss this dialog
         if (listener.onInputResult(tag, inputEditText.getText().toString(), promptTextView)) {
             dialog.dismiss();
         }

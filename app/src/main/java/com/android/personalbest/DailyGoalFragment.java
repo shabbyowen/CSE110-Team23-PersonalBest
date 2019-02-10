@@ -25,13 +25,11 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class DailyGoalFragment extends Fragment implements InputDialogFragment.InputDialogListener {
 
+    // use this tag to identify the source of onInputResult
     public static final String SET_GOAL = "set_goal";
     public static final String ADD_STEP = "add_step";
 
     private Button recordBtn;
-//    private EditText new_goal;
-//    private TextView change_goal_instruction;
-//    private AlertDialog changeGoalDialog;
     private Button changeGoalBtn;
     private Button addStepsBtn;
 
@@ -45,6 +43,7 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
         // Inflate the layout for this fragment
         View fragmentView = inflater.inflate(R.layout.fragment_daily_goal, container, false);
 
+        // assigning listeners
         recordBtn = fragmentView.findViewById(R.id.daily_goal_record_btn);
         recordBtn.setOnClickListener(this::onRecordBtnClicked);
 
@@ -75,7 +74,10 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
 
     @Override
     public boolean onInputResult(String tag, String result, TextView prompt) {
+        // processes the result from the input dialog
         switch (tag) {
+
+            // from set goal
             case SET_GOAL:
                 int value;
                 try {
@@ -95,6 +97,8 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
                     prompt.setText(R.string.change_goal_instruction_failed);
                     return false;
                 }
+
+            // from add step
             case ADD_STEP:
                 break;
             default:
@@ -102,78 +106,4 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
         }
         return false;
     }
-
-    /*
-    public void editDailyGoal() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-
-        View rootView = inflater.inflate(R.layout.dialog_set_goal, null, false);
-
-        builder.setView(rootView);
-        builder.setTitle("Set Goal");
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-
-            }
-        });
-
-        builder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                dialog.dismiss();
-            }
-        });
-
-        changeGoalDialog = builder.create();
-
-        new_goal = rootView.findViewById(R.id.new_goal);
-
-        change_goal_instruction = rootView.findViewById(R.id.change_daily_goal_instruction);
-
-        changeGoalDialog.show();
-
-        changeGoalDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Boolean isValid = true;
-
-                //The try catch is user to catch potential overflow errors
-                try {
-                    Integer value = Integer.valueOf(new_goal.getText().toString());
-
-                    if (value < 0) {
-                        isValid = false;
-                    }
-
-                } catch (NumberFormatException e) {
-                    isValid = false;
-                }
-
-                if (isValid) {
-
-                    SharedPreferences sharedPreferences =
-                        getActivity().getSharedPreferences("user_name", MODE_PRIVATE);
-
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                    editor.putString("daily_goal", new_goal.getText().toString());
-
-                    editor.apply();
-
-                    Toast.makeText(getActivity(), "Saved", Toast.LENGTH_LONG).show();
-
-                    changeGoalDialog.dismiss();
-
-                } else {
-
-                    change_goal_instruction.setText(R.string.change_goal_instruction_failed);
-
-                }
-            }
-        });
-    }
-    */
 }
