@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     tools:context=".DailyGoalFragment"
     android:orientation="vertical"
-    android:gravity="center">
+    android:gravity="center"
+    style="@style/root_layout">
 
 
     <TextView
