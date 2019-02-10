@@ -120,7 +120,7 @@ public class DailyGoalFragment extends Fragment {
 
                     SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                    editor.putString("daily_goal", new_goal.getText().toString());
+                    editor.putString("daily_goal", new_goal.getText().toString());.
 
                     editor.apply();
 
