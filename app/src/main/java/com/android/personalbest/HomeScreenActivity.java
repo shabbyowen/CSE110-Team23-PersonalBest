@@ -15,8 +15,9 @@ import com.android.personalbest.fitness.FitnessServiceFactory;
 import com.android.personalbest.fitness.GoogleFitAdapter;
 
 
-public class HomeScreenActivity extends AppCompatActivity {
+public class HomeScreenActivity extends AppCompatActivity implements HeightPromptFragment.HeightPromptListener {
     private static final String FITNESS_API_KEY = "HOME_SCREEN_KEY";
+    private static final String INPUT_HEIGHT = "INPUT_HEIGHT";
 
     private FitnessService fitnessService;
 
@@ -57,7 +58,6 @@ public class HomeScreenActivity extends AppCompatActivity {
 
         // init fragment manager
         fragmentManager = getSupportFragmentManager();
-        putFragment(new DailyGoalFragment());
 
         // set up bottom navigation menu
         BottomNavigationView navigation = findViewById(R.id.navigation);
@@ -72,6 +72,10 @@ public class HomeScreenActivity extends AppCompatActivity {
         });
         fitnessService = FitnessServiceFactory.create(FITNESS_API_KEY, this);
         fitnessService.setup();
+
+        HeightPromptFragment heightPromptFragment = HeightPromptFragment.newInstance(this, INPUT_HEIGHT, R.string.prompt_height_str);
+        heightPromptFragment.show(fragmentManager, INPUT_HEIGHT);
+        putFragment(new DailyGoalFragment());
     }
 
     private void putFragment(Fragment fragment) {
@@ -96,5 +100,10 @@ public class HomeScreenActivity extends AppCompatActivity {
     public void setStepCount(long stepCount) {
         if (dailyGoalFragment == null) return;
         dailyGoalFragment.setStepCount(stepCount);
+    }
+
+    @Override
+    public boolean onInputResult(String tag, String result, TextView view) {
+        return true;
     }
 }

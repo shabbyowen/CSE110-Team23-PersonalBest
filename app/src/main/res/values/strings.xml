@@ -33,6 +33,12 @@
     <!-- Toast texts -->
     <string name="saved">Saved</string>
 
+    <!-- Height Prompt texts -->
+    <string name="ft_str">ft.</string>
+    <string name="inch_str">inch.</string>
+    <string name="prompt_height_str">Please enter your height</string>
+
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="placeholder_str">Place Holder</string>
     <string name="placeholder_num">10000</string>
