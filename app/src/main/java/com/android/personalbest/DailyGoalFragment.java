@@ -21,6 +21,9 @@ import android.widget.Toast;
 import android.content.SharedPreferences;
 
 
+import com.android.personalbest.fitness.FitnessService;
+import com.android.personalbest.fitness.FitnessServiceFactory;
+
 import static android.content.Context.MODE_PRIVATE;
 
 public class DailyGoalFragment extends Fragment implements InputDialogFragment.InputDialogListener {
@@ -32,6 +35,8 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
     private Button recordBtn;
     private Button changeGoalBtn;
     private Button addStepsBtn;
+
+    private TextView currentStepTextView;
 
     public DailyGoalFragment() {
         // Required empty public constructor
@@ -52,6 +57,8 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
 
         addStepsBtn = fragmentView.findViewById(R.id.daily_goal_add_steps_btn);
         addStepsBtn.setOnClickListener(this::onAddStepsBtnClicked);
+
+        currentStepTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
 
         return fragmentView;
     }
@@ -105,5 +112,9 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
                 return false;
         }
         return false;
+    }
+
+    public void setStepCount(long stepCount) {
+        currentStepTextView.setText(String.valueOf(stepCount));
     }
 }

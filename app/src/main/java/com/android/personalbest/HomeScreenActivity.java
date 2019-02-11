@@ -10,12 +10,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.android.personalbest.fitness.FitnessService;
+import com.android.personalbest.fitness.FitnessServiceFactory;
+import com.android.personalbest.fitness.GoogleFitAdapter;
+
+
 public class HomeScreenActivity extends AppCompatActivity {
+    private static final String FITNESS_API_KEY = "HOME_SCREEN_KEY";
+
+    private FitnessService fitnessService;
 
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
     private Fragment currentFragment;
-    private Fragment dailyGoalFragment;
+    private DailyGoalFragment dailyGoalFragment;
     private Fragment weeklyProgressFragment;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -54,6 +62,16 @@ public class HomeScreenActivity extends AppCompatActivity {
         // set up bottom navigation menu
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+
+        FitnessServiceFactory.put(FITNESS_API_KEY, new FitnessServiceFactory.BluePrint() {
+            @Override
+            public FitnessService create(HomeScreenActivity stepCountActivity) {
+                return new GoogleFitAdapter(stepCountActivity);
+            }
+        });
+        fitnessService = FitnessServiceFactory.create(FITNESS_API_KEY, this);
+        fitnessService.setup();
     }
 
     private void putFragment(Fragment fragment) {
@@ -73,5 +91,10 @@ public class HomeScreenActivity extends AppCompatActivity {
         fragmentTransaction.add(R.id.home_screen_container, fragment);
         currentFragment = fragment;
         fragmentTransaction.commit();
+    }
+
+    public void setStepCount(long stepCount) {
+        if (dailyGoalFragment == null) return;
+        dailyGoalFragment.setStepCount(stepCount);
     }
 }
