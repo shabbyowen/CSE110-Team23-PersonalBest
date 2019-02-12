@@ -17,8 +17,12 @@ import android.widget.Toast;
 
 
 import com.android.personalbest.models.StepCounter;
+import com.android.personalbest.models.WorkoutRecord;
 
-public class DailyGoalFragment extends Fragment implements InputDialogFragment.InputDialogListener, StepCounter.Listener {
+public class DailyGoalFragment extends Fragment implements
+    InputDialogFragment.InputDialogListener,
+    StepCounter.Listener,
+    WorkoutRecord.Listener {
 
     private static final String TAG = "DailyGoalFragment";
 
@@ -32,9 +36,12 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
     private Button addStepsBtn;
     private TextView currentStepTextView;
     private TextView currentStepGoalTextView;
+    private TextView sessionStepTextView;
+    private TextView sessionTimeTextView;
 
     // models
     private StepCounter counter;
+    private WorkoutRecord record;
 
     // Required empty public constructor
     public DailyGoalFragment() {}
@@ -44,8 +51,10 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
         super.onCreate(savedInstanceState);
 
         // initialize the model field
-        counter = StepCounter.getInstance(getActivity());
+        counter = StepCounter.getInstance(getContext());
         counter.addListener(this);
+        record = WorkoutRecord.getInstance(getContext());
+        record.addListener(this);
     }
 
     @Override
@@ -63,6 +72,8 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
 
         currentStepTextView = fragmentView.findViewById(R.id.daily_goal_steps_tv);
         currentStepGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
+        sessionTimeTextView = fragmentView.findViewById(R.id.daily_goal_current_time_tv);
+        sessionStepTextView = fragmentView.findViewById(R.id.daily_goal_current_step_tv);
 
         return fragmentView;
     }
@@ -81,10 +92,17 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
 
         // clean up
         counter.removeListener(this);
+        record.removeListener(this);
     }
 
     public void onRecordBtnClicked(View view) {
-
+        if (!record.isWorkingout()) {
+            record.startWorkout(System.currentTimeMillis(), counter.getStep());
+            recordBtn.setText(R.string.end_record);
+        } else {
+            record.endWorkout();
+            recordBtn.setText(R.string.start_record);
+        }
     }
 
     public void onChangeGoalBtnClicked(View view) {
@@ -138,5 +156,15 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
     @Override
     public void onGoalChanged(int value) {
         currentStepGoalTextView.setText(String.valueOf(value));
+    }
+
+    @Override
+    public void onSecondElapsed(int value) {
+        sessionTimeTextView.setText(String.valueOf(value));
+    }
+
+    @Override
+    public void onStepWalked(int value) {
+        sessionStepTextView.setText(String.valueOf(value));
     }
 }

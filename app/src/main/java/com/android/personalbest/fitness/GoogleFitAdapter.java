@@ -74,6 +74,7 @@ public class GoogleFitAdapter implements FitnessService {
     public void updateStepCount() {
         GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
         if (lastSignedInAccount == null) {
+            Log.w(TAG, "No account signed in!");
             return;
         }
 

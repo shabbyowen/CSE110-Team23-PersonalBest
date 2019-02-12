@@ -145,11 +145,11 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/dist"
+                    android:text="@string/step"
                     style="@style/normal_text" />
 
                 <TextView
-                    android:id="@+id/daily_goal_current_dist_tv"
+                    android:id="@+id/daily_goal_current_step_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/placeholder_num"

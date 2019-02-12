@@ -10,7 +10,7 @@
     <string name="text_divider">/</string>
     <string name="current_session">Current Session</string>
     <string name="time">Time</string>
-    <string name="dist">Distance</string>
+    <string name="step">Step</string>
     <string name="speed">Speed</string>
     <string name="mph">mph</string>
     <string name="mile">mi</string>
@@ -41,7 +41,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="placeholder_str">Place Holder</string>
-    <string name="placeholder_num">10000</string>
+    <string name="placeholder_num">0</string>
     <string name="placeholder_time">--:--:--</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

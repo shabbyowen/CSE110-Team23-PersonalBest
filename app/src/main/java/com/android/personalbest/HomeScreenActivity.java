@@ -1,5 +1,6 @@
 package com.android.personalbest;
 
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -14,12 +16,17 @@ import com.android.personalbest.fitness.FitnessService;
 import com.android.personalbest.fitness.FitnessServiceFactory;
 import com.android.personalbest.fitness.GoogleFitAdapter;
 import com.android.personalbest.models.StepCounter;
+import com.android.personalbest.models.WorkoutRecord;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 
 public class HomeScreenActivity extends AppCompatActivity implements HeightPromptFragment.HeightPromptListener{
 
     private static final String FITNESS_API_KEY = "HOME_SCREEN_KEY";
     private static final String INPUT_HEIGHT = "INPUT_HEIGHT";
+    private static final String TAG = "HomeScreenActivity";
+    private static final int UPDATE_DELAY_SEC = 5;
 
     private FitnessService fitnessService;
 
@@ -28,6 +35,9 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     private Fragment currentFragment;
     private DailyGoalFragment dailyGoalFragment;
     private Fragment weeklyProgressFragment;
+    private Runnable updateStepTask;
+    private Runnable updateTimeTask;
+    private Handler handler;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
         = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -55,6 +65,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
 
     // models
     private StepCounter counter;
+    private WorkoutRecord record;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +74,10 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
 
         // get models
         counter = StepCounter.getInstance(this);
+        record = WorkoutRecord.getInstance(this);
+
+        // the record model listens to the step update
+        counter.addListener(record);
 
         // init fragment manager
         fragmentManager = getSupportFragmentManager();
@@ -71,7 +86,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-
+        // fitness service connection
         FitnessServiceFactory.put(FITNESS_API_KEY, new FitnessServiceFactory.BluePrint() {
             @Override
             public FitnessService create(HomeScreenActivity stepCountActivity) {
@@ -81,9 +96,42 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         fitnessService = FitnessServiceFactory.create(FITNESS_API_KEY, this);
         fitnessService.setup();
 
+        // ask user for their height
         HeightPromptFragment heightPromptFragment = HeightPromptFragment.newInstance(this, INPUT_HEIGHT, R.string.prompt_height_str);
         heightPromptFragment.show(fragmentManager, INPUT_HEIGHT);
         putFragment(new DailyGoalFragment());
+
+        // initialize update task
+        handler = new Handler();
+        updateStepTask = () -> {
+            Log.d(TAG, "try to update the step count...");
+            fitnessService.updateStepCount();
+            handler.postDelayed(updateStepTask, UPDATE_DELAY_SEC * 1000);
+        };
+        updateTimeTask = () -> {
+            record.updateTime(System.currentTimeMillis());
+            handler.postDelayed(updateTimeTask, 1000);
+        };
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // resume updating step count
+        handler.post(updateStepTask);
+        handler.post(updateTimeTask);
+        Log.d(TAG, "update tasks resumed");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // pause update task
+        handler.removeCallbacks(updateStepTask);
+        handler.removeCallbacks(updateTimeTask);
+        Log.d(TAG, "update tasks paused");
     }
 
     private void putFragment(Fragment fragment) {
