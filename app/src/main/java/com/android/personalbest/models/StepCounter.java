@@ -9,11 +9,15 @@ import java.util.List;
 
 public class StepCounter {
 
-    private static final String USER_SHARED_PREF = "personal_best_user";
+    private static final String COUNTER_SHARED_PREF = "personal_best_counter";
     private static final String STEP_COUNT = "step_count";
     private static final String STEP_GOAL = "step_goal";
-
     private static StepCounter instance;
+
+    private SharedPreferences sharedPreferences;
+    private List<Listener> listeners;
+    private int step;
+    private int goal;
 
     public static StepCounter getInstance(Context context) {
         if (instance == null) {
@@ -22,18 +26,13 @@ public class StepCounter {
         return instance;
     }
 
-    private SharedPreferences sharedPreferences;
-    private List<Listener> listeners;
-    private int step;
-    private int goal;
-
     public interface Listener {
         void onStepChanged(int value);
         void onGoalChanged(int value);
     }
 
     public StepCounter(Context context) {
-        sharedPreferences = context.getSharedPreferences(USER_SHARED_PREF, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(COUNTER_SHARED_PREF, Context.MODE_PRIVATE);
         listeners = new ArrayList<>();
         load();
     }
