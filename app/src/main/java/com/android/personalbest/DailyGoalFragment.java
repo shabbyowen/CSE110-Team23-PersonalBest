@@ -117,6 +117,7 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
                 }
                 if (value > 0) {
                     counter.setGoal(value);
+                    counter.save();
                     Toast.makeText(getActivity(), R.string.saved, Toast.LENGTH_LONG).show();
                     Log.d(TAG, String.format("changing daily goal to %d", value));
                     return true;

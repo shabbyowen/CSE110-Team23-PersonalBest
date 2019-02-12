@@ -50,7 +50,6 @@ public class StepCounter {
 
     public void setStep(int value) {
         step = value;
-        save();
         for (Listener listener: listeners) {
             listener.onStepChanged(value);
         }
@@ -58,7 +57,6 @@ public class StepCounter {
 
     public void setGoal(int value) {
         goal = value;
-        save();
         for (Listener listener: listeners) {
             listener.onGoalChanged(value);
         }
@@ -72,11 +70,11 @@ public class StepCounter {
         return goal;
     }
 
-    private void save() {
+    public void save() {
         sharedPreferences.edit().putInt(STEP_COUNT, step).putInt(STEP_GOAL, goal).apply();
     }
 
-    private void load() {
+    public void load() {
         step = sharedPreferences.getInt(STEP_COUNT, -1);
         goal = sharedPreferences.getInt(STEP_GOAL, 5000);
     }
