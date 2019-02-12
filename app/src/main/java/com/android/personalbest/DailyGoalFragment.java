@@ -1,45 +1,51 @@
 package com.android.personalbest;
 
 
-import android.app.Activity;
-import android.renderscript.ScriptGroup;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.content.SharedPreferences;
 
 
-import com.android.personalbest.fitness.FitnessService;
-import com.android.personalbest.fitness.FitnessServiceFactory;
+import com.android.personalbest.models.StepCounter;
 
-import static android.content.Context.MODE_PRIVATE;
+public class DailyGoalFragment extends Fragment implements InputDialogFragment.InputDialogListener, StepCounter.Listener {
 
-public class DailyGoalFragment extends Fragment implements InputDialogFragment.InputDialogListener {
+    private static final String TAG = "DailyGoalFragment";
 
     // use this tag to identify the source of onInputResult
-    public static final String SET_GOAL = "set_goal";
-    public static final String ADD_STEP = "add_step";
+    private static final String SET_GOAL = "set_goal";
+    private static final String ADD_STEP = "add_step";
 
+    // UI elements
     private Button recordBtn;
     private Button changeGoalBtn;
     private Button addStepsBtn;
-
     private TextView currentStepTextView;
+    private TextView currentStepGoalTextView;
 
-    public DailyGoalFragment() {
-        // Required empty public constructor
+    // models
+    private StepCounter counter;
+
+    // Required empty public constructor
+    public DailyGoalFragment() {}
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // initialize the model field
+        counter = StepCounter.getInstance(getActivity());
+        counter.addListener(this);
     }
 
     @Override
@@ -55,12 +61,26 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
         changeGoalBtn = fragmentView.findViewById(R.id.daily_goal_change_goal_btn);
         changeGoalBtn.setOnClickListener(this::onChangeGoalBtnClicked);
 
-        addStepsBtn = fragmentView.findViewById(R.id.daily_goal_add_steps_btn);
-        addStepsBtn.setOnClickListener(this::onAddStepsBtnClicked);
-
-        currentStepTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
+        currentStepTextView = fragmentView.findViewById(R.id.daily_goal_steps_tv);
+        currentStepGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
 
         return fragmentView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
+        // display step goal and current steps
+        currentStepTextView.setText(String.valueOf(counter.getStep()));
+        currentStepGoalTextView.setText(String.valueOf(counter.getGoal()));
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // clean up
+        counter.removeListener(this);
     }
 
     public void onRecordBtnClicked(View view) {
@@ -86,6 +106,8 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
 
             // from set goal
             case SET_GOAL:
+
+                // validate entered goal
                 int value;
                 try {
                     value = Integer.valueOf(result);
@@ -94,27 +116,26 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
                     return false;
                 }
                 if (value > 0) {
-                    SharedPreferences sharedPreferences = getActivity().getSharedPreferences("personal_best", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putInt("daily_goal", value);
-                    editor.apply();
+                    counter.setGoal(value);
                     Toast.makeText(getActivity(), R.string.saved, Toast.LENGTH_LONG).show();
+                    Log.d(TAG, String.format("changing daily goal to %d", value));
                     return true;
                 } else {
                     prompt.setText(R.string.change_goal_instruction_failed);
                     return false;
                 }
-
-            // from add step
-            case ADD_STEP:
-                break;
             default:
                 return false;
         }
-        return false;
     }
 
-    public void setStepCount(long stepCount) {
-        currentStepTextView.setText(String.valueOf(stepCount));
+    @Override
+    public void onStepChanged(int value) {
+        currentStepTextView.setText(String.valueOf(value));
+    }
+
+    @Override
+    public void onGoalChanged(int value) {
+        currentStepGoalTextView.setText(String.valueOf(value));
     }
 }

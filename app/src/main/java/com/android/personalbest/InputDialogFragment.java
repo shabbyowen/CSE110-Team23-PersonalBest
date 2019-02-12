@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,6 +68,7 @@ public class InputDialogFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_input_dialog, null);
         promptTextView = view.findViewById(R.id.fragment_input_dialog_tv);
         inputEditText = view.findViewById(R.id.fragment_input_dialog_et);
+        inputEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
 
         // set prompt
         promptTextView.setText(prompt);

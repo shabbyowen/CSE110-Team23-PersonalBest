@@ -13,9 +13,11 @@ import android.widget.TextView;
 import com.android.personalbest.fitness.FitnessService;
 import com.android.personalbest.fitness.FitnessServiceFactory;
 import com.android.personalbest.fitness.GoogleFitAdapter;
+import com.android.personalbest.models.StepCounter;
 
 
-public class HomeScreenActivity extends AppCompatActivity implements HeightPromptFragment.HeightPromptListener {
+public class HomeScreenActivity extends AppCompatActivity implements HeightPromptFragment.HeightPromptListener{
+
     private static final String FITNESS_API_KEY = "HOME_SCREEN_KEY";
     private static final String INPUT_HEIGHT = "INPUT_HEIGHT";
 
@@ -51,10 +53,16 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         }
     };
 
+    // models
+    private StepCounter counter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
+
+        // get models
+        counter = StepCounter.getInstance(this);
 
         // init fragment manager
         fragmentManager = getSupportFragmentManager();
@@ -98,8 +106,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     }
 
     public void setStepCount(long stepCount) {
-        if (dailyGoalFragment == null) return;
-        dailyGoalFragment.setStepCount(stepCount);
+        counter.setStep((int)stepCount);
     }
 
     @Override
