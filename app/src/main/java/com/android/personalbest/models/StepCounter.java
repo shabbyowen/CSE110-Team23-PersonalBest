@@ -24,6 +24,8 @@ public class StepCounter {
 
     private SharedPreferences sharedPreferences;
     private List<Listener> listeners;
+    private int step;
+    private int goal;
 
     public interface Listener {
         void onStepChanged(int value);
@@ -31,8 +33,9 @@ public class StepCounter {
     }
 
     public StepCounter(Context context) {
-        this.sharedPreferences = context.getSharedPreferences(USER_SHARED_PREF, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(USER_SHARED_PREF, Context.MODE_PRIVATE);
         listeners = new ArrayList<>();
+        load();
     }
 
     public void addListener(Listener listener) {
@@ -46,24 +49,35 @@ public class StepCounter {
     }
 
     public void setStep(int value) {
-        sharedPreferences.edit().putInt(STEP_COUNT, value).apply();
+        step = value;
+        save();
         for (Listener listener: listeners) {
             listener.onStepChanged(value);
         }
     }
 
     public void setGoal(int value) {
-        sharedPreferences.edit().putInt(STEP_GOAL, value).apply();
+        goal = value;
+        save();
         for (Listener listener: listeners) {
             listener.onGoalChanged(value);
         }
     }
 
     public int getStep() {
-        return sharedPreferences.getInt(STEP_COUNT, -1);
+        return step;
     }
 
     public int getGoal() {
-        return sharedPreferences.getInt(STEP_GOAL, 5000);
+        return goal;
+    }
+
+    private void save() {
+        sharedPreferences.edit().putInt(STEP_COUNT, step).putInt(STEP_GOAL, goal).apply();
+    }
+
+    private void load() {
+        step = sharedPreferences.getInt(STEP_COUNT, -1);
+        goal = sharedPreferences.getInt(STEP_GOAL, 5000);
     }
 }
