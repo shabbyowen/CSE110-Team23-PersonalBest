@@ -168,24 +168,27 @@ public class DailyGoalFragment extends Fragment implements
         return sb.toString();
     }
 
-    public StringBuilder padZero(StringBuilder sb, int number) {
+    public void padZero(StringBuilder sb, int number) {
         if (number == 0) {
             sb.append("00");
-            return sb;
+            return;
         }
         if (number < 10) {
             sb.append(0);
         }
         sb.append(number);
-        return sb;
     }
 
     @Override
     public void onUpdate(Object o) {
+
+        // counter results
         if (o instanceof StepCounter.Result) {
             StepCounter.Result result = (StepCounter.Result) o;
             currentStepTextView.setText(String.valueOf(result.step));
             currentStepGoalTextView.setText(String.valueOf(result.goal));
+
+        // record results
         } else if (o instanceof WorkoutRecord.Result) {
             WorkoutRecord.Result result = (WorkoutRecord.Result) o;
             sessionStepTextView.setText(String.valueOf(result.deltaStep));
