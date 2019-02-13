@@ -4,10 +4,7 @@ package com.android.personalbest.models;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class StepCounter {
+public class StepCounter extends Model {
 
     private static final String COUNTER_SHARED_PREF = "personal_best_counter";
     private static final String STEP_COUNT = "step_count";
@@ -15,7 +12,6 @@ public class StepCounter {
     private static StepCounter instance;
 
     private SharedPreferences sharedPreferences;
-    private List<Listener> listeners;
     private int step;
     private int goal;
 
@@ -26,39 +22,35 @@ public class StepCounter {
         return instance;
     }
 
-    public interface Listener {
-        void onStepChanged(int value);
-        void onGoalChanged(int value);
-    }
+    public class Result {
 
-    public StepCounter(Context context) {
-        sharedPreferences = context.getSharedPreferences(COUNTER_SHARED_PREF, Context.MODE_PRIVATE);
-        listeners = new ArrayList<>();
-        load();
-    }
+        public int step;
+        public int goal;
 
-    public void addListener(Listener listener) {
-        if (!listeners.contains(listener)) {
-            listeners.add(listener);
+        public Result(int step, int goal){
+            this.step = step;
+            this.goal = goal;
         }
     }
 
-    public void removeListener(Listener listener) {
-        listeners.remove(listener);
+    public StepCounter(Context context) {
+        super();
+        sharedPreferences = context.getSharedPreferences(COUNTER_SHARED_PREF, Context.MODE_PRIVATE);
+        load();
     }
 
     public void setStep(int value) {
         step = value;
-        for (Listener listener: listeners) {
-            listener.onStepChanged(value);
-        }
+        updateAll();
     }
 
     public void setGoal(int value) {
         goal = value;
-        for (Listener listener: listeners) {
-            listener.onGoalChanged(value);
-        }
+        updateAll();
+    }
+
+    public void updateAll() {
+        update(new Result(step, goal));
     }
 
     public int getStep() {

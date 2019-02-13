@@ -7,7 +7,7 @@ import android.util.Log;
 import java.util.LinkedList;
 import java.util.List;
 
-public class WorkoutRecord implements StepCounter.Listener{
+public class WorkoutRecord extends Model implements Model.Listener {
 
     private static final String TAG = "WorkoutRecord";
     private static final String SESSION_SHARED_PREF = "personal_best_workout_record";
@@ -18,7 +18,6 @@ public class WorkoutRecord implements StepCounter.Listener{
     private SharedPreferences sharedPreferences;
     private List<Session> sessions;
     private Session currentSession;
-    private List<Listener> listeners;
 
     public static WorkoutRecord getInstance(Context context) {
         if (instance == null) {
@@ -27,35 +26,37 @@ public class WorkoutRecord implements StepCounter.Listener{
         return instance;
     }
 
-    public class Session {
+    private class Session {
 
-        private long startTime;
-        private int startStep;
+        public long startTime;
+        public int startStep;
+        public long deltaTime;
+        public int deltaStep;
 
         public Session(long startTime, int startStep) {
             this.startTime = startTime;
             this.startStep = startStep;
-        }
-
-        public long getStartTime() {
-            return startTime;
-        }
-
-        public int getStartStep() {
-            return startStep;
+            this.deltaTime = 0;
+            this.deltaStep = 0;
         }
     }
 
-    public interface Listener {
-        void onSecondElapsed(int value);
-        void onStepWalked(int value);
+    public class Result {
+
+        public int deltaTime;
+        public int deltaStep;
+
+        public Result(int deltaTime, int deltaStep) {
+            this.deltaTime = deltaTime;
+            this.deltaStep = deltaStep;
+        }
     }
 
     public WorkoutRecord(Context context) {
+        super();
         sharedPreferences = context.getSharedPreferences(SESSION_SHARED_PREF, Context.MODE_PRIVATE);
         sessions = new LinkedList<>();
         currentSession = null;
-        listeners = new LinkedList<>();
     }
 
     public void startWorkout(long now, int startStep) {
@@ -78,35 +79,25 @@ public class WorkoutRecord implements StepCounter.Listener{
         return currentSession != null;
     }
 
-    public void addListener(Listener listener) {
-        listeners.add(listener);
-    }
-
-    public void removeListener(Listener listener) {
-        listeners.remove(listener);
-    }
-
     public void updateTime(long time) {
         if (currentSession != null) {
-            long deltaTime = (time - currentSession.getStartTime()) / 1000L;
-            for (Listener listener: listeners) {
-                listener.onSecondElapsed((int)deltaTime);
-            }
+            currentSession.deltaTime = (time - currentSession.startTime) / 1000L;
+            updateAll();
         }
     }
 
-    @Override
-    public void onStepChanged(int value) {
-        if (currentSession != null) {
-            int deltaStep = value - currentSession.getStartStep();
-            for (Listener listener: listeners) {
-                listener.onStepWalked(deltaStep);
-            }
-        }
+    public void updateAll() {
+        update(new Result((int)currentSession.deltaTime, currentSession.deltaStep));
     }
 
     @Override
-    public void onGoalChanged(int value) {
-        // do nothing
+    public void onUpdate(Object o) {
+        if (o instanceof StepCounter.Result) {
+            if (currentSession != null) {
+                StepCounter.Result result = (StepCounter.Result) o;
+                currentSession.deltaStep = result.step - currentSession.startStep;
+                updateAll();
+            }
+        }
     }
 }

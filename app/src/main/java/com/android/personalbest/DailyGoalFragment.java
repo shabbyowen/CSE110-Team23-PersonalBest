@@ -16,13 +16,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.personalbest.models.Model;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
 
 public class DailyGoalFragment extends Fragment implements
     InputDialogFragment.InputDialogListener,
-    StepCounter.Listener,
-    WorkoutRecord.Listener {
+    Model.Listener {
 
     private static final String TAG = "DailyGoalFragment";
 
@@ -181,24 +181,15 @@ public class DailyGoalFragment extends Fragment implements
     }
 
     @Override
-    public void onStepChanged(int value) {
-        currentStepTextView.setText(String.valueOf(value));
-
-        // show meet goal achievement
-    }
-
-    @Override
-    public void onGoalChanged(int value) {
-        currentStepGoalTextView.setText(String.valueOf(value));
-    }
-
-    @Override
-    public void onSecondElapsed(int value) {
-        sessionTimeTextView.setText(formatTime(value));
-    }
-
-    @Override
-    public void onStepWalked(int value) {
-        sessionStepTextView.setText(String.valueOf(value));
+    public void onUpdate(Object o) {
+        if (o instanceof StepCounter.Result) {
+            StepCounter.Result result = (StepCounter.Result) o;
+            currentStepTextView.setText(String.valueOf(result.step));
+            currentStepGoalTextView.setText(String.valueOf(result.goal));
+        } else if (o instanceof WorkoutRecord.Result) {
+            WorkoutRecord.Result result = (WorkoutRecord.Result) o;
+            sessionStepTextView.setText(String.valueOf(result.deltaStep));
+            sessionTimeTextView.setText(formatTime(result.deltaTime));
+        }
     }
 }
