@@ -148,9 +148,43 @@ public class DailyGoalFragment extends Fragment implements
         }
     }
 
+    public String formatTime(int second) {
+        int hour = 0;
+        while (second >= 3600) {
+            hour++;
+            second -= 3600;
+        }
+        int minute = 0;
+        while (second >= 60) {
+            minute++;
+            second -= 60;
+        }
+        StringBuilder sb = new StringBuilder();
+        padZero(sb, hour);
+        sb.append(':');
+        padZero(sb, minute);
+        sb.append(':');
+        padZero(sb, second);
+        return sb.toString();
+    }
+
+    public StringBuilder padZero(StringBuilder sb, int number) {
+        if (number == 0) {
+            sb.append("00");
+            return sb;
+        }
+        if (number < 10) {
+            sb.append(0);
+        }
+        sb.append(number);
+        return sb;
+    }
+
     @Override
     public void onStepChanged(int value) {
         currentStepTextView.setText(String.valueOf(value));
+
+        // show meet goal achievement
     }
 
     @Override
@@ -160,7 +194,7 @@ public class DailyGoalFragment extends Fragment implements
 
     @Override
     public void onSecondElapsed(int value) {
-        sessionTimeTextView.setText(String.valueOf(value));
+        sessionTimeTextView.setText(formatTime(value));
     }
 
     @Override
