@@ -16,13 +16,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.personalbest.models.Model;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
 
 public class DailyGoalFragment extends Fragment implements
     InputDialogFragment.InputDialogListener,
-    StepCounter.Listener,
-    WorkoutRecord.Listener {
+    Model.Listener {
 
     private static final String TAG = "DailyGoalFragment";
 
@@ -148,23 +148,51 @@ public class DailyGoalFragment extends Fragment implements
         }
     }
 
-    @Override
-    public void onStepChanged(int value) {
-        currentStepTextView.setText(String.valueOf(value));
+    public String formatTime(int second) {
+        int hour = 0;
+        while (second >= 3600) {
+            hour++;
+            second -= 3600;
+        }
+        int minute = 0;
+        while (second >= 60) {
+            minute++;
+            second -= 60;
+        }
+        StringBuilder sb = new StringBuilder();
+        padZero(sb, hour);
+        sb.append(':');
+        padZero(sb, minute);
+        sb.append(':');
+        padZero(sb, second);
+        return sb.toString();
+    }
+
+    public void padZero(StringBuilder sb, int number) {
+        if (number == 0) {
+            sb.append("00");
+            return;
+        }
+        if (number < 10) {
+            sb.append(0);
+        }
+        sb.append(number);
     }
 
     @Override
-    public void onGoalChanged(int value) {
-        currentStepGoalTextView.setText(String.valueOf(value));
-    }
+    public void onUpdate(Object o) {
 
-    @Override
-    public void onSecondElapsed(int value) {
-        sessionTimeTextView.setText(String.valueOf(value));
-    }
+        // counter results
+        if (o instanceof StepCounter.Result) {
+            StepCounter.Result result = (StepCounter.Result) o;
+            currentStepTextView.setText(String.valueOf(result.step));
+            currentStepGoalTextView.setText(String.valueOf(result.goal));
 
-    @Override
-    public void onStepWalked(int value) {
-        sessionStepTextView.setText(String.valueOf(value));
+        // record results
+        } else if (o instanceof WorkoutRecord.Result) {
+            WorkoutRecord.Result result = (WorkoutRecord.Result) o;
+            sessionStepTextView.setText(String.valueOf(result.deltaStep));
+            sessionTimeTextView.setText(formatTime(result.deltaTime));
+        }
     }
 }

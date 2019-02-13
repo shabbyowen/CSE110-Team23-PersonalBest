@@ -134,6 +134,14 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         Log.d(TAG, "update tasks paused");
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // remove listeners
+        counter.removeListener(record);
+    }
+
     private void putFragment(Fragment fragment) {
         fragmentTransaction = fragmentManager.beginTransaction();
 
