@@ -17,6 +17,7 @@ import com.android.personalbest.fitness.FitnessServiceFactory;
 import com.android.personalbest.fitness.GoogleFitAdapter;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
+import com.android.personalbest.util.TimeMachine;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -109,7 +110,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
             handler.postDelayed(updateStepTask, UPDATE_DELAY_SEC * 1000);
         };
         updateTimeTask = () -> {
-            record.updateTime(System.currentTimeMillis());
+            record.updateTime(TimeMachine.nowMillis());
             handler.postDelayed(updateTimeTask, 1000);
         };
     }
