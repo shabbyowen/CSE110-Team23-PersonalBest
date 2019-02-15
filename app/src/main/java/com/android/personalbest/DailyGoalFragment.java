@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.android.personalbest.models.Model;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
+import com.android.personalbest.util.TimeMachine;
 
 public class DailyGoalFragment extends Fragment implements
     InputDialogFragment.InputDialogListener,
@@ -38,6 +39,7 @@ public class DailyGoalFragment extends Fragment implements
     private TextView currentStepGoalTextView;
     private TextView sessionStepTextView;
     private TextView sessionTimeTextView;
+    private TextView sessionSpeedTextView;
 
     // models
     private StepCounter counter;
@@ -74,6 +76,7 @@ public class DailyGoalFragment extends Fragment implements
         currentStepGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
         sessionTimeTextView = fragmentView.findViewById(R.id.daily_goal_current_time_tv);
         sessionStepTextView = fragmentView.findViewById(R.id.daily_goal_current_step_tv);
+        sessionSpeedTextView = fragmentView.findViewById(R.id.daily_goal_current_speed_tv);
 
         return fragmentView;
     }
@@ -97,7 +100,7 @@ public class DailyGoalFragment extends Fragment implements
 
     public void onRecordBtnClicked(View view) {
         if (!record.isWorkingout()) {
-            record.startWorkout(System.currentTimeMillis(), counter.getStep());
+            record.startWorkout(TimeMachine.nowMillis(), counter.getStep());
             recordBtn.setText(R.string.end_record);
         } else {
             record.endWorkout();
@@ -193,6 +196,7 @@ public class DailyGoalFragment extends Fragment implements
             WorkoutRecord.Result result = (WorkoutRecord.Result) o;
             sessionStepTextView.setText(String.valueOf(result.deltaStep));
             sessionTimeTextView.setText(formatTime(result.deltaTime));
+            sessionSpeedTextView.setText(String.format("%.2f", result.mph));
         }
     }
 }
