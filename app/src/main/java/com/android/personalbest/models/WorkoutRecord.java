@@ -13,8 +13,6 @@ public class WorkoutRecord extends Model implements Model.Listener {
     private static final String SESSION_SHARED_PREF = "personal_best_workout_record";
     private static final String SESSION_LIST = "session_list";
     private static final int UPDATE_SEC = 5;
-    private static final double STRIDE_LENGTH_CONST = 0.413;
-    private static final double DEFAULT_HEIGHT = 70;
     private static WorkoutRecord instance;
 
     private SharedPreferences sharedPreferences;
@@ -41,31 +39,16 @@ public class WorkoutRecord extends Model implements Model.Listener {
             this.deltaTime = 0;
             this.deltaStep = 0;
         }
-
-        public double getSpeed() {
-            double distance = DEFAULT_HEIGHT * STRIDE_LENGTH_CONST * deltaStep;
-            distance = distance / 12.0 / 5280.0; // convert to miles per steps
-            double time = deltaTime / 3600.0; // convert to hours
-
-            // avoid divide by zero error
-            if (time == 0) {
-                time = 1;
-            }
-
-            return distance / time;
-        }
     }
 
     public class Result {
 
         public int deltaTime;
         public int deltaStep;
-        public double mph;
 
-        public Result(int deltaTime, int deltaStep, double mph) {
+        public Result(int deltaTime, int deltaStep) {
             this.deltaTime = deltaTime;
             this.deltaStep = deltaStep;
-            this.mph = mph;
         }
     }
 
@@ -114,7 +97,7 @@ public class WorkoutRecord extends Model implements Model.Listener {
     }
 
     public void updateAll() {
-        update(new Result((int)currentSession.deltaTime, currentSession.deltaStep, currentSession.getSpeed()));
+        update(new Result((int)currentSession.deltaTime, currentSession.deltaStep));
     }
 
     @Override

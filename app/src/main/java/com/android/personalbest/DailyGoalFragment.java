@@ -1,6 +1,7 @@
 package com.android.personalbest;
 
 
+import android.icu.text.StringPrepParseException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 import com.android.personalbest.models.Model;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
+import com.android.personalbest.util.SpeedCalculator;
 import com.android.personalbest.util.TimeMachine;
 
 public class DailyGoalFragment extends Fragment implements
@@ -40,6 +42,8 @@ public class DailyGoalFragment extends Fragment implements
     private TextView sessionStepTextView;
     private TextView sessionTimeTextView;
     private TextView sessionSpeedTextView;
+    private TextView currentDistTextView;
+    private TextView currentDistGoalTextView;
 
     // models
     private StepCounter counter;
@@ -74,6 +78,8 @@ public class DailyGoalFragment extends Fragment implements
 
         currentStepTextView = fragmentView.findViewById(R.id.daily_goal_steps_tv);
         currentStepGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
+        currentDistTextView = fragmentView.findViewById(R.id.daily_goal_dist_tv);
+        currentDistGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_dist_tv);
         sessionTimeTextView = fragmentView.findViewById(R.id.daily_goal_current_time_tv);
         sessionStepTextView = fragmentView.findViewById(R.id.daily_goal_current_step_tv);
         sessionSpeedTextView = fragmentView.findViewById(R.id.daily_goal_current_speed_tv);
@@ -83,10 +89,7 @@ public class DailyGoalFragment extends Fragment implements
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
-        // display step goal and current steps
-        currentStepTextView.setText(String.valueOf(counter.getStep()));
-        currentStepGoalTextView.setText(String.valueOf(counter.getGoal()));
+        updateCurrentStepAndGoal(counter.getStep(), counter.getGoal());
     }
 
     @Override
@@ -97,6 +100,52 @@ public class DailyGoalFragment extends Fragment implements
         counter.removeListener(this);
         record.removeListener(this);
     }
+
+    // utility functions
+
+    private void updateCurrentStepAndGoal(int step, int goal) {
+
+        // display step goal and current steps
+        currentStepTextView.setText(String.valueOf(step));
+        currentStepGoalTextView.setText(String.valueOf(goal));
+        double goalDist = SpeedCalculator.stepToMiles(goal);
+        double currDist = SpeedCalculator.stepToMiles(step);
+        currentDistTextView.setText(String.format("%.2f", currDist));
+        currentDistGoalTextView.setText(String.format("%.2f", goalDist));
+    }
+
+    private String formatTime(int second) {
+        int hour = 0;
+        while (second >= 3600) {
+            hour++;
+            second -= 3600;
+        }
+        int minute = 0;
+        while (second >= 60) {
+            minute++;
+            second -= 60;
+        }
+        StringBuilder sb = new StringBuilder();
+        padZero(sb, hour);
+        sb.append(':');
+        padZero(sb, minute);
+        sb.append(':');
+        padZero(sb, second);
+        return sb.toString();
+    }
+
+    private void padZero(StringBuilder sb, int number) {
+        if (number == 0) {
+            sb.append("00");
+            return;
+        }
+        if (number < 10) {
+            sb.append(0);
+        }
+        sb.append(number);
+    }
+
+    // event listeners
 
     public void onRecordBtnClicked(View view) {
         if (!record.isWorkingout()) {
@@ -151,52 +200,21 @@ public class DailyGoalFragment extends Fragment implements
         }
     }
 
-    public String formatTime(int second) {
-        int hour = 0;
-        while (second >= 3600) {
-            hour++;
-            second -= 3600;
-        }
-        int minute = 0;
-        while (second >= 60) {
-            minute++;
-            second -= 60;
-        }
-        StringBuilder sb = new StringBuilder();
-        padZero(sb, hour);
-        sb.append(':');
-        padZero(sb, minute);
-        sb.append(':');
-        padZero(sb, second);
-        return sb.toString();
-    }
-
-    public void padZero(StringBuilder sb, int number) {
-        if (number == 0) {
-            sb.append("00");
-            return;
-        }
-        if (number < 10) {
-            sb.append(0);
-        }
-        sb.append(number);
-    }
-
     @Override
     public void onUpdate(Object o) {
 
         // counter results
         if (o instanceof StepCounter.Result) {
             StepCounter.Result result = (StepCounter.Result) o;
-            currentStepTextView.setText(String.valueOf(result.step));
-            currentStepGoalTextView.setText(String.valueOf(result.goal));
+            updateCurrentStepAndGoal(result.step, result.goal);
 
         // record results
         } else if (o instanceof WorkoutRecord.Result) {
             WorkoutRecord.Result result = (WorkoutRecord.Result) o;
             sessionStepTextView.setText(String.valueOf(result.deltaStep));
             sessionTimeTextView.setText(formatTime(result.deltaTime));
-            sessionSpeedTextView.setText(String.format("%.2f", result.mph));
+            double mph = SpeedCalculator.calculateSpeed(result.deltaStep, result.deltaTime);
+            sessionSpeedTextView.setText(String.format("%.2f", mph));
         }
     }
 }
