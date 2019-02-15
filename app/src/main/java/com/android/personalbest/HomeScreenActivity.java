@@ -19,9 +19,6 @@ import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
 import com.android.personalbest.util.TimeMachine;
 
-import java.time.LocalDateTime;
-import java.util.Date;
-
 public class HomeScreenActivity extends AppCompatActivity implements HeightPromptFragment.HeightPromptListener{
 
     private static final String FITNESS_API_KEY = "HOME_SCREEN_KEY";
@@ -110,7 +107,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
             handler.postDelayed(updateStepTask, UPDATE_DELAY_SEC * 1000);
         };
         updateTimeTask = () -> {
-            record.updateTime(TimeMachine.nowMillis());
+            record.setTime(TimeMachine.nowMillis());
             handler.postDelayed(updateTimeTask, 1000);
         };
     }

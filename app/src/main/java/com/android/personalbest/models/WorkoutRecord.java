@@ -82,14 +82,14 @@ public class WorkoutRecord extends Model implements Model.Listener {
         return currentSession != null;
     }
 
-    public void updateTime(long time) {
+    public void setTime(long time) {
         if (currentSession != null) {
             currentSession.deltaTime = time / 1000L - currentSession.startTime;
             updateAll();
         }
     }
 
-    public void updateStep(int step) {
+    public void setStep(int step) {
         if (currentSession != null) {
             currentSession.deltaStep = step - currentSession.startStep;
             updateAll();
@@ -104,7 +104,7 @@ public class WorkoutRecord extends Model implements Model.Listener {
     public void onUpdate(Object o) {
         if (o instanceof StepCounter.Result) {
             StepCounter.Result result = (StepCounter.Result) o;
-            updateStep(result.step);
+            setStep(result.step);
         }
     }
 }
