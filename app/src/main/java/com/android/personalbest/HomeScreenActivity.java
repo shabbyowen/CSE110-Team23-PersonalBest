@@ -54,6 +54,7 @@ public class HomeScreenActivity extends AppCompatActivity {
         // stub
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
     }
 
     private void putFragment(Fragment fragment) {
