@@ -37,6 +37,7 @@
     <string name="ft_str">ft.</string>
     <string name="inch_str">inch.</string>
     <string name="prompt_height_str">Please enter your height</string>
+    <string name="height_instruction_failed">Please enter a valid height.</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

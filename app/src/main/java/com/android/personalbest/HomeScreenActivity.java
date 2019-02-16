@@ -96,7 +96,9 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
 
         // ask user for their height
         HeightPromptFragment heightPromptFragment = HeightPromptFragment.newInstance(this, INPUT_HEIGHT, R.string.prompt_height_str);
-        heightPromptFragment.show(fragmentManager, INPUT_HEIGHT);
+        if (heightPromptFragment != null) {
+            heightPromptFragment.show(fragmentManager, INPUT_HEIGHT);
+        }
         putFragment(new DailyGoalFragment());
 
         // initialize update task
