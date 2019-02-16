@@ -93,7 +93,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         });
         fitnessService = FitnessServiceFactory.create(FITNESS_API_KEY, this);
         fitnessService.setup();
-        
+
 
         // ask user for their height
         int height = getSharedPreferences(HeightPromptFragment.HEIGHT_SHARED_PREF, MODE_PRIVATE)

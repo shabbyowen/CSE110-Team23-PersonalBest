@@ -59,14 +59,13 @@ public class WeeklyProgressFragment extends Fragment {
         Description description = new Description();
         description.setText("Weekly Progress");
         barChart.setDescription(description);
-        barChart.setMaxVisibleValueCount(6);
+        barChart.setMaxVisibleValueCount(30);
         barChart.setPinchZoom(false);
         barChart.setDrawGridBackground(false);
 
         XAxis xl = barChart.getXAxis();
         xl.setGranularity(1f);
         xl.setCenterAxisLabels(true);
-        xl.setLabelCount(7);
 
         YAxis leftAxis = barChart.getAxisLeft();
         leftAxis.setDrawGridLines(false);
@@ -79,8 +78,8 @@ public class WeeklyProgressFragment extends Fragment {
         float barSpace = 0.02f;
         float barWidth = 0.46f;
 
-        int startYear = 1980;
-        int endYear = 1985;
+        int startYear = 2;
+        int endYear = 8;
 
         List<BarEntry> yVals1 = new ArrayList<BarEntry>();
         List<BarEntry> yVals2 = new ArrayList<BarEntry>();
