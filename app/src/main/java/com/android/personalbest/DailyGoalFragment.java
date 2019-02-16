@@ -112,6 +112,11 @@ public class DailyGoalFragment extends Fragment implements
         double currDist = SpeedCalculator.stepToMiles(step);
         currentDistTextView.setText(String.format("%.2f", currDist));
         currentDistGoalTextView.setText(String.format("%.2f", goalDist));
+
+        // check if the user has met the goal
+        if (step >= goal) {
+
+        }
     }
 
     private String formatTime(int second) {
