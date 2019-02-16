@@ -21,6 +21,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.fitness.data.DataType;
+import com.google.android.gms.fitness.request.DataReadRequest;
+
+import java.util.concurrent.TimeUnit;
+
 import static android.content.Context.MODE_PRIVATE;
 
 /**
@@ -35,8 +40,8 @@ public class HeightPromptFragment extends DialogFragment {
     private String tag;
     private int prompt;
     private int height;
-    private static final String HEIGHT_SHARED_PREF = "personal_best_height";
-    private static final String HEIGHT = "user_height";
+    public static final String HEIGHT_SHARED_PREF = "personal_best_height";
+    public static final String HEIGHT = "user_height";
 
     public HeightPromptFragment() {
         // Required empty public constructor

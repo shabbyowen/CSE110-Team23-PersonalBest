@@ -93,11 +93,17 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         });
         fitnessService = FitnessServiceFactory.create(FITNESS_API_KEY, this);
         fitnessService.setup();
+        
 
         // ask user for their height
-        HeightPromptFragment heightPromptFragment = HeightPromptFragment.newInstance(this, INPUT_HEIGHT, R.string.prompt_height_str);
-        if (heightPromptFragment != null) {
-            heightPromptFragment.show(fragmentManager, INPUT_HEIGHT);
+        int height = getSharedPreferences(HeightPromptFragment.HEIGHT_SHARED_PREF, MODE_PRIVATE)
+                .getInt(HeightPromptFragment.HEIGHT, -1);
+
+        if (height == -1) {
+            HeightPromptFragment heightPromptFragment = HeightPromptFragment.newInstance(this, INPUT_HEIGHT, R.string.prompt_height_str);
+            if (heightPromptFragment != null) {
+                heightPromptFragment.show(fragmentManager, INPUT_HEIGHT);
+            }
         }
         putFragment(new DailyGoalFragment());
 
