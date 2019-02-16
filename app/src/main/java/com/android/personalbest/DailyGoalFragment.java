@@ -112,7 +112,7 @@ public class DailyGoalFragment extends Fragment implements
         double currDist = SpeedCalculator.stepToMiles(step);
         currentDistTextView.setText(String.format("%.2f", currDist));
         currentDistGoalTextView.setText(String.format("%.2f", goalDist));
-    }
+
 
     private String formatTime(int second) {
         int hour = 0;
@@ -199,7 +199,6 @@ public class DailyGoalFragment extends Fragment implements
                 return false;
         }
     }
-
 
     @Override
     public void onUpdate(Object o) {
