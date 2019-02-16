@@ -1,42 +1,66 @@
 package com.android.personalbest;
 
 
-import android.app.Activity;
-import android.renderscript.ScriptGroup;
+import android.icu.text.StringPrepParseException;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.content.SharedPreferences;
 
 
-import static android.content.Context.MODE_PRIVATE;
+import com.android.personalbest.models.Model;
+import com.android.personalbest.models.StepCounter;
+import com.android.personalbest.models.WorkoutRecord;
+import com.android.personalbest.util.SpeedCalculator;
+import com.android.personalbest.util.TimeMachine;
 
-public class DailyGoalFragment extends Fragment implements InputDialogFragment.InputDialogListener {
+public class DailyGoalFragment extends Fragment implements
+    InputDialogFragment.InputDialogListener,
+    Model.Listener {
 
-    public static final String SET_GOAL = "set_goal";
-    public static final String ADD_STEP = "add_step";
+    private static final String TAG = "DailyGoalFragment";
 
+    // use this tag to identify the source of onInputResult
+    private static final String SET_GOAL = "set_goal";
+    private static final String ADD_STEP = "add_step";
+
+    // UI elements
     private Button recordBtn;
-//    private EditText new_goal;
-//    private TextView change_goal_instruction;
-//    private AlertDialog changeGoalDialog;
     private Button changeGoalBtn;
     private Button addStepsBtn;
+    private TextView currentStepTextView;
+    private TextView currentStepGoalTextView;
+    private TextView sessionStepTextView;
+    private TextView sessionTimeTextView;
+    private TextView sessionSpeedTextView;
+    private TextView currentDistTextView;
+    private TextView currentDistGoalTextView;
 
-    public DailyGoalFragment() {
-        // Required empty public constructor
+    // models
+    private StepCounter counter;
+    private WorkoutRecord record;
+
+    // Required empty public constructor
+    public DailyGoalFragment() {}
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // initialize the model field
+        counter = StepCounter.getInstance(getContext());
+        counter.addListener(this);
+        record = WorkoutRecord.getInstance(getContext());
+        record.addListener(this);
     }
 
     @Override
@@ -45,20 +69,92 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
         // Inflate the layout for this fragment
         View fragmentView = inflater.inflate(R.layout.fragment_daily_goal, container, false);
 
+        // assigning listeners
         recordBtn = fragmentView.findViewById(R.id.daily_goal_record_btn);
         recordBtn.setOnClickListener(this::onRecordBtnClicked);
 
         changeGoalBtn = fragmentView.findViewById(R.id.daily_goal_change_goal_btn);
         changeGoalBtn.setOnClickListener(this::onChangeGoalBtnClicked);
 
-        addStepsBtn = fragmentView.findViewById(R.id.daily_goal_add_steps_btn);
-        addStepsBtn.setOnClickListener(this::onAddStepsBtnClicked);
+        currentStepTextView = fragmentView.findViewById(R.id.daily_goal_steps_tv);
+        currentStepGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
+        currentDistTextView = fragmentView.findViewById(R.id.daily_goal_dist_tv);
+        currentDistGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_dist_tv);
+        sessionTimeTextView = fragmentView.findViewById(R.id.daily_goal_current_time_tv);
+        sessionStepTextView = fragmentView.findViewById(R.id.daily_goal_current_step_tv);
+        sessionSpeedTextView = fragmentView.findViewById(R.id.daily_goal_current_speed_tv);
 
         return fragmentView;
     }
 
-    public void onRecordBtnClicked(View view) {
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        updateCurrentStepAndGoal(counter.getStep(), counter.getGoal());
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // clean up
+        counter.removeListener(this);
+        record.removeListener(this);
+    }
+
+    // utility functions
+
+    private void updateCurrentStepAndGoal(int step, int goal) {
+
+        // display step goal and current steps
+        currentStepTextView.setText(String.valueOf(step));
+        currentStepGoalTextView.setText(String.valueOf(goal));
+        double goalDist = SpeedCalculator.stepToMiles(goal);
+        double currDist = SpeedCalculator.stepToMiles(step);
+        currentDistTextView.setText(String.format("%.2f", currDist));
+        currentDistGoalTextView.setText(String.format("%.2f", goalDist));
+    }
+
+    private String formatTime(int second) {
+        int hour = 0;
+        while (second >= 3600) {
+            hour++;
+            second -= 3600;
+        }
+        int minute = 0;
+        while (second >= 60) {
+            minute++;
+            second -= 60;
+        }
+        StringBuilder sb = new StringBuilder();
+        padZero(sb, hour);
+        sb.append(':');
+        padZero(sb, minute);
+        sb.append(':');
+        padZero(sb, second);
+        return sb.toString();
+    }
+
+    private void padZero(StringBuilder sb, int number) {
+        if (number == 0) {
+            sb.append("00");
+            return;
+        }
+        if (number < 10) {
+            sb.append(0);
+        }
+        sb.append(number);
+    }
+
+    // event listeners
+
+    public void onRecordBtnClicked(View view) {
+        if (!record.isWorkingout()) {
+            record.startWorkout(TimeMachine.nowMillis(), counter.getStep());
+            recordBtn.setText(R.string.end_record);
+        } else {
+            record.endWorkout();
+            recordBtn.setText(R.string.start_record);
+        }
     }
 
     public void onChangeGoalBtnClicked(View view) {
@@ -75,8 +171,13 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
 
     @Override
     public boolean onInputResult(String tag, String result, TextView prompt) {
+        // processes the result from the input dialog
         switch (tag) {
+
+            // from set goal
             case SET_GOAL:
+
+                // validate entered goal
                 int value;
                 try {
                     value = Integer.valueOf(result);
@@ -85,95 +186,36 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
                     return false;
                 }
                 if (value > 0) {
-                    SharedPreferences sharedPreferences = getActivity().getSharedPreferences("personal_best", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putInt("daily_goal", value);
-                    editor.apply();
+                    counter.setGoal(value);
+                    counter.save();
                     Toast.makeText(getActivity(), R.string.saved, Toast.LENGTH_LONG).show();
+                    Log.d(TAG, String.format("changing daily goal to %d", value));
                     return true;
                 } else {
                     prompt.setText(R.string.change_goal_instruction_failed);
                     return false;
                 }
-            case ADD_STEP:
-                break;
             default:
                 return false;
         }
-        return false;
     }
 
-    /*
-    public void editDailyGoal() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        View rootView = inflater.inflate(R.layout.dialog_set_goal, null, false);
+    @Override
+    public void onUpdate(Object o) {
 
-        builder.setView(rootView);
-        builder.setTitle("Set Goal");
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
+        // counter results
+        if (o instanceof StepCounter.Result) {
+            StepCounter.Result result = (StepCounter.Result) o;
+            updateCurrentStepAndGoal(result.step, result.goal);
 
-            }
-        });
-
-        builder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                dialog.dismiss();
-            }
-        });
-
-        changeGoalDialog = builder.create();
-
-        new_goal = rootView.findViewById(R.id.new_goal);
-
-        change_goal_instruction = rootView.findViewById(R.id.change_daily_goal_instruction);
-
-        changeGoalDialog.show();
-
-        changeGoalDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Boolean isValid = true;
-
-                //The try catch is user to catch potential overflow errors
-                try {
-                    Integer value = Integer.valueOf(new_goal.getText().toString());
-
-                    if (value < 0) {
-                        isValid = false;
-                    }
-
-                } catch (NumberFormatException e) {
-                    isValid = false;
-                }
-
-                if (isValid) {
-
-                    SharedPreferences sharedPreferences =
-                        getActivity().getSharedPreferences("user_name", MODE_PRIVATE);
-
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                    editor.putString("daily_goal", new_goal.getText().toString());.
-
-                    editor.apply();
-
-                    Toast.makeText(getActivity(), "Saved", Toast.LENGTH_LONG).show();
-
-                    changeGoalDialog.dismiss();
-
-                } else {
-
-                    change_goal_instruction.setText(R.string.change_goal_instruction_failed);
-
-                }
-            }
-        });
+        // record results
+        } else if (o instanceof WorkoutRecord.Result) {
+            WorkoutRecord.Result result = (WorkoutRecord.Result) o;
+            sessionStepTextView.setText(String.valueOf(result.deltaStep));
+            sessionTimeTextView.setText(formatTime(result.deltaTime));
+            double mph = SpeedCalculator.calculateSpeed(result.deltaStep, result.deltaTime);
+            sessionSpeedTextView.setText(String.format("%.2f", mph));
+        }
     }
-    */
 }
