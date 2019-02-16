@@ -66,7 +66,7 @@ public class StepCounter extends Model {
     }
 
     public void load() {
-        step = sharedPreferences.getInt(STEP_COUNT, -1);
+        step = sharedPreferences.getInt(STEP_COUNT, 0);
         goal = sharedPreferences.getInt(STEP_GOAL, 5000);
     }
 }
