@@ -128,6 +128,10 @@ public class WorkoutRecord extends Model implements Model.Listener {
         String data = sharedPreferences.getString(SESSION_LIST, "");
         Type type = new TypeToken<List<Session>>() {}.getType(); // REFLECTION BLACK MAGIC!
         sessions = gson.fromJson(data, type);
+        if (sessions == null) {
+            Log.d(TAG, "No sessions found, creating a new profile");
+            sessions = new LinkedList<>();
+        }
         Log.d(TAG, "Sessions loaded");
         Log.v(TAG, data);
     }
