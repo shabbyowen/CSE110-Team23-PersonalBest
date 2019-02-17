@@ -201,17 +201,18 @@ public class WeeklyProgressFragment extends Fragment {
         speedByDay = new double[offset];
 
         int counter = 0;
-        for(int i = 1; i <= offset; i++){
-
-            WorkoutRecord.Session daySession = sessions.get(sessions.size()-counter);
-            //Checking if the sessions is within the numerical range of a specific day
-            if (today - i*numMillInDay < daySession.startTime && daySession.startTime <= today - (i-1)*numMillInDay){
-                stepsByDay[offset-1-counter] = daySession.deltaStep;
-                deltaTimeByDay[offset-1-counter] = daySession.deltaTime;
-                speedByDay[offset-1-counter] =
-                        SpeedCalculator.calculateSpeed(daySession.deltaStep, (int)daySession.deltaTime);
-            }
-
+//        for(int i = 1; i <= offset; i++){
+//
+//            WorkoutRecord.Session daySession = sessions.get(sessions.size()-counter-i);
+//            //Checking if the sessions is within the numerical range of a specific day
+//            if (today - i*numMillInDay < daySession.startTime && daySession.startTime <= today - (i-1)*numMillInDay){
+//                stepsByDay[offset-1-counter] = daySession.deltaStep;
+//                deltaTimeByDay[offset-1-counter] = daySession.deltaTime;
+//                speedByDay[offset-1-counter] =
+//                        SpeedCalculator.calculateSpeed(daySession.deltaStep, (int)daySession.deltaTime);
+//            }
+//
+//            counter ++;
 
 //            Fitness.getHistoryClient(getActivity(), lastSignedInAccount)
 //                    .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
@@ -223,6 +224,6 @@ public class WeeklyProgressFragment extends Fragment {
 //
 //                                }
 //                            });
-        }
+//        }
     }
 }
