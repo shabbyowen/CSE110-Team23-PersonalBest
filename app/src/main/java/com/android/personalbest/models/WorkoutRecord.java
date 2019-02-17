@@ -8,9 +8,12 @@ import com.android.personalbest.HomeScreenActivity;
 import com.android.personalbest.fitness.FitnessService;
 import com.android.personalbest.util.DateCalculator;
 import com.android.personalbest.util.TimeMachine;
+import com.google.android.gms.fitness.data.Bucket;
 import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
+import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
+import com.google.android.gms.fitness.result.DataReadResponse;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -169,11 +172,13 @@ public class WorkoutRecord extends Model implements Model.Listener {
             if (DateCalculator.dateChanged(startTime, currentTime)) {
 
                 // get the step from fitness service
-                fitnessService.updateStepCountWithCallback(new OnSuccessListener<DataSet>() {
+                fitnessService.updateStepCountWithCallback(new OnSuccessListener<DataReadResponse>() {
                     @Override
-                    public void onSuccess(DataSet dataSet) {
-                        List<DataPoint> list = dataSet.getDataPoints();
-                        int yesterdayStep = list.get(1).getValue(Field.FIELD_STEPS).asInt();
+                    public void onSuccess(DataReadResponse dataReadResponse) {
+                        List<Bucket> buckets = dataReadResponse.getBuckets();
+                        DataSet dataSet = buckets.get(buckets.size() - 2).getDataSet(DataType.AGGREGATE_STEP_COUNT_DELTA);
+                        int yesterdayStep = dataSet == null || dataSet.isEmpty() ? 0 :
+                            dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
                         currentSession.deltaStep = yesterdayStep - currentSession.startStep;
                         currentSession.deltaTime = 86400L * 1000L - session.startTime;
                         sessions.add(currentSession);

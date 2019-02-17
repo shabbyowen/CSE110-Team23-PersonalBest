@@ -29,7 +29,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     private static final String TAG = "HomeScreenActivity";
     private static final int UPDATE_DELAY_SEC = 5;
 
-    private FitnessService fitnessService;
+    public FitnessService fitnessService;
 
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
