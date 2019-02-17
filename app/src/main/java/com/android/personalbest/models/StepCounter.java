@@ -3,18 +3,21 @@ package com.android.personalbest.models;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import com.android.personalbest.util.TimeMachine;
 
 public class StepCounter extends Model {
 
     private static final String COUNTER_SHARED_PREF = "personal_best_counter";
     private static final String STEP_COUNT = "step_count";
     private static final String STEP_GOAL = "step_goal";
+    private static final String LAST_SAVED_TIME = "saved_time";
     private static StepCounter instance;
 
     private SharedPreferences sharedPreferences;
     private int step;
     private int goal;
     private int yesterdayStep;
+    private long lastSavedTime;
 
     public static StepCounter getInstance(Context context) {
         if (instance == null) {
@@ -70,12 +73,21 @@ public class StepCounter extends Model {
         return goal;
     }
 
+    public long getLastSavedTime() {
+        return lastSavedTime;
+    }
+
     public void save() {
-        sharedPreferences.edit().putInt(STEP_COUNT, step).putInt(STEP_GOAL, goal).apply();
+        sharedPreferences.edit()
+                .putInt(STEP_COUNT, step)
+                .putInt(STEP_GOAL, goal)
+                .putLong(LAST_SAVED_TIME, TimeMachine.nowMillis())
+                .apply();
     }
 
     public void load() {
         step = sharedPreferences.getInt(STEP_COUNT, 0);
         goal = sharedPreferences.getInt(STEP_GOAL, 5000);
+        lastSavedTime = sharedPreferences.getLong(LAST_SAVED_TIME, 0);
     }
 }

@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.android.personalbest.util.DateCalculator;
 import com.android.personalbest.util.TimeMachine;
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.fitness.Fitness;
@@ -47,7 +48,6 @@ public class GoogleFitAdapter implements FitnessService {
     public GoogleFitAdapter(HomeScreenActivity activity) {
         this.activity = activity;
     }
-
 
     public void setup() {
         FitnessOptions fitnessOptions = FitnessOptions.builder()

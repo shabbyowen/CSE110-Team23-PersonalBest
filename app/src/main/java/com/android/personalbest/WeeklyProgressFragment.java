@@ -53,6 +53,9 @@ public class WeeklyProgressFragment extends Fragment {
         // Required empty public constructor
     }
 
+    public void setProgressChart(CombinedChart progressChart) {this.progressChart = progressChart;}
+
+    public CombinedChart getProgressChart() {return progressChart;}
 
     /**
      * This method is used to create the CombinedChart for display
@@ -75,6 +78,9 @@ public class WeeklyProgressFragment extends Fragment {
 
         int offset = this.offsetCalculator();
         this.findThisWeekSessions(allSessions, offset);
+
+        drawChart(offset); // the official draw chart
+//        drawChartDummy(0); // dummy for display purpose
 
         return fragmentView;
     }
@@ -299,5 +305,6 @@ public class WeeklyProgressFragment extends Fragment {
                         drawChart(offset);
                     }
                 });
+
     }
 }

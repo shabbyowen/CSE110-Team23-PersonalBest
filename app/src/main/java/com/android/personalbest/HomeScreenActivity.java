@@ -17,6 +17,7 @@ import com.android.personalbest.fitness.FitnessServiceFactory;
 import com.android.personalbest.fitness.GoogleFitAdapter;
 import com.android.personalbest.models.EncouragementTracker;
 import com.android.personalbest.models.StepCounter;
+import com.android.personalbest.models.UserHeight;
 import com.android.personalbest.models.WorkoutRecord;
 import com.android.personalbest.util.TimeMachine;
 
@@ -39,6 +40,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     private Runnable updateStepTask;
     private Runnable updateTimeTask;
     private Handler handler;
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
         = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -68,6 +70,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     private StepCounter counter;
     private WorkoutRecord record;
     private EncouragementTracker promptTracker;
+    private UserHeight userHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +78,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         setContentView(R.layout.activity_home_screen);
 
         // get models
+        userHeight = UserHeight.getInstance(this);
         counter = StepCounter.getInstance(this);
         record = WorkoutRecord.getInstance(this);
         record.setFitnessService(fitnessService);
@@ -149,7 +153,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         Log.d(TAG, "Update tasks paused");
     }
 
-    private void putFragment(Fragment fragment) {
+    public void putFragment(Fragment fragment) {
         fragmentTransaction = fragmentManager.beginTransaction();
 
         // dont switch if the new fragment is the same
@@ -163,7 +167,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         }
 
         // add the new fragment and commit
-        fragmentTransaction.add(R.id.home_screen_container, fragment);
+        fragmentTransaction.add(R.id.home_screen_container, fragment, "test");
         currentFragment = fragment;
         fragmentTransaction.commit();
     }
@@ -176,8 +180,13 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         counter.setYesterdayStep((int)stepCount);
     }
 
+    public int getStepCount() {return counter.getStep(); }
+
     @Override
     public boolean onInputResult(String tag, String result, TextView view) {
         return true;
     }
+
+    /* Test method by Haaris */
+    public void setFragmentManager(FragmentManager fragmentManager) {this.fragmentManager = fragmentManager;}
 }
