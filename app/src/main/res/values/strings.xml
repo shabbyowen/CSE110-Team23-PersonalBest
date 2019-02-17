@@ -14,7 +14,7 @@
     <string name="speed">Speed</string>
     <string name="mph">mph</string>
     <string name="mile">mi</string>
-    <string name="add_steps">Add Steps</string>
+    <string name="add_steps">+500</string>
     <string name="change_goal">Change Goal</string>
 
     <!-- input dialog -->
@@ -25,6 +25,9 @@
     <string name="set_goal">Set Goal</string>
     <string name="change_goal_instruction_initial">Please enter your new step goal.</string>
     <string name="change_goal_instruction_failed">Please enter a number bigger than 0.</string>
+
+    <!-- Increase goal dialog -->
+    <string name="met_goal">Congrats, You have met your goal! Do you want to increase your step by 500?</string>
 
     <!-- add steps -->
     <string name="add_step_instruction_initial">initial</string>
@@ -37,6 +40,7 @@
     <string name="ft_str">ft.</string>
     <string name="inch_str">inch.</string>
     <string name="prompt_height_str">Please enter your height</string>
+    <string name="height_instruction_failed">Please enter a valid height.</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

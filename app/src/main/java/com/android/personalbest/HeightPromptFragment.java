@@ -1,27 +1,21 @@
 package com.android.personalbest;
 
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.renderscript.ScriptGroup;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -34,6 +28,9 @@ public class HeightPromptFragment extends DialogFragment {
     private HeightPromptListener listener;
     private String tag;
     private int prompt;
+    private int height;
+    public static final String HEIGHT_SHARED_PREF = "personal_best_height";
+    public static final String HEIGHT = "user_height";
 
     public HeightPromptFragment() {
         // Required empty public constructor
@@ -88,9 +85,30 @@ public class HeightPromptFragment extends DialogFragment {
 
     public void onConfirmBtnClicked(DialogInterface dialog, int i) {
 
+        SharedPreferences sp = getContext().getSharedPreferences(HEIGHT_SHARED_PREF, Context.MODE_PRIVATE);
+
         // callback, if listener says true, dismiss this dialog
-        if (listener.onInputResult(tag, inputEditTextFt.getText().toString(), promptTextView)) {
-            dialog.dismiss();
+        if ((listener.onInputResult(tag, inputEditTextFt.getText().toString(), promptTextView)) && (listener.onInputResult(tag, inputEditTextInch.getText().toString(), promptTextView))) {
+            // validate entered goal
+            int ft;
+            int inch;
+
+            try {
+                ft = Integer.valueOf(inputEditTextFt.getText().toString());
+                inch = Integer.valueOf(inputEditTextInch.getText().toString());
+                height = 12*ft + inch;
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            if (height > 0 && height < 110) {
+                sp.edit().putInt(HEIGHT, height).apply();
+                Toast.makeText(getActivity(), R.string.saved, Toast.LENGTH_LONG).show();
+                dialog.dismiss();
+
+            } else {
+                promptTextView.setText(R.string.height_instruction_failed);
+            }
+
         }
 
     }

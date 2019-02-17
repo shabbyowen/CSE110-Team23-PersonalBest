@@ -14,6 +14,7 @@ public class StepCounter extends Model {
     private SharedPreferences sharedPreferences;
     private int step;
     private int goal;
+    private int yesterdayStep;
 
     public static StepCounter getInstance(Context context) {
         if (instance == null) {
@@ -44,6 +45,14 @@ public class StepCounter extends Model {
         updateAll();
     }
 
+    public void setYesterdayStep(int value) {
+        yesterdayStep = value;
+    }
+
+    public int getYesterdayStep() {
+        return yesterdayStep;
+    }
+
     public void setGoal(int value) {
         goal = value;
         updateAll();
@@ -66,7 +75,7 @@ public class StepCounter extends Model {
     }
 
     public void load() {
-        step = sharedPreferences.getInt(STEP_COUNT, -1);
+        step = sharedPreferences.getInt(STEP_COUNT, 0);
         goal = sharedPreferences.getInt(STEP_GOAL, 5000);
     }
 }

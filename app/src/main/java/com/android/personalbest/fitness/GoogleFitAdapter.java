@@ -2,18 +2,17 @@ package com.android.personalbest.fitness;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
-
+import com.android.personalbest.HomeScreenActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
+import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-
-import com.android.personalbest.HomeScreenActivity;
 
 public class GoogleFitAdapter implements FitnessService {
     private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
@@ -42,6 +41,7 @@ public class GoogleFitAdapter implements FitnessService {
             startRecording();
         }
     }
+
 
     private void startRecording() {
         GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
@@ -83,14 +83,21 @@ public class GoogleFitAdapter implements FitnessService {
                         new OnSuccessListener<DataSet>() {
                             @Override
                             public void onSuccess(DataSet dataSet) {
-                                Log.d(TAG, dataSet.toString());
+//                                Log.d(TAG, dataSet.toString());
                                 long total =
                                         dataSet.isEmpty()
                                                 ? 0
                                                 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
 
+                                for (DataPoint dp: dataSet.getDataPoints()) {
+//                                    Log.d(TAG, String.valueOf(dp.getValue(Field.FIELD_STEPS).asInt()));
+                                }
+
                                 activity.setStepCount(total);
-                                Log.d(TAG, "Total steps: " + total);
+                                if (dataSet.getDataPoints().size() > 1) {
+                                    activity.setYesterdayStepCount(dataSet.getDataPoints().get(1).getValue(Field.FIELD_STEPS).asInt());
+                                }
+//                                Log.d(TAG, "Total steps: " + total);
                             }
                         })
                 .addOnFailureListener(
@@ -100,6 +107,26 @@ public class GoogleFitAdapter implements FitnessService {
                                 Log.d(TAG, "There was a problem getting the step count.", e);
                             }
                         });
+    }
+
+    @Override
+    public void updateStepCountWithCallback(OnSuccessListener<DataSet> successListener) {
+        GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
+        if (lastSignedInAccount == null) {
+            Log.w(TAG, "No account signed in!");
+            return;
+        }
+
+        Fitness.getHistoryClient(activity, lastSignedInAccount)
+            .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
+            .addOnSuccessListener(successListener)
+            .addOnFailureListener(
+                new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "There was a problem getting the step count.", e);
+                    }
+                });
     }
 
 

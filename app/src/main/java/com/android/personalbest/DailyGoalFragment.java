@@ -1,6 +1,7 @@
 package com.android.personalbest;
 
 
+import android.content.DialogInterface;
 import android.icu.text.StringPrepParseException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -8,6 +9,7 @@ import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +19,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.personalbest.models.EncouragementTracker;
 import com.android.personalbest.models.Model;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
+import com.android.personalbest.util.DateCalculator;
 import com.android.personalbest.util.SpeedCalculator;
 import com.android.personalbest.util.TimeMachine;
 
@@ -48,6 +52,7 @@ public class DailyGoalFragment extends Fragment implements
     // models
     private StepCounter counter;
     private WorkoutRecord record;
+    private EncouragementTracker encouragementTracker;
 
     // Required empty public constructor
     public DailyGoalFragment() {}
@@ -58,9 +63,8 @@ public class DailyGoalFragment extends Fragment implements
 
         // initialize the model field
         counter = StepCounter.getInstance(getContext());
-        counter.addListener(this);
         record = WorkoutRecord.getInstance(getContext());
-        record.addListener(this);
+        encouragementTracker = EncouragementTracker.getInstance(getContext());
     }
 
     @Override
@@ -75,6 +79,9 @@ public class DailyGoalFragment extends Fragment implements
 
         changeGoalBtn = fragmentView.findViewById(R.id.daily_goal_change_goal_btn);
         changeGoalBtn.setOnClickListener(this::onChangeGoalBtnClicked);
+
+        addStepsBtn = fragmentView.findViewById(R.id.daily_goal_add_steps);
+        addStepsBtn.setOnClickListener(this::onAddStepsBtnClicked);
 
         currentStepTextView = fragmentView.findViewById(R.id.daily_goal_steps_tv);
         currentStepGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
@@ -93,12 +100,31 @@ public class DailyGoalFragment extends Fragment implements
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onResume() {
+        super.onResume();
+
+        // add listener
+        counter.addListener(this);
+        record.addListener(this);
+
+        // the correct the text of the button
+        if (record.isWorkingout()) {
+            recordBtn.setText(R.string.end_record);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
 
         // clean up
         counter.removeListener(this);
         record.removeListener(this);
+
+        // save the running session
+        counter.save();
+        record.save();
+        encouragementTracker.save();
     }
 
     // utility functions
@@ -112,6 +138,55 @@ public class DailyGoalFragment extends Fragment implements
         double currDist = SpeedCalculator.stepToMiles(step);
         currentDistTextView.setText(String.format("%.2f", currDist));
         currentDistGoalTextView.setText(String.format("%.2f", goalDist));
+
+        // check if the user has met the goal
+        if (step >= goal && goal < 15000 && encouragementTracker.shouldDisplayGoalPrompt()) {
+            Log.d(TAG, "Showing meet goal encouragement");
+            encouragementTracker.setLastGoalPromptTime(TimeMachine.nowMillis());
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+
+            // set dialog message
+            alertDialogBuilder
+                .setMessage(R.string.met_goal)
+                .setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        counter.setGoal(counter.getGoal() + 500);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(R.string.cancel,new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        dialog.dismiss();
+                    }
+                });
+            alertDialogBuilder.create().show();
+            return;
+        }
+
+        int tmp = counter.getYesterdayStep();
+        long tmp2 = TimeMachine.nowMillis();
+        long tmp3 = DateCalculator.toLocalTime(TimeMachine.nowMillis());
+        long tmp4 = DateCalculator.toLocalTime(TimeMachine.nowMillis()) % (86400 * 1000);
+        long tmp5 = 20 * 3600 * 1000;
+        boolean tmp6 = encouragementTracker.shouldDisplayEncouragement();
+        if (step - counter.getYesterdayStep() >= 500 &&
+            DateCalculator.toLocalTime(TimeMachine.nowMillis()) % (86400 * 1000) > 20 * 3600 * 1000 &&
+            encouragementTracker.shouldDisplayEncouragement()) {
+            Log.d(TAG, "Showing sub-goal encouragement");
+            encouragementTracker.setLastEncouragementTime(TimeMachine.nowMillis());
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+
+            // set dialog message
+            alertDialogBuilder
+                .setMessage(String.format("Congrats, you walked over %d more steps than yesterday!",
+                    (step - counter.getYesterdayStep()) / 500 * 500))
+                .setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        dialog.dismiss();
+                    }
+                });
+            alertDialogBuilder.create().show();
+        }
     }
 
     private String formatTime(int second) {
@@ -164,9 +239,7 @@ public class DailyGoalFragment extends Fragment implements
     }
 
     public void onAddStepsBtnClicked(View view) {
-        DialogFragment dialog = InputDialogFragment.newInstance(this, ADD_STEP, R.string.add_step_instruction_initial);
-        FragmentManager fm = getActivity().getSupportFragmentManager();
-        dialog.show(fm, "input_fragment");
+        counter.setStep(counter.getStep() + 500);
     }
 
     @Override
@@ -212,7 +285,7 @@ public class DailyGoalFragment extends Fragment implements
         } else if (o instanceof WorkoutRecord.Result) {
             WorkoutRecord.Result result = (WorkoutRecord.Result) o;
             sessionStepTextView.setText(String.valueOf(result.deltaStep));
-            sessionTimeTextView.setText(formatTime(result.deltaTime));
+            sessionTimeTextView.setText(formatTime(result.deltaTime / 1000));
             double mph = SpeedCalculator.calculateSpeed(result.deltaStep, result.deltaTime);
             sessionSpeedTextView.setText(String.format("%.2f", mph));
         }

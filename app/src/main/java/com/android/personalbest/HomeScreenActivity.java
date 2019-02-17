@@ -15,9 +15,12 @@ import android.widget.TextView;
 import com.android.personalbest.fitness.FitnessService;
 import com.android.personalbest.fitness.FitnessServiceFactory;
 import com.android.personalbest.fitness.GoogleFitAdapter;
+import com.android.personalbest.models.EncouragementTracker;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
 import com.android.personalbest.util.TimeMachine;
+
+import java.util.List;
 
 public class HomeScreenActivity extends AppCompatActivity implements HeightPromptFragment.HeightPromptListener{
 
@@ -26,7 +29,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     private static final String TAG = "HomeScreenActivity";
     private static final int UPDATE_DELAY_SEC = 5;
 
-    private FitnessService fitnessService;
+    public FitnessService fitnessService;
 
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
@@ -64,6 +67,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     // models
     private StepCounter counter;
     private WorkoutRecord record;
+    private EncouragementTracker promptTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,9 +77,8 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         // get models
         counter = StepCounter.getInstance(this);
         record = WorkoutRecord.getInstance(this);
-
-        // the record model listens to the step update
-        counter.addListener(record);
+        record.setFitnessService(fitnessService);
+        promptTracker = EncouragementTracker.getInstance(this);
 
         // init fragment manager
         fragmentManager = getSupportFragmentManager();
@@ -95,14 +98,22 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         fitnessService.setup();
 
         // ask user for their height
-        HeightPromptFragment heightPromptFragment = HeightPromptFragment.newInstance(this, INPUT_HEIGHT, R.string.prompt_height_str);
-        heightPromptFragment.show(fragmentManager, INPUT_HEIGHT);
+        int height = getSharedPreferences(HeightPromptFragment.HEIGHT_SHARED_PREF, MODE_PRIVATE)
+                .getInt(HeightPromptFragment.HEIGHT, -1);
+
+        if (height == -1) {
+            HeightPromptFragment heightPromptFragment = HeightPromptFragment.newInstance(this, INPUT_HEIGHT, R.string.prompt_height_str);
+            if (heightPromptFragment != null) {
+                heightPromptFragment.show(fragmentManager, INPUT_HEIGHT);
+            }
+        }
+
         putFragment(new DailyGoalFragment());
 
         // initialize update task
         handler = new Handler();
         updateStepTask = () -> {
-            Log.d(TAG, "try to update the step count...");
+//            Log.d(TAG, "try to update the step count...");
             fitnessService.updateStepCount();
             handler.postDelayed(updateStepTask, UPDATE_DELAY_SEC * 1000);
         };
@@ -116,28 +127,26 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     protected void onResume() {
         super.onResume();
 
+        // the record model listens to the step update
+        counter.addListener(record);
+
         // resume updating step count
         handler.post(updateStepTask);
         handler.post(updateTimeTask);
-        Log.d(TAG, "update tasks resumed");
+        Log.d(TAG, "Update tasks resumed");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
+        // remove listeners
+        counter.removeListener(record);
+
         // pause update task
         handler.removeCallbacks(updateStepTask);
         handler.removeCallbacks(updateTimeTask);
-        Log.d(TAG, "update tasks paused");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        // remove listeners
-        counter.removeListener(record);
+        Log.d(TAG, "Update tasks paused");
     }
 
     private void putFragment(Fragment fragment) {
@@ -163,8 +172,8 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         counter.setStep((int)stepCount);
     }
 
-    public int getStepCount() {
-        return counter.getStep();
+    public void setYesterdayStepCount(long stepCount) {
+        counter.setYesterdayStep((int)stepCount);
     }
 
     @Override
