@@ -35,7 +35,7 @@ public class WeeklyProgressFragment extends Fragment {
     private CombinedChart progressChart;
     //private BarChart progressChart;
     private final int[] bar_colors = new int[]{Color.parseColor("#68a0b0"),Color.parseColor("#9178a0")};
-    private final String[] xAxisLabel = new String[]{ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+    private final String[] xAxisLabel = new String[]{ "S", "M", "T", "W", "T", "F", "S" };
     private WorkoutRecord weekRecords = WorkoutRecord.getInstance(getContext());
 
     private final long numMillInDay = 86400000;
@@ -78,7 +78,7 @@ public class WeeklyProgressFragment extends Fragment {
         List<BarEntry> yVals1 = new ArrayList<BarEntry>();
 
         for (int i = 0; i < numberOfDays; i++) {
-            yVals1.add(new BarEntry(i, new float[]{10f, 20f}));
+            yVals1.add(new BarEntry(i, new float[]{100f, 200f}));
         }
 
         BarDataSet barSet;
@@ -86,13 +86,15 @@ public class WeeklyProgressFragment extends Fragment {
         barSet = new BarDataSet(yVals1, "");
         barSet.setDrawIcons(false);
         barSet.setStackLabels(new String[]{"Other", "Planned"});
+        barSet.setValueTextSize(15);
+
         barSet.setColors(bar_colors);
 
         List<Entry> lineDataList = new ArrayList<>();
 
         // set line dummy data
         for (int i = 0; i < numberOfDays; i++) {
-            lineDataList.add(new Entry(i, 25));
+            lineDataList.add(new Entry(i, 250));
         }
 
         LineDataSet lineSet = new LineDataSet(lineDataList, "");
@@ -102,6 +104,22 @@ public class WeeklyProgressFragment extends Fragment {
         lineSet.setCircleRadius(5f);
         lineSet.setColor(Color.rgb(240, 238, 70));
         lineSet.setLabel("Goal");
+        lineSet.setValueTextSize(15);
+
+        List<Entry> speedsList = new ArrayList<>();
+        // set speed dummy data
+        for (int i = 0; i < numberOfDays; i++) {
+            speedsList.add(new Entry(i, 5));
+        }
+
+        LineDataSet speedSet = new LineDataSet(speedsList, "");
+
+        speedSet.setLineWidth(2.5f);
+        speedSet.setCircleColor(Color.BLUE);
+        speedSet.setCircleRadius(5f);
+        speedSet.setColor(Color.BLUE);
+        speedSet.setLabel("Speed");
+        speedSet.setValueTextSize(15);
 
 
         //Fixing the X-axis to Weekdays
@@ -131,9 +149,15 @@ public class WeeklyProgressFragment extends Fragment {
         CombinedData data = new CombinedData();
         BarData barData = new BarData(barSet);
         LineData lineData = new LineData(lineSet);
+        LineData speedData = new LineData(speedSet);
+
 
         data.setData(barData);
-        data.setData(lineData);
+        LineData chartData = new LineData();
+        chartData.addDataSet(lineSet);
+        chartData.addDataSet(speedSet);
+        data.setData(chartData);
+        data.setValueTextSize(15);
 
         progressChart.setData(data);
         //progressChart.setFitBars(true);
@@ -143,7 +167,19 @@ public class WeeklyProgressFragment extends Fragment {
         progressChart.getXAxis().setAxisMaximum(barData.getXMax() + 0.75f);
         progressChart.getXAxis().setAxisMinimum(barData.getXMin() - 0.75f);
 
+        progressChart.getXAxis().setTextSize(30);
+
+
+//        progressChart.getSecondScale().addSeries(series2);
+//        // the y bounds are always manual for second scale
+//        graph.getSecondScale().setMinY(0);
+//        graph.getSecondScale().setMaxY(15);
+//        series2.setColor(Color.RED);
+//        graph.getGridLabelRenderer().setVerticalLabelsSecondScaleColor(Color.RED);
+
     }
+
+
 
     /**
      * This method is used to calculated the offset needed to find the correct sessions
@@ -202,31 +238,18 @@ public class WeeklyProgressFragment extends Fragment {
 
         int counter = 0;
 
-        for(int i = 1; i <= offset; i++) {
-
-            WorkoutRecord.Session daySession = sessions.get(sessions.size() - counter);
-            //Checking if the sessions is within the numerical range of a specific day
-            if (today - i * numMillInDay < daySession.startTime && daySession.startTime <= today - (i - 1) * numMillInDay) {
-                stepsByDay[offset - 1 - counter] = daySession.deltaStep;
-                deltaTimeByDay[offset - 1 - counter] = daySession.deltaTime;
-                speedByDay[offset - 1 - counter] =
-                        SpeedCalculator.calculateSpeed(daySession.deltaStep, (int) daySession.deltaTime);
-            } else {
-
-            }
-
-
-//            Fitness.getHistoryClient(getActivity(), lastSignedInAccount)
-//                    .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
-//                    .addOnSuccessListener(successListener)
-//                    .addOnFailureListener(
-//                            new OnFailureListener() {
-//                                @Override
-//                                public void onFailure(@NonNull Exception e) {
+//        for(int i = 1; i <= offset; i++) {
 //
-//                                }
-//                            });
+//            WorkoutRecord.Session daySession = sessions.get(sessions.size() - counter);
+//            //Checking if the sessions is within the numerical range of a specific day
+//            if (today - i * numMillInDay < daySession.startTime && daySession.startTime <= today - (i - 1) * numMillInDay) {
+//                stepsByDay[offset - 1 - counter] = daySession.deltaStep;
+//                deltaTimeByDay[offset - 1 - counter] = daySession.deltaTime;
+//                speedByDay[offset - 1 - counter] =
+//                        SpeedCalculator.calculateSpeed(daySession.deltaStep, (int) daySession.deltaTime);
+//            } else {
+//
+//            }
 //        }
-        }
     }
 }

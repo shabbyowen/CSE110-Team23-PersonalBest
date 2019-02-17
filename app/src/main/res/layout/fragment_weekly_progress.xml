@@ -8,10 +8,11 @@
 
     <com.github.mikephil.charting.charts.CombinedChart
             android:id="@+id/progressChart"
+
             android:layout_marginTop="30dp"
             android:layout_marginLeft="18dp"
             android:layout_width="350dp"
-            android:layout_height="420dp"/>
+            android:layout_height="475dp"/>
 
 
 </FrameLayout>
