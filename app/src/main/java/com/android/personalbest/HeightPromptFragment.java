@@ -1,6 +1,11 @@
 package com.android.personalbest;
 
 
+/**
+ * This file contains a HeightPromptFragment that prompts the user to enter
+ * their height when they first log in
+ */
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,7 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Class for the pop up window
  */
 public class HeightPromptFragment extends DialogFragment {
 
@@ -32,15 +37,23 @@ public class HeightPromptFragment extends DialogFragment {
     public static final String HEIGHT_SHARED_PREF = "personal_best_height";
     public static final String HEIGHT = "user_height";
 
+    /**
+     * This method is required empty public constructor
+     */
     public HeightPromptFragment() {
         // Required empty public constructor
     }
 
-    // implement this interface to get the result from the dialog
+    /**
+     * This method implement this interface to get the result from the dialog
+     */
     public interface HeightPromptListener{
         boolean onInputResult(String tag, String result, TextView view);
     }
 
+    /**
+     * This method create a new instance of the height prompt
+     */
     public static HeightPromptFragment newInstance(HeightPromptListener listener, String tag, int prompt) {
 
         // initialize a new input dialog fragment
@@ -53,6 +66,13 @@ public class HeightPromptFragment extends DialogFragment {
         return fragment;
     }
 
+
+    /**
+     * This method create the text, button and layout for the pop up
+     *
+     * @param savedInstanceState as Bundle
+     * @return a dialog fot the home screen to display
+     */
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -83,12 +103,20 @@ public class HeightPromptFragment extends DialogFragment {
         return dialog;
     }
 
+    /**
+     * This method is the listener for the OK button.
+     * Check if the input is valid and save valid input
+     *
+     * @param dialog as DialogInterface.
+     * @param i as to see if the button is clicked
+     */
     public void onConfirmBtnClicked(DialogInterface dialog, int i) {
 
         SharedPreferences sp = getContext().getSharedPreferences(HEIGHT_SHARED_PREF, Context.MODE_PRIVATE);
 
         // callback, if listener says true, dismiss this dialog
         if ((listener.onInputResult(tag, inputEditTextFt.getText().toString(), promptTextView)) && (listener.onInputResult(tag, inputEditTextInch.getText().toString(), promptTextView))) {
+
             // validate entered goal
             int ft;
             int inch;

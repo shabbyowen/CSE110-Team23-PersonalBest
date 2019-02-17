@@ -1,5 +1,8 @@
 package com.android.personalbest;
 
+/**
+ * this file contains the WeeklyProgressFragment that displays the weekly summary
+ */
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -25,12 +28,11 @@ import java.util.*;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * Class to make the chart
  */
 public class WeeklyProgressFragment extends Fragment {
 
     private CombinedChart progressChart;
-    //private BarChart progressChart;
 
     private final int[] bar_colors = new int[]{Color.parseColor("#68a0b0"),Color.parseColor("#9178a0")};
     private final String[] xAxisLabel = new String[]{ "S", "M", "T", "W", "T", "F", "S" };
@@ -46,10 +48,19 @@ public class WeeklyProgressFragment extends Fragment {
     }
 
 
+    /**
+     * This method is used to create the CombinedChart for display
+     *
+     * @param inflater as LayoutInflater
+     * @param container as ViewGroup
+     * @param savedInstanceState as Bundle
+     * @return the fragment view for display
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        // Inflate the layout for this fragment
         View fragmentView = inflater.inflate(R.layout.fragment_weekly_progress, container, false);
 
         progressChart = fragmentView.findViewById(R.id.progressChart);
@@ -59,14 +70,17 @@ public class WeeklyProgressFragment extends Fragment {
         int offset = this.offsetCalculator();
         this.findThisWeekSessions(allSessions, offset);
 
-        // Inflate the layout for this fragment
-        //drawChart(offset);
-        drawChartDummy(0);
+        //drawChart(offset); // the official draw chart
+        drawChartDummy(0); // dummy for display purpose
 
         return fragmentView;
     }
 
-
+    /**
+     * This method is used to draw the chart base on the data stored in sharedPref
+     *
+     * @param offset as int
+     */
     private void drawChart(int offset) {
 
         Description description = new Description();
@@ -176,14 +190,6 @@ public class WeeklyProgressFragment extends Fragment {
         progressChart.getXAxis().setAxisMaximum(barData.getXMax() + 0.75f);
         progressChart.getXAxis().setAxisMinimum(barData.getXMin() - 0.75f);
 
-
-//        progressChart.getSecondScale().addSeries(series2);
-//        // the y bounds are always manual for second scale
-//        graph.getSecondScale().setMinY(0);
-//        graph.getSecondScale().setMaxY(15);
-//        series2.setColor(Color.RED);
-//        graph.getGridLabelRenderer().setVerticalLabelsSecondScaleColor(Color.RED);
-
     }
 
 
@@ -284,6 +290,12 @@ public class WeeklyProgressFragment extends Fragment {
                 });
     }
 
+    /**
+     * This method is used to draw the chart base on preset data for
+     * testing and display purpose
+     *
+     * @param offset as int
+     */
     private void drawChartDummy(int offset) {
 
         Description description = new Description();
@@ -399,13 +411,6 @@ public class WeeklyProgressFragment extends Fragment {
         progressChart.getXAxis().setAxisMaximum(barData.getXMax() + 0.75f);
         progressChart.getXAxis().setAxisMinimum(barData.getXMin() - 0.75f);
 
-
-//        progressChart.getSecondScale().addSeries(series2);
-//        // the y bounds are always manual for second scale
-//        graph.getSecondScale().setMinY(0);
-//        graph.getSecondScale().setMaxY(15);
-//        series2.setColor(Color.RED);
-//        graph.getGridLabelRenderer().setVerticalLabelsSecondScaleColor(Color.RED);
 
     }
 }
