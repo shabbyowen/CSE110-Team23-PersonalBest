@@ -26,8 +26,8 @@ import java.util.List;
  */
 public class WeeklyProgressFragment extends Fragment {
 
-    //private CombinedChart progressChart;
-    private BarChart progressChart;
+    private CombinedChart progressChart;
+    //private BarChart progressChart;
     private final int[] bar_colors = new int[]{Color.parseColor("#68a0b0"),Color.parseColor("#9178a0")};
     private final String[] xAxisLabel = new String[]{ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
     private WorkoutRecord weekRecords = WorkoutRecord.getInstance(getContext());
@@ -43,7 +43,7 @@ public class WeeklyProgressFragment extends Fragment {
 
         View fragmentView = inflater.inflate(R.layout.fragment_weekly_progress, container, false);
 
-        progressChart = fragmentView.findViewById(R.id.barChart);
+        progressChart = fragmentView.findViewById(R.id.progressChart);
 
         List<WorkoutRecord.Session> allSessions = weekRecords.getSessions();
 
@@ -64,16 +64,31 @@ public class WeeklyProgressFragment extends Fragment {
         List<BarEntry> yVals1 = new ArrayList<BarEntry>();
 
         for (int i = 0; i < numberOfDays; i++) {
-            yVals1.add(new BarEntry(i, new float[]{1f,2f}));
+            yVals1.add(new BarEntry(i, new float[]{10f,20f}));
         }
 
         BarDataSet barSet;
 
         barSet = new BarDataSet(yVals1, "");
         barSet.setDrawIcons(false);
-        barSet.setStackLabels(new String[]{"Unintentional", "Intentional"});
-
+        barSet.setStackLabels(new String[]{"Other", "Planned"});
         barSet.setColors(bar_colors);
+
+        List<Entry> lineDataList = new ArrayList<>();
+
+        // set line dummy data
+        for (int i = 0; i < numberOfDays; i++) {
+            lineDataList.add(new Entry(i, 25));
+        }
+
+        LineDataSet lineSet = new LineDataSet(lineDataList, "");
+
+        lineSet.setLineWidth(2.5f);
+        lineSet.setCircleColor(Color.rgb(240, 238, 70));
+        lineSet.setCircleRadius(5f);
+        lineSet.setColor(Color.rgb(240, 238, 70));
+        lineSet.setLabel("Goal");
+
 
         //Fixing the X-axis to Weekdays
         progressChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(){
@@ -99,12 +114,20 @@ public class WeeklyProgressFragment extends Fragment {
             }
         });
 
-        //CombinedData data = new CombinedData();
-        BarData data = new BarData(barSet);
-        //data.setData(barData);
+        CombinedData data = new CombinedData();
+        BarData barData = new BarData(barSet);
+        LineData lineData = new LineData(lineSet);
+
+        data.setData(barData);
+        data.setData(lineData);
+
         progressChart.setData(data);
-        progressChart.setFitBars(true);
+        //progressChart.setFitBars(true);
         progressChart.invalidate();
+        progressChart.setScaleEnabled(false);
+
+        progressChart.getXAxis().setAxisMaximum(barData.getXMax() + 0.75f);
+        progressChart.getXAxis().setAxisMinimum(barData.getXMin() - 0.75f);
 
     }
 }
