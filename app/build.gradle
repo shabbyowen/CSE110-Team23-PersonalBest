@@ -42,9 +42,12 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
+
+
 }
 
 repositories {
     maven { url 'http://repo1.maven.org/maven2' }
     maven { url 'https://jitpack.io' }
+    maven { url 'https://dl.bintray.com/sj/maven/' }
 }

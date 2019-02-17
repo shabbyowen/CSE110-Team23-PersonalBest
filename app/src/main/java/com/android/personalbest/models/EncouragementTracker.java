@@ -39,7 +39,6 @@ public class EncouragementTracker extends Model {
     }
 
     public void load() {
-
         lastGoalPromptTime = sharedPreferences.getLong(LAST_GOAL_PROMPT_TIME, 0);
     }
 

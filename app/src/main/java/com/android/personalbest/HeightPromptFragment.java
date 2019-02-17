@@ -100,7 +100,7 @@ public class HeightPromptFragment extends DialogFragment {
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
-            if (height > 0) {
+            if (height > 0 && height < 110) {
                 sp.edit().putInt(HEIGHT, height).apply();
                 Toast.makeText(getActivity(), R.string.saved, Toast.LENGTH_LONG).show();
                 dialog.dismiss();

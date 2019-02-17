@@ -1,11 +1,18 @@
 package com.android.personalbest;
 
+
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.android.personalbest.models.WorkoutRecord;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.CombinedChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.data.*;
 import com.android.personalbest.util.SpeedCalculator;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -19,21 +26,22 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import java.util.*;
 
 
+
 /**
  * A simple {@link Fragment} subclass.
  */
 public class WeeklyProgressFragment extends Fragment {
 
-    private BarChart barChart;
-    private final int[] bar_colors = new int[]{ColorTemplate.JOYFUL_COLORS[0],ColorTemplate.JOYFUL_COLORS[1]};
-    private final String[] xAxisLabel = new String[]{ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    private CombinedChart progressChart;
+    //private BarChart progressChart;
+    private final int[] bar_colors = new int[]{Color.parseColor("#68a0b0"),Color.parseColor("#9178a0")};
+    private final String[] xAxisLabel = new String[]{ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
     private WorkoutRecord weekRecords = WorkoutRecord.getInstance(getContext());
+
     private final long numMillInDay = 86400000;
     private int[] stepsByDay = null;
     private long[] deltaTimeByDay = null;
     private double[] speedByDay = null;
-
-
 
     public WeeklyProgressFragment() {
         // Required empty public constructor
@@ -46,7 +54,7 @@ public class WeeklyProgressFragment extends Fragment {
 
         View fragmentView = inflater.inflate(R.layout.fragment_weekly_progress, container, false);
 
-        barChart = fragmentView.findViewById(R.id.barChart);
+        progressChart = fragmentView.findViewById(R.id.progressChart);
 
         List<WorkoutRecord.Session> allSessions = weekRecords.getSessions();
 
@@ -64,27 +72,40 @@ public class WeeklyProgressFragment extends Fragment {
 
         Description description = new Description();
         description.setText("Weekly Progress");
-        barChart.setDescription(description);
+        progressChart.setDescription(description);
 
         int numberOfDays = 7;
         List<BarEntry> yVals1 = new ArrayList<BarEntry>();
 
-
-
         for (int i = 0; i < numberOfDays; i++) {
-            yVals1.add(new BarEntry(i, new float[]{500f,300f}));
+            yVals1.add(new BarEntry(i, new float[]{10f, 20f}));
         }
 
-        BarDataSet set1;
+        BarDataSet barSet;
 
-        set1 = new BarDataSet(yVals1, "Weekly Workout");
-        set1.setDrawIcons(false);
-        set1.setStackLabels(new String[]{"Intentional", "Unintentional"});
+        barSet = new BarDataSet(yVals1, "");
+        barSet.setDrawIcons(false);
+        barSet.setStackLabels(new String[]{"Other", "Planned"});
+        barSet.setColors(bar_colors);
 
-        set1.setColors(bar_colors);
+        List<Entry> lineDataList = new ArrayList<>();
+
+        // set line dummy data
+        for (int i = 0; i < numberOfDays; i++) {
+            lineDataList.add(new Entry(i, 25));
+        }
+
+        LineDataSet lineSet = new LineDataSet(lineDataList, "");
+
+        lineSet.setLineWidth(2.5f);
+        lineSet.setCircleColor(Color.rgb(240, 238, 70));
+        lineSet.setCircleRadius(5f);
+        lineSet.setColor(Color.rgb(240, 238, 70));
+        lineSet.setLabel("Goal");
+
 
         //Fixing the X-axis to Weekdays
-        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(){
+        progressChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
                 return xAxisLabel[(int) value];
@@ -92,7 +113,7 @@ public class WeeklyProgressFragment extends Fragment {
         });
 
         //Fixing the left and right axises to integer
-        barChart.getAxisLeft().setValueFormatter(new IndexAxisValueFormatter(){
+        progressChart.getAxisLeft().setValueFormatter(new IndexAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
                 return String.valueOf((int) Math.floor(value));
@@ -100,17 +121,27 @@ public class WeeklyProgressFragment extends Fragment {
         });
 
 
-        barChart.getAxisRight().setValueFormatter(new IndexAxisValueFormatter(){
+        progressChart.getAxisRight().setValueFormatter(new IndexAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
                 return String.valueOf((int) Math.floor(value));
             }
         });
 
-        BarData data = new BarData(set1);
-        barChart.setData(data);
-        barChart.setFitBars(true);
-        barChart.invalidate();
+        CombinedData data = new CombinedData();
+        BarData barData = new BarData(barSet);
+        LineData lineData = new LineData(lineSet);
+
+        data.setData(barData);
+        data.setData(lineData);
+
+        progressChart.setData(data);
+        //progressChart.setFitBars(true);
+        progressChart.invalidate();
+        progressChart.setScaleEnabled(false);
+
+        progressChart.getXAxis().setAxisMaximum(barData.getXMax() + 0.75f);
+        progressChart.getXAxis().setAxisMinimum(barData.getXMin() - 0.75f);
 
     }
 
