@@ -1,5 +1,7 @@
 package com.android.personalbest.util;
 
+import com.android.personalbest.models.UserHeight;
+
 public class SpeedCalculator {
 
     private static final double STRIDE_LENGTH_CONST = 0.413;
@@ -18,7 +20,13 @@ public class SpeedCalculator {
     }
 
     public static double stepToMiles(int step) {
-        double distance = DEFAULT_HEIGHT * STRIDE_LENGTH_CONST * step;
+        UserHeight userHeight = UserHeight.getInstance();
+        userHeight.load();
+        double mHeight = userHeight.getHeight();
+        if (mHeight <= 0) {
+            mHeight = DEFAULT_HEIGHT;
+        }
+        double distance = mHeight * STRIDE_LENGTH_CONST * step;
         return distance / 12.0 / 5280.0; // convert to miles per steps
     }
 }
