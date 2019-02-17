@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.personalbest.models.EncouragementTracker;
 import com.android.personalbest.models.Model;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
@@ -48,6 +49,7 @@ public class DailyGoalFragment extends Fragment implements
     // models
     private StepCounter counter;
     private WorkoutRecord record;
+    private EncouragementTracker encouragementTracker;
 
     // Required empty public constructor
     public DailyGoalFragment() {}
@@ -58,9 +60,8 @@ public class DailyGoalFragment extends Fragment implements
 
         // initialize the model field
         counter = StepCounter.getInstance(getContext());
-        counter.addListener(this);
         record = WorkoutRecord.getInstance(getContext());
-        record.addListener(this);
+        encouragementTracker = EncouragementTracker.getInstance(getContext());
     }
 
     @Override
@@ -75,6 +76,9 @@ public class DailyGoalFragment extends Fragment implements
 
         changeGoalBtn = fragmentView.findViewById(R.id.daily_goal_change_goal_btn);
         changeGoalBtn.setOnClickListener(this::onChangeGoalBtnClicked);
+
+        addStepsBtn = fragmentView.findViewById(R.id.daily_goal_add_steps);
+        addStepsBtn.setOnClickListener(this::onAddStepsBtnClicked);
 
         currentStepTextView = fragmentView.findViewById(R.id.daily_goal_steps_tv);
         currentStepGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
@@ -93,12 +97,29 @@ public class DailyGoalFragment extends Fragment implements
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onResume() {
+        super.onResume();
+
+        // add listener
+        counter.addListener(this);
+        record.addListener(this);
+
+        // the correct the text of the button
+        if (record.isWorkingout()) {
+            recordBtn.setText(R.string.end_record);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
 
         // clean up
         counter.removeListener(this);
         record.removeListener(this);
+
+        // save the running session
+        record.save();
     }
 
     // utility functions
@@ -114,8 +135,9 @@ public class DailyGoalFragment extends Fragment implements
         currentDistGoalTextView.setText(String.format("%.2f", goalDist));
 
         // check if the user has met the goal
-        if (step >= goal) {
-
+        if (step >= goal && encouragementTracker.shouldDisplayGoalPrompt()) {
+            encouragementTracker.setLastGoalPromptTime(TimeMachine.nowMillis());
+            Toast.makeText(getContext(), R.string.met_goal, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -169,9 +191,7 @@ public class DailyGoalFragment extends Fragment implements
     }
 
     public void onAddStepsBtnClicked(View view) {
-        DialogFragment dialog = InputDialogFragment.newInstance(this, ADD_STEP, R.string.add_step_instruction_initial);
-        FragmentManager fm = getActivity().getSupportFragmentManager();
-        dialog.show(fm, "input_fragment");
+        counter.setStep(counter.getStep() + 500);
     }
 
     @Override
@@ -217,7 +237,7 @@ public class DailyGoalFragment extends Fragment implements
         } else if (o instanceof WorkoutRecord.Result) {
             WorkoutRecord.Result result = (WorkoutRecord.Result) o;
             sessionStepTextView.setText(String.valueOf(result.deltaStep));
-            sessionTimeTextView.setText(formatTime(result.deltaTime));
+            sessionTimeTextView.setText(formatTime(result.deltaTime / 1000));
             double mph = SpeedCalculator.calculateSpeed(result.deltaStep, result.deltaTime);
             sessionSpeedTextView.setText(String.format("%.2f", mph));
         }
