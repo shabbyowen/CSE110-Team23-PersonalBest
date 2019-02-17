@@ -7,24 +7,31 @@ package com.android.personalbest;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
+import com.android.personalbest.util.DateCalculator;
 import com.android.personalbest.util.SpeedCalculator;
+import com.android.personalbest.util.TimeMachine;
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.data.*;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.android.gms.fitness.data.Bucket;
+import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.result.DataReadResponse;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.TimeZone;
 
 
 
@@ -70,9 +77,6 @@ public class WeeklyProgressFragment extends Fragment {
 
         int offset = this.offsetCalculator();
         this.findThisWeekSessions(allSessions, offset);
-
-        //drawChart(offset); // the official draw chart
-        drawChartDummy(0); // dummy for display purpose
 
         return fragmentView;
     }
@@ -236,14 +240,9 @@ public class WeeklyProgressFragment extends Fragment {
      */
     private void findThisWeekSessions(List<WorkoutRecord.Session> sessions, int offset) {
 
-
-        Calendar c = new GregorianCalendar();
-        c.set(Calendar.HOUR_OF_DAY, 23); //anything 0 - 23
-        c.set(Calendar.MINUTE, 59);
-        c.set(Calendar.SECOND, 59);
-        c.setTimeZone(TimeZone.getDefault());
-
-        Long today = c.getTimeInMillis(); //the midnight, that's the last second of the day.
+        //the midnight, that's the last second of the day.
+        Long today = DateCalculator.toClosesetMinightTmr(TimeMachine.nowCal()).getTimeInMillis();
+        today = DateCalculator.toLocalTime(today);
 
         intentionalStepsByDay = new int[offset];
         speedByDay = new double[offset];
@@ -276,142 +275,34 @@ public class WeeklyProgressFragment extends Fragment {
                 .updateStepCountWithCallback(new OnSuccessListener<DataReadResponse>() {
                     @Override
                     public void onSuccess(DataReadResponse dataReadResponse) {
-                        List<Bucket> list = dataReadResponse.getBuckets().subList(0, offset);
+                        List<Bucket> list = dataReadResponse.getBuckets();
+                        list = list.subList(list.size()-offset, list.size());
 
                         //The leftmost DataPoint is the most recent steps for the day
                         for(int i = 0; i < offset; i++) {
 
-                            int totalStepOfTheDay = list.get(i).getDataSet(DataType.AGGREGATE_STEP_COUNT_DELTA)
-                                    .getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
+                            int totalStepOfTheDay;
 
-                            WeeklyProgressFragment.this.unIntentionalStepsByDay[offset - i - 1] =
+                            Log.d("WeeklyProgressFragment", list.toString());
+
+                            DataSet totalStepOfTheDayDataSet = list.get(i)
+                                .getDataSet(DataType.AGGREGATE_STEP_COUNT_DELTA);
+
+                             if(totalStepOfTheDayDataSet.isEmpty()){
+                                continue;
+                            }else{
+                                 totalStepOfTheDay = totalStepOfTheDayDataSet
+                                         .getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
+                             }
+
+                            WeeklyProgressFragment.this.unIntentionalStepsByDay[i] =
                                     totalStepOfTheDay -
-                                            WeeklyProgressFragment.this.intentionalStepsByDay[offset - i - 1];
+                                            WeeklyProgressFragment.this.intentionalStepsByDay[i];
                         }
-
+                        drawChart(offset);
                     }
                 });
-    }
 
-    /**
-     * This method is used to draw the chart base on preset data for
-     * testing and display purpose
-     *
-     * @param offset as int
-     */
-    private void drawChartDummy(int offset) {
-
-        Description description = new Description();
-        description.setText("Weekly Progress");
-        progressChart.setDescription(description);
-
-        List<BarEntry> yVals1 = new ArrayList<BarEntry>();
-
-
-        // pushing step counts data for the week
-        yVals1.add(new BarEntry(0, new float[]{3500, 1200}));
-        yVals1.add(new BarEntry(1, new float[]{1400, 2500}));
-        yVals1.add(new BarEntry(2, new float[]{6500, 500}));
-        yVals1.add(new BarEntry(3, new float[]{4000, 2100}));
-        yVals1.add(new BarEntry(4, new float[]{3500, 3600}));
-        yVals1.add(new BarEntry(5, new float[]{2000, 5700}));
-        yVals1.add(new BarEntry(6, new float[]{0,0}));
-
-        BarDataSet barSet;
-
-        barSet = new BarDataSet(yVals1, "");
-        barSet.setDrawIcons(false);
-        barSet.setStackLabels(new String[]{"Other", "Planned"});
-        barSet.setValueTextSize(15);
-
-        barSet.setColors(bar_colors);
-
-        List<Entry> goalDataList = new ArrayList<>();
-
-        // pushing goal data
-        goalDataList.add(new Entry(0, 5000));
-        goalDataList.add(new Entry(1, 5000));
-        goalDataList.add(new Entry(2, 5500));
-        goalDataList.add(new Entry(3, 5500));
-        goalDataList.add(new Entry(4, 6000));
-        goalDataList.add(new Entry(5, 6500));
-        goalDataList.add(new Entry(6, 6500));
-
-
-        LineDataSet goalSet = new LineDataSet(goalDataList, "");
-
-        goalSet.setLineWidth(2.5f);
-        goalSet.setCircleColor(Color.rgb(240, 238, 70));
-        goalSet.setCircleRadius(5f);
-        goalSet.setColor(Color.rgb(240, 238, 70));
-        goalSet.setLabel("Goal");
-        goalSet.setValueTextSize(15);
-
-        List<Entry> speedsList = new ArrayList<>();
-
-        // pushing speed data
-        speedsList.add(new BarEntry(0, 4f));
-        speedsList.add(new BarEntry(1, 2f));
-        speedsList.add(new BarEntry(2, 1f));
-        speedsList.add(new BarEntry(3, 4f));
-        speedsList.add(new BarEntry(4, 3f));
-        speedsList.add(new BarEntry(5, 6f));
-        speedsList.add(new BarEntry(6, 0f));
-
-
-
-        LineDataSet speedSet = new LineDataSet(speedsList, "");
-
-        speedSet.setLineWidth(2.5f);
-        speedSet.setCircleColor(Color.BLUE);
-        speedSet.setCircleRadius(5f);
-        speedSet.setColor(Color.BLUE);
-        speedSet.setLabel("Speed");
-        speedSet.setValueTextSize(15);
-
-
-        //Fixing the X-axis to Weekdays
-        progressChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter() {
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                return xAxisLabel[(int) value];
-            }
-        });
-
-        //Fixing the left and right axises to integer
-        progressChart.getAxisLeft().setValueFormatter(new IndexAxisValueFormatter() {
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                return String.valueOf((int) Math.floor(value));
-            }
-        });
-
-
-        progressChart.getAxisRight().setValueFormatter(new IndexAxisValueFormatter() {
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                return String.valueOf((int) Math.floor(value));
-            }
-        });
-
-        CombinedData data = new CombinedData();
-        BarData barData = new BarData(barSet);
-
-
-        data.setData(barData);
-        LineData chartData = new LineData();
-        chartData.addDataSet(goalSet);
-        chartData.addDataSet(speedSet);
-        data.setData(chartData);
-        data.setValueTextSize(15);
-
-        progressChart.setData(data);
-        progressChart.invalidate();
-        progressChart.setScaleEnabled(false);
-
-        progressChart.getXAxis().setAxisMaximum(barData.getXMax() + 0.75f);
-        progressChart.getXAxis().setAxisMinimum(barData.getXMin() - 0.75f);
-
-
+         // the official draw chart
     }
 }
