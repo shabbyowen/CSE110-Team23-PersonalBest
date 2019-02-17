@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.android.personalbest.fitness.FitnessService;
 import com.android.personalbest.fitness.FitnessServiceFactory;
 import com.android.personalbest.fitness.GoogleFitAdapter;
+import com.android.personalbest.models.EncouragementTracker;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
 import com.android.personalbest.util.TimeMachine;
@@ -64,6 +65,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     // models
     private StepCounter counter;
     private WorkoutRecord record;
+    private EncouragementTracker promptTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,9 +75,8 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         // get models
         counter = StepCounter.getInstance(this);
         record = WorkoutRecord.getInstance(this);
-
-        // the record model listens to the step update
-        counter.addListener(record);
+        record.setFitnessService(fitnessService);
+        promptTracker = EncouragementTracker.getInstance(this);
 
         // init fragment manager
         fragmentManager = getSupportFragmentManager();
@@ -124,28 +125,26 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     protected void onResume() {
         super.onResume();
 
+        // the record model listens to the step update
+        counter.addListener(record);
+
         // resume updating step count
         handler.post(updateStepTask);
         handler.post(updateTimeTask);
-        Log.d(TAG, "update tasks resumed");
+        Log.d(TAG, "Update tasks resumed");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
+        // remove listeners
+        counter.removeListener(record);
+
         // pause update task
         handler.removeCallbacks(updateStepTask);
         handler.removeCallbacks(updateTimeTask);
-        Log.d(TAG, "update tasks paused");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        // remove listeners
-        counter.removeListener(record);
+        Log.d(TAG, "Update tasks paused");
     }
 
     private void putFragment(Fragment fragment) {

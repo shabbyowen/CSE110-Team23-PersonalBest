@@ -3,16 +3,17 @@ package com.android.personalbest.models;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.android.personalbest.util.DateCalculator;
+import com.android.personalbest.util.TimeMachine;
+
 public class EncouragementTracker extends Model {
 
     private static final String ENCOURAGEMENT_SHARED_PREF = "personal_best_encouragement";
-    private static final String HAS_DISPLAYED_ENCOURAGMENT = "has_displayed_encouragement";
-    private static final String LAST_TIME_ENCOURAGMENT = "last_time_encouragement";
+    private static final String LAST_GOAL_PROMPT_TIME = "last_goal_prompt_time";
     private static EncouragementTracker instance;
 
     private SharedPreferences sharedPreferences;
-    private long lastEncouragement;
-    private boolean encouragementDisplayed;
+    private long lastGoalPromptTime;
 
     public static EncouragementTracker getInstance(Context context) {
         if (instance == null) {
@@ -24,12 +25,26 @@ public class EncouragementTracker extends Model {
 
     public EncouragementTracker(Context context) {
         sharedPreferences = context.getSharedPreferences(ENCOURAGEMENT_SHARED_PREF, Context.MODE_PRIVATE);
-        //load();
+        load();
+    }
+
+    public void setLastGoalPromptTime(long lastGoalPromptTime) {
+        this.lastGoalPromptTime = lastGoalPromptTime;
+    }
+
+    public boolean shouldDisplayGoalPrompt() {
+        boolean result = DateCalculator.dateChanged(lastGoalPromptTime, TimeMachine.nowMillis());
+        lastGoalPromptTime = TimeMachine.nowMillis();
+        return result;
     }
 
     public void load() {
-        lastEncouragement = sharedPreferences.getLong(LAST_TIME_ENCOURAGMENT, 0);
-        encouragementDisplayed = sharedPreferences.getBoolean(HAS_DISPLAYED_ENCOURAGMENT, false);
+        lastGoalPromptTime = sharedPreferences.getLong(LAST_GOAL_PROMPT_TIME, 0);
+    }
 
+    public void save() {
+        sharedPreferences.edit()
+            .putLong(LAST_GOAL_PROMPT_TIME, lastGoalPromptTime)
+            .apply();
     }
 }

@@ -4,11 +4,22 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.android.personalbest.HomeScreenActivity;
+import com.android.personalbest.fitness.FitnessService;
+import com.android.personalbest.util.DateCalculator;
 import com.android.personalbest.util.TimeMachine;
+import com.google.android.gms.fitness.data.DataPoint;
+import com.google.android.gms.fitness.data.DataSet;
+import com.google.android.gms.fitness.data.Field;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,11 +29,12 @@ public class WorkoutRecord extends Model implements Model.Listener {
     public static final String SESSION_SHARED_PREF = "personal_best_workout_record";
     public static final String SESSION_LIST = "session_list";
     public static final String SESSION_SAVE_TIME = "session_saved_time";
+    public static final String RUNNING_SESSION = "running_session";
 
-    private static final int UPDATE_SEC = 5;
     private static WorkoutRecord instance;
 
     private SharedPreferences sharedPreferences;
+    private FitnessService fitnessService;
     private List<Session> sessions;
     private Session currentSession;
 
@@ -69,7 +81,7 @@ public class WorkoutRecord extends Model implements Model.Listener {
 
     public void startWorkout(long now, int startStep) {
         if (currentSession == null) {
-            currentSession = new Session(now / 1000L, startStep);
+            currentSession = new Session(now, startStep);
         } else {
             Log.e(TAG, "A session is already running!");
         }
@@ -81,10 +93,6 @@ public class WorkoutRecord extends Model implements Model.Listener {
             // record this session
             sessions.add(currentSession);
             currentSession = null;
-
-            // save the session list
-            save();
-
         } else {
             Log.e(TAG, "No session is currently running!");
         }
@@ -94,9 +102,13 @@ public class WorkoutRecord extends Model implements Model.Listener {
         return currentSession != null;
     }
 
+    public void setFitnessService(FitnessService fitnessService) {
+        this.fitnessService = fitnessService;
+    }
+
     public void setTime(long time) {
         if (currentSession != null) {
-            currentSession.deltaTime = time / 1000L - currentSession.startTime;
+            currentSession.deltaTime = time - currentSession.startTime;
             updateAll();
         }
     }
@@ -110,20 +122,30 @@ public class WorkoutRecord extends Model implements Model.Listener {
 
     public void save() {
 
-        // save as json
+        // save sessions
         Gson gson = new Gson();
         String data = gson.toJson(sessions);
-        sharedPreferences.edit()
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor
             .putString(SESSION_LIST, data)
-            .putLong(SESSION_SAVE_TIME, TimeMachine.nowMillis())
-            .apply();
+            .putLong(SESSION_SAVE_TIME, TimeMachine.nowMillis());
         Log.d(TAG, "Sessions saved");
-        Log.v(TAG, data);
+
+        // save running session
+        if (currentSession != null) {
+            Log.d(TAG, "Saving running session");
+            editor.putString(RUNNING_SESSION, gson.toJson(currentSession));
+        } else {
+            Log.d(TAG, "No running session");
+            editor.putString(RUNNING_SESSION, "");
+        }
+
+        editor.apply();
     }
 
     public void load() {
 
-        // load json
+        // load all the sessions
         Gson gson = new Gson();
         String data = sharedPreferences.getString(SESSION_LIST, "");
         Type type = new TypeToken<List<Session>>() {}.getType(); // REFLECTION BLACK MAGIC!
@@ -133,7 +155,41 @@ public class WorkoutRecord extends Model implements Model.Listener {
             sessions = new LinkedList<>();
         }
         Log.d(TAG, "Sessions loaded");
-        Log.v(TAG, data);
+
+
+        // check if we have saved any running session
+        Session session = gson.fromJson(sharedPreferences.getString(RUNNING_SESSION, ""), Session.class);
+        if (session != null) {
+            Log.d(TAG, "Running session found");
+
+            // check if it has been a day
+            long startTime = session.startTime;
+            long currentTime = TimeMachine.nowMillis();
+
+            if (DateCalculator.dateChanged(startTime, currentTime)) {
+
+                // get the step from fitness service
+                fitnessService.updateStepCountWithCallback(new OnSuccessListener<DataSet>() {
+                    @Override
+                    public void onSuccess(DataSet dataSet) {
+                        List<DataPoint> list = dataSet.getDataPoints();
+                        int yesterdayStep = list.get(1).getValue(Field.FIELD_STEPS).asInt();
+                        currentSession.deltaStep = yesterdayStep - currentSession.startStep;
+                        currentSession.deltaTime = 86400L * 1000L - session.startTime;
+                        sessions.add(currentSession);
+                        currentSession = null;
+                        Log.d(TAG, "Date change detected!");
+                    }
+                });
+            } else {
+                currentSession = session;
+                Log.d(TAG, "No date change");
+            }
+
+        } else {
+            Log.d(TAG, "No running session found");
+            currentSession = null;
+        }
     }
 
     public List<Session> getSessions() {
@@ -151,4 +207,5 @@ public class WorkoutRecord extends Model implements Model.Listener {
             setStep(result.step);
         }
     }
+
 }

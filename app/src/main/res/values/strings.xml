@@ -14,7 +14,7 @@
     <string name="speed">Speed</string>
     <string name="mph">mph</string>
     <string name="mile">mi</string>
-    <string name="add_steps">Add Steps</string>
+    <string name="add_steps">+500</string>
     <string name="change_goal">Change Goal</string>
 
     <!-- input dialog -->
@@ -32,6 +32,7 @@
 
     <!-- Toast texts -->
     <string name="saved">Saved</string>
+    <string name="met_goal">Congrats, You have met your goal!</string>
 
     <!-- Height Prompt texts -->
     <string name="ft_str">ft.</string>
