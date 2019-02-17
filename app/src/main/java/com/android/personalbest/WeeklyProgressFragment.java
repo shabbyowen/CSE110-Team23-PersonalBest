@@ -202,17 +202,17 @@ public class WeeklyProgressFragment extends Fragment {
 
         int counter = 0;
 
-        for(int i = 1; i <= offset; i++){
+        for(int i = 1; i <= offset; i++) {
 
-            WorkoutRecord.Session daySession = sessions.get(sessions.size()-counter);
+            WorkoutRecord.Session daySession = sessions.get(sessions.size() - counter);
             //Checking if the sessions is within the numerical range of a specific day
-            if (today - i*numMillInDay < daySession.startTime && daySession.startTime <= today - (i-1)*numMillInDay){
-                stepsByDay[offset-1-counter] = daySession.deltaStep;
-                deltaTimeByDay[offset-1-counter] = daySession.deltaTime;
-                speedByDay[offset-1-counter] =
-                        SpeedCalculator.calculateSpeed(daySession.deltaStep, (int)daySession.deltaTime);
-            }else{
-                
+            if (today - i * numMillInDay < daySession.startTime && daySession.startTime <= today - (i - 1) * numMillInDay) {
+                stepsByDay[offset - 1 - counter] = daySession.deltaStep;
+                deltaTimeByDay[offset - 1 - counter] = daySession.deltaTime;
+                speedByDay[offset - 1 - counter] =
+                        SpeedCalculator.calculateSpeed(daySession.deltaStep, (int) daySession.deltaTime);
+            } else {
+
             }
 
 
@@ -227,5 +227,6 @@ public class WeeklyProgressFragment extends Fragment {
 //                                }
 //                            });
 //        }
+        }
     }
 }
