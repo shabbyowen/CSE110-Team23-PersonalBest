@@ -16,6 +16,7 @@
     <string name="mile">mi</string>
     <string name="add_steps">+500</string>
     <string name="change_goal">Change Goal</string>
+    <string name="time_set">Set Time</string>
 
     <!-- input dialog -->
     <string name="ok">OK</string>
