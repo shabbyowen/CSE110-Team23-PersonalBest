@@ -216,7 +216,9 @@ public class WorkoutRecord extends Model implements Model.Listener {
             item.deltaTime += session.deltaTime;
             item.deltaStep += session.deltaStep;
         }
-        result.add(item);
+        if (item != null) {
+            result.add(item);
+        }
         return result;
     }
 
