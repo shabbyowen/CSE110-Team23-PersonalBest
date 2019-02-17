@@ -172,9 +172,6 @@ public class WeeklyProgressFragment extends Fragment {
 
         CombinedData data = new CombinedData();
         BarData barData = new BarData(barSet);
-        LineData lineData = new LineData(goalSet);
-        LineData speedData = new LineData(speedSet);
-
 
         data.setData(barData);
         LineData chartData = new LineData();
@@ -393,8 +390,6 @@ public class WeeklyProgressFragment extends Fragment {
 
         CombinedData data = new CombinedData();
         BarData barData = new BarData(barSet);
-        LineData lineData = new LineData(goalSet);
-        LineData speedData = new LineData(speedSet);
 
 
         data.setData(barData);
