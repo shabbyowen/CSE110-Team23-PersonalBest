@@ -5,9 +5,9 @@ public class SpeedCalculator {
     private static final double STRIDE_LENGTH_CONST = 0.413;
     private static final double DEFAULT_HEIGHT = 70;
 
-    public static double calculateSpeed(int step, int second) {
+    public static double calculateSpeed(int step, int millis) {
         double distance = stepToMiles(step);
-        double time = (double) second / 3600.0; // convert to hours
+        double time = (double) millis / 1000.0 / 3600.0; // convert to hours
 
         // avoid divide by zero error
         if (time == 0) {

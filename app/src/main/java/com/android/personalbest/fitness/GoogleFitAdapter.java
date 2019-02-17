@@ -15,7 +15,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import com.android.personalbest.HomeScreenActivity;
-import com.google.android.gms.tasks.Task;
 
 public class GoogleFitAdapter implements FitnessService {
     private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
@@ -87,18 +86,21 @@ public class GoogleFitAdapter implements FitnessService {
                         new OnSuccessListener<DataSet>() {
                             @Override
                             public void onSuccess(DataSet dataSet) {
-                                Log.d(TAG, dataSet.toString());
+//                                Log.d(TAG, dataSet.toString());
                                 long total =
                                         dataSet.isEmpty()
                                                 ? 0
                                                 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
 
                                 for (DataPoint dp: dataSet.getDataPoints()) {
-                                    Log.d(TAG, String.valueOf(dp.getValue(Field.FIELD_STEPS).asInt()));
+//                                    Log.d(TAG, String.valueOf(dp.getValue(Field.FIELD_STEPS).asInt()));
                                 }
 
                                 activity.setStepCount(total);
-                                Log.d(TAG, "Total steps: " + total);
+                                if (dataSet.getDataPoints().size() > 1) {
+                                    activity.setYesterdayStepCount(dataSet.getDataPoints().get(1).getValue(Field.FIELD_STEPS).asInt());
+                                }
+//                                Log.d(TAG, "Total steps: " + total);
                             }
                         })
                 .addOnFailureListener(

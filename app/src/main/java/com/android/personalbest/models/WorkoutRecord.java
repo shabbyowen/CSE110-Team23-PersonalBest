@@ -196,6 +196,25 @@ public class WorkoutRecord extends Model implements Model.Listener {
         return sessions;
     }
 
+    public List<Session> getAggragatedSessions() {
+        List<Session> result = new LinkedList<>();
+        int currentDay = -1;
+        Session item = null;
+        for (Session session : sessions) {
+            if (DateCalculator.toLocalEpochDay(session.startTime) > currentDay) {
+                if (item != null) {
+                    result.add(item);
+                }
+                currentDay = DateCalculator.toLocalEpochDay(session.startTime);
+                item = new Session(session.startTime, session.startStep);
+            }
+            item.deltaTime += session.deltaTime;
+            item.deltaStep += session.deltaStep;
+        }
+        result.add(item);
+        return result;
+    }
+
     public void updateAll() {
         update(new Result((int)currentSession.deltaTime, currentSession.deltaStep));
     }
