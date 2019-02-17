@@ -1,35 +1,21 @@
 package com.android.personalbest;
 
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.renderscript.ScriptGroup;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-<<<<<<< HEAD
-=======
-import com.google.android.gms.fitness.data.DataType;
-import com.google.android.gms.fitness.request.DataReadRequest;
-
-import java.util.concurrent.TimeUnit;
-
->>>>>>> 1ed20eddfcb635f9d6de1d6761f62419c43ad431
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -42,12 +28,9 @@ public class HeightPromptFragment extends DialogFragment {
     private HeightPromptListener listener;
     private String tag;
     private int prompt;
-<<<<<<< HEAD
-=======
     private int height;
     public static final String HEIGHT_SHARED_PREF = "personal_best_height";
     public static final String HEIGHT = "user_height";
->>>>>>> 1ed20eddfcb635f9d6de1d6761f62419c43ad431
 
     public HeightPromptFragment() {
         // Required empty public constructor
@@ -67,10 +50,6 @@ public class HeightPromptFragment extends DialogFragment {
         fragment.listener = listener;
         fragment.tag = tag;
         fragment.prompt = prompt;
-<<<<<<< HEAD
-=======
-
->>>>>>> 1ed20eddfcb635f9d6de1d6761f62419c43ad431
         return fragment;
     }
 
@@ -101,20 +80,11 @@ public class HeightPromptFragment extends DialogFragment {
             Button button = ((AlertDialog) d).getButton(AlertDialog.BUTTON_POSITIVE);
             button.setOnClickListener((v) -> onConfirmBtnClicked(d, AlertDialog.BUTTON_POSITIVE));
         });
-<<<<<<< HEAD
-=======
-
->>>>>>> 1ed20eddfcb635f9d6de1d6761f62419c43ad431
         return dialog;
     }
 
     public void onConfirmBtnClicked(DialogInterface dialog, int i) {
 
-<<<<<<< HEAD
-        // callback, if listener says true, dismiss this dialog
-        if (listener.onInputResult(tag, inputEditTextFt.getText().toString(), promptTextView)) {
-            dialog.dismiss();
-=======
         SharedPreferences sp = getContext().getSharedPreferences(HEIGHT_SHARED_PREF, Context.MODE_PRIVATE);
 
         // callback, if listener says true, dismiss this dialog
@@ -139,7 +109,6 @@ public class HeightPromptFragment extends DialogFragment {
                 promptTextView.setText(R.string.height_instruction_failed);
             }
 
->>>>>>> 1ed20eddfcb635f9d6de1d6761f62419c43ad431
         }
 
     }
