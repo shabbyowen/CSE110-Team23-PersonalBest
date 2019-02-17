@@ -1,6 +1,7 @@
 package com.android.personalbest;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -30,7 +32,7 @@ import java.util.List;
  */
 public class WeeklyProgressFragment extends Fragment {
 
-    private BarChart barChart;
+    private BarChart mChart;
 
     public WeeklyProgressFragment() {
         // Required empty public constructor
@@ -43,82 +45,66 @@ public class WeeklyProgressFragment extends Fragment {
 
         View fragmentView = inflater.inflate(R.layout.fragment_weekly_progress, container, false);
 
-        barChart = fragmentView.findViewById(R.id.barChart);
+        mChart = fragmentView.findViewById(R.id.barChart);
 
         // Inflate the layout for this fragment
-        drawChart();
 
+        drawChart();
         return fragmentView;
     }
 
 
-    private void drawChart() {
 
-        barChart.setDrawBarShadow(false);
-        barChart.setDrawValueAboveBar(true);
-        Description description = new Description();
-        description.setText("Weekly Progress");
-        barChart.setDescription(description);
-        barChart.setMaxVisibleValueCount(30);
-        barChart.setPinchZoom(false);
-        barChart.setDrawGridBackground(false);
+    private void drawChart(){
 
-        XAxis xl = barChart.getXAxis();
-        xl.setGranularity(1f);
-        xl.setCenterAxisLabels(true);
+        int size = 7;
 
-        YAxis leftAxis = barChart.getAxisLeft();
-        leftAxis.setDrawGridLines(false);
-        leftAxis.setSpaceTop(15f);
-        leftAxis.setAxisMinimum(0f);
-        barChart.getAxisRight().setEnabled(false);
 
-        //data
-        float groupSpace = 0.04f;
-        float barSpace = 0.02f;
-        float barWidth = 0.46f;
+        ArrayList<BarEntry> yVals1 = new ArrayList<BarEntry>();
 
-        int startYear = 2;
-        int endYear = 8;
+        for (int i = 0; i < size + 1; i++) {
+            float mult = (size + 1);
+            float val1 = (float) (Math.random() * mult) + mult / 3;
+            float val2 = (float) (Math.random() * mult) + mult / 3;
+            float val3 = (float) (Math.random() * mult) + mult / 3;
 
-        List<BarEntry> yVals1 = new ArrayList<BarEntry>();
-        List<BarEntry> yVals2 = new ArrayList<BarEntry>();
+            yVals1.add(new BarEntry(
+                    i,
+                    new float[]{val1, val2, val3}));
 
-        for (int i = startYear; i < endYear; i++) {
-            yVals1.add(new BarEntry(i, 0.4f));
         }
 
-        for (int i = startYear; i < endYear; i++) {
-            yVals2.add(new BarEntry(i, 0.7f));
-        }
+        BarDataSet set1;
 
-        BarDataSet set1, set2;
-
-        if (barChart.getData() != null && barChart.getData().getDataSetCount() > 0) {
-            set1 = (BarDataSet) barChart.getData().getDataSetByIndex(0);
-            set2 = (BarDataSet) barChart.getData().getDataSetByIndex(1);
+        if (mChart.getData() != null &&
+                mChart.getData().getDataSetCount() > 0) {
+            set1 = (BarDataSet) mChart.getData().getDataSetByIndex(0);
             set1.setValues(yVals1);
-            set2.setValues(yVals2);
-            barChart.getData().notifyDataChanged();
-            barChart.notifyDataSetChanged();
+            mChart.getData().notifyDataChanged();
+            mChart.notifyDataSetChanged();
         } else {
-            set1 = new BarDataSet(yVals1, "Company A");
-            set1.setColor(Color.rgb(104, 241, 175));
-            set2 = new BarDataSet(yVals2, "Company B");
-            set2.setColor(Color.rgb(164, 228, 251));
+
+            List<Integer> colorList = new LinkedList<>();
+            colorList.add(Color.parseColor("#68a0b0"));
+            colorList.add(Color.parseColor("#9178a0"));
+            colorList.add(Color.parseColor("#6fa991"));
+
+            set1 = new BarDataSet(yVals1, "Statistics Vienna 2014");
+            set1.setDrawIcons(false);
+            set1.setColors(colorList);
+            set1.setStackLabels(new String[]{"Births", "Divorces", "Marriages"});
 
             ArrayList<IBarDataSet> dataSets = new ArrayList<IBarDataSet>();
             dataSets.add(set1);
-            dataSets.add(set2);
 
             BarData data = new BarData(dataSets);
-            barChart.setData(data);
+            data.setValueTextColor(Color.WHITE);
+
+            mChart.setData(data);
         }
 
-        barChart.getBarData().setBarWidth(barWidth);
-        barChart.groupBars(startYear, groupSpace, barSpace);
-        barChart.invalidate();
-
+        mChart.setFitBars(true);
+        mChart.invalidate();
     }
 
 
