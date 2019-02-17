@@ -165,11 +165,11 @@ public class DailyGoalFragment extends Fragment implements
             return;
         }
 
-        int tmp = counter.getYesterdayStep();
-        long tmp2 = TimeMachine.nowMillis();
-        long tmp4 = TimeMachine.nowMillis() % (86400 * 1000);
-        long tmp5 = 20 * 3600 * 1000;
-        boolean tmp6 = encouragementTracker.shouldDisplayEncouragement();
+//        int tmp = counter.getYesterdayStep();
+//        long tmp2 = TimeMachine.nowMillis();
+//        long tmp4 = TimeMachine.nowMillis() % (86400 * 1000);
+//        long tmp5 = 20 * 3600 * 1000;
+//        boolean tmp6 = encouragementTracker.shouldDisplayEncouragement();
         if (step - counter.getYesterdayStep() >= 500 &&
             TimeMachine.nowMillis() % (86400 * 1000) > 20 * 3600 * 1000 &&
             encouragementTracker.shouldDisplayEncouragement()) {

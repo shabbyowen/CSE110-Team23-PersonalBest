@@ -17,6 +17,7 @@ import com.android.personalbest.fitness.FitnessServiceFactory;
 import com.android.personalbest.fitness.GoogleFitAdapter;
 import com.android.personalbest.models.EncouragementTracker;
 import com.android.personalbest.models.StepCounter;
+import com.android.personalbest.models.UserHeight;
 import com.android.personalbest.models.WorkoutRecord;
 import com.android.personalbest.util.TimeMachine;
 
@@ -68,6 +69,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     private StepCounter counter;
     private WorkoutRecord record;
     private EncouragementTracker promptTracker;
+    private UserHeight userHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +77,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         setContentView(R.layout.activity_home_screen);
 
         // get models
+        userHeight = UserHeight.getInstance(this);
         counter = StepCounter.getInstance(this);
         record = WorkoutRecord.getInstance(this);
         record.setFitnessService(fitnessService);

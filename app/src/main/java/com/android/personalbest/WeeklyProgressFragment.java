@@ -71,8 +71,8 @@ public class WeeklyProgressFragment extends Fragment {
         int offset = this.offsetCalculator();
         this.findThisWeekSessions(allSessions, offset);
 
-        //drawChart(offset); // the official draw chart
-        drawChartDummy(0); // dummy for display purpose
+        drawChart(offset); // the official draw chart
+//        drawChartDummy(0); // dummy for display purpose
 
         return fragmentView;
     }

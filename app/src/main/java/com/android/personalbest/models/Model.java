@@ -3,7 +3,7 @@ package com.android.personalbest.models;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Model {
+abstract public class Model {
 
     private List<Listener> listeners;
 
@@ -28,4 +28,8 @@ public class Model {
             listener.onUpdate(o);
         }
     }
+
+    abstract void load();
+
+    abstract void save();
 }
