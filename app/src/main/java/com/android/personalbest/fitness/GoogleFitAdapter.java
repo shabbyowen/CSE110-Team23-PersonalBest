@@ -7,6 +7,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
+import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
@@ -14,6 +15,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import com.android.personalbest.HomeScreenActivity;
+import com.google.android.gms.tasks.Task;
 
 public class GoogleFitAdapter implements FitnessService {
     private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
@@ -43,6 +45,7 @@ public class GoogleFitAdapter implements FitnessService {
             startRecording();
         }
     }
+
 
     private void startRecording() {
         GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
@@ -90,6 +93,10 @@ public class GoogleFitAdapter implements FitnessService {
                                                 ? 0
                                                 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
 
+                                for (DataPoint dp: dataSet.getDataPoints()) {
+                                    Log.d(TAG, String.valueOf(dp.getValue(Field.FIELD_STEPS).asInt()));
+                                }
+
                                 activity.setStepCount(total);
                                 Log.d(TAG, "Total steps: " + total);
                             }
@@ -101,6 +108,26 @@ public class GoogleFitAdapter implements FitnessService {
                                 Log.d(TAG, "There was a problem getting the step count.", e);
                             }
                         });
+    }
+
+    @Override
+    public void updateStepCountWithCallback(OnSuccessListener<DataSet> successListener) {
+        GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
+        if (lastSignedInAccount == null) {
+            Log.w(TAG, "No account signed in!");
+            return;
+        }
+
+        Fitness.getHistoryClient(activity, lastSignedInAccount)
+            .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
+            .addOnSuccessListener(successListener)
+            .addOnFailureListener(
+                new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "There was a problem getting the step count.", e);
+                    }
+                });
     }
 
 
