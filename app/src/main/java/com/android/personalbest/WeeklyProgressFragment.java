@@ -18,9 +18,10 @@ import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.data.*;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import com.google.android.gms.fitness.data.DataPoint;
-import com.google.android.gms.fitness.data.DataSet;
+import com.google.android.gms.fitness.data.Bucket;
+import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
+import com.google.android.gms.fitness.result.DataReadResponse;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.*;
@@ -272,17 +273,22 @@ public class WeeklyProgressFragment extends Fragment {
 
 
         ((HomeScreenActivity)getActivity()).fitnessService
-                .updateStepCountWithCallback(new OnSuccessListener<com.google.android.gms.fitness.data.DataSet>() {
+                .updateStepCountWithCallback(new OnSuccessListener<DataReadResponse>() {
                     @Override
-                    public void onSuccess(DataSet dataSet) {
-                        List<DataPoint> list = dataSet.getDataPoints().subList(0, offset);
+                    public void onSuccess(DataReadResponse dataReadResponse) {
+                        List<Bucket> list = dataReadResponse.getBuckets().subList(0, offset);
 
                         //The leftmost DataPoint is the most recent steps for the day
                         for(int i = 0; i < offset; i++) {
+
+                            int totalStepOfTheDay = list.get(i).getDataSet(DataType.AGGREGATE_STEP_COUNT_DELTA)
+                                    .getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
+
                             WeeklyProgressFragment.this.unIntentionalStepsByDay[offset - i - 1] =
-                                    list.get(i).getValue(Field.FIELD_STEPS).asInt() -
+                                    totalStepOfTheDay -
                                             WeeklyProgressFragment.this.intentionalStepsByDay[offset - i - 1];
                         }
+
                     }
                 });
     }
