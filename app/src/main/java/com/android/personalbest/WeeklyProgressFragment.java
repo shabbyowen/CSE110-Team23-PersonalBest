@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
 import com.android.personalbest.util.SpeedCalculator;
 import com.github.mikephil.charting.charts.CombinedChart;
@@ -30,8 +31,9 @@ public class WeeklyProgressFragment extends Fragment {
 
     private CombinedChart progressChart;
     //private BarChart progressChart;
-    private final int[] bar_colors = new int[]{Color.parseColor("#68a0b0"), Color.parseColor("#9178a0")};
-    private final String[] xAxisLabel = new String[]{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+
+    private final int[] bar_colors = new int[]{Color.parseColor("#68a0b0"),Color.parseColor("#9178a0")};
+    private final String[] xAxisLabel = new String[]{ "S", "M", "T", "W", "T", "F", "S" };
     private WorkoutRecord weekRecords = WorkoutRecord.getInstance(getContext());
 
     private final long numMillInDay = 86400000;
@@ -72,6 +74,7 @@ public class WeeklyProgressFragment extends Fragment {
 
         List<BarEntry> yVals1 = new ArrayList<BarEntry>();
 
+
         // pushing step counts data for the week
         for (int i = 0; i < offset; i++) {
             yVals1.add(new BarEntry(i, new float[]{unIntentionalStepsByDay[i], intentionalStepsByDay[i]}));
@@ -85,25 +88,47 @@ public class WeeklyProgressFragment extends Fragment {
         barSet = new BarDataSet(yVals1, "");
         barSet.setDrawIcons(false);
         barSet.setStackLabels(new String[]{"Other", "Planned"});
+        barSet.setValueTextSize(15);
+
         barSet.setColors(bar_colors);
 
-        List<Entry> lineDataList = new ArrayList<>();
+        List<Entry> goalDataList = new ArrayList<>();
+
+        // pushing goal data
+        for (int i = 0; i < offset; i++) {
+            goalDataList.add(new Entry(i, (float)StepCounter.getInstance(getActivity()).getGoal()));
+        }
+        for (int i = offset; i < 7; i++) {
+            goalDataList.add(new BarEntry(i, 0f));
+        }
+
+        LineDataSet goalSet = new LineDataSet(goalDataList, "");
+
+        goalSet.setLineWidth(2.5f);
+        goalSet.setCircleColor(Color.rgb(240, 238, 70));
+        goalSet.setCircleRadius(5f);
+        goalSet.setColor(Color.rgb(240, 238, 70));
+        goalSet.setLabel("Goal");
+        goalSet.setValueTextSize(15);
+
+        List<Entry> speedsList = new ArrayList<>();
 
         // pushing speed data
         for (int i = 0; i < offset; i++) {
-            lineDataList.add(new Entry(i, (float)speedByDay[i]));
+            speedsList.add(new Entry(i, (float)speedByDay[i]));
         }
-        for (int i = offset; i < 7; i++){
-            lineDataList.add(new BarEntry(i, 0f));
+        for (int i = offset; i < 7; i++) {
+            speedsList.add(new BarEntry(i, 0f));
         }
 
-        LineDataSet lineSet = new LineDataSet(lineDataList, "");
+        LineDataSet speedSet = new LineDataSet(speedsList, "");
 
-        lineSet.setLineWidth(2.5f);
-        lineSet.setCircleColor(Color.rgb(240, 238, 70));
-        lineSet.setCircleRadius(5f);
-        lineSet.setColor(Color.rgb(240, 238, 70));
-        lineSet.setLabel("Goal");
+        speedSet.setLineWidth(2.5f);
+        speedSet.setCircleColor(Color.BLUE);
+        speedSet.setCircleRadius(5f);
+        speedSet.setColor(Color.BLUE);
+        speedSet.setLabel("Speed");
+        speedSet.setValueTextSize(15);
 
 
         //Fixing the X-axis to Weekdays
@@ -132,10 +157,16 @@ public class WeeklyProgressFragment extends Fragment {
 
         CombinedData data = new CombinedData();
         BarData barData = new BarData(barSet);
-        LineData lineData = new LineData(lineSet);
+        LineData lineData = new LineData(goalSet);
+        LineData speedData = new LineData(speedSet);
+
 
         data.setData(barData);
-        data.setData(lineData);
+        LineData chartData = new LineData();
+        chartData.addDataSet(goalSet);
+        chartData.addDataSet(speedSet);
+        data.setData(chartData);
+        data.setValueTextSize(15);
 
         progressChart.setData(data);
         progressChart.invalidate();
@@ -144,7 +175,19 @@ public class WeeklyProgressFragment extends Fragment {
         progressChart.getXAxis().setAxisMaximum(barData.getXMax() + 0.75f);
         progressChart.getXAxis().setAxisMinimum(barData.getXMin() - 0.75f);
 
+        progressChart.getXAxis().setTextSize(30);
+
+
+//        progressChart.getSecondScale().addSeries(series2);
+//        // the y bounds are always manual for second scale
+//        graph.getSecondScale().setMinY(0);
+//        graph.getSecondScale().setMaxY(15);
+//        series2.setColor(Color.RED);
+//        graph.getGridLabelRenderer().setVerticalLabelsSecondScaleColor(Color.RED);
+
     }
+
+
 
     /**
      * This method is used to calculated the offset needed to find the correct sessions
@@ -205,6 +248,7 @@ public class WeeklyProgressFragment extends Fragment {
 
         // Counting intentional steps for every day
         int counter = 0;
+
         for (int i = 1; i <= offset; i++) {
 
             //The rightmost session is the most recent session
