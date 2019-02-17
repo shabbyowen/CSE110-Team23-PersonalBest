@@ -151,4 +151,5 @@ public class WorkoutRecord extends Model implements Model.Listener {
             setStep(result.step);
         }
     }
+
 }
