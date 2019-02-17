@@ -99,7 +99,7 @@ public class WeeklyProgressFragment extends Fragment {
             goalDataList.add(new Entry(i, (float)StepCounter.getInstance(getActivity()).getGoal()));
         }
         for (int i = offset; i < 7; i++) {
-            goalDataList.add(new BarEntry(i, 0f));
+            goalDataList.add(new BarEntry(i, (float)StepCounter.getInstance(getActivity()).getGoal()));
         }
 
         LineDataSet goalSet = new LineDataSet(goalDataList, "");
