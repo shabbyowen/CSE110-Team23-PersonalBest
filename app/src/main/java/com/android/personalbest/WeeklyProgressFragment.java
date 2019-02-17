@@ -179,6 +179,8 @@ public class WeeklyProgressFragment extends Fragment {
                 deltaTimeByDay[offset-1-counter] = daySession.deltaTime;
                 speedByDay[offset-1-counter] =
                         SpeedCalculator.calculateSpeed(daySession.deltaStep, (int)daySession.deltaTime);
+            }else{
+                
             }
 
 
