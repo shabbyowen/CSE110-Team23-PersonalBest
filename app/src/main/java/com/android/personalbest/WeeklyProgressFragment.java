@@ -36,9 +36,8 @@ public class WeeklyProgressFragment extends Fragment {
 
     private final long numMillInDay = 86400000;
     private int[] intentionalStepsByDay = null;
-    private int[] unintentionalStepsByDay = null;
     private double[] speedByDay = null;
-    private int[] pastDayTotalSteps = null;
+    private int[] unIntentionalStepsByDay = null;
 
     public WeeklyProgressFragment() {
         // Required empty public constructor
@@ -53,29 +52,32 @@ public class WeeklyProgressFragment extends Fragment {
 
         progressChart = fragmentView.findViewById(R.id.progressChart);
 
-        List<WorkoutRecord.Session> allSessions = weekRecords.getSessions();
+        List<WorkoutRecord.Session> allSessions = weekRecords.getAggragatedSessions();
 
         int offset = this.offsetCalculator();
         this.findThisWeekSessions(allSessions, offset);
 
         // Inflate the layout for this fragment
-        drawChart();
+        drawChart(offset);
 
         return fragmentView;
     }
 
 
-    private void drawChart() {
+    private void drawChart(int offset) {
 
         Description description = new Description();
         description.setText("Weekly Progress");
         progressChart.setDescription(description);
 
-        int numberOfDays = 7;
         List<BarEntry> yVals1 = new ArrayList<BarEntry>();
 
-        for (int i = 0; i < numberOfDays; i++) {
-            yVals1.add(new BarEntry(i, new float[]{10f, 20f}));
+        // pushing step counts data for the week
+        for (int i = 0; i < offset; i++) {
+            yVals1.add(new BarEntry(i, new float[]{unIntentionalStepsByDay[i], intentionalStepsByDay[i]}));
+        }
+        for (int i = offset; i < 7; i++){
+            yVals1.add(new BarEntry(i, new float[]{0, 0}));
         }
 
         BarDataSet barSet;
@@ -87,9 +89,12 @@ public class WeeklyProgressFragment extends Fragment {
 
         List<Entry> lineDataList = new ArrayList<>();
 
-        // set line dummy data
-        for (int i = 0; i < numberOfDays; i++) {
-            lineDataList.add(new Entry(i, 25));
+        // pushing speed data
+        for (int i = 0; i < offset; i++) {
+            lineDataList.add(new Entry(i, (float)speedByDay[i]));
+        }
+        for (int i = offset; i < 7; i++){
+            lineDataList.add(new BarEntry(i, 0f));
         }
 
         LineDataSet lineSet = new LineDataSet(lineDataList, "");
@@ -196,7 +201,7 @@ public class WeeklyProgressFragment extends Fragment {
 
         intentionalStepsByDay = new int[offset];
         speedByDay = new double[offset];
-        pastDayTotalSteps = new int[offset];
+        unIntentionalStepsByDay = new int[offset];
 
         // Counting intentional steps for every day
         int counter = 0;
@@ -228,8 +233,9 @@ public class WeeklyProgressFragment extends Fragment {
 
                         //The leftmost DataPoint is the most recent steps for the day
                         for(int i = 0; i < offset; i++) {
-                            WeeklyProgressFragment.this.pastDayTotalSteps[offset - i - 1] =
-                                    list.get(i).getValue(Field.FIELD_STEPS).asInt();
+                            WeeklyProgressFragment.this.unIntentionalStepsByDay[offset - i - 1] =
+                                    list.get(i).getValue(Field.FIELD_STEPS).asInt() -
+                                            WeeklyProgressFragment.this.intentionalStepsByDay[offset - i - 1];
                         }
                     }
                 });
