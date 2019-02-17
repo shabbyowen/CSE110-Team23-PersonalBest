@@ -9,17 +9,18 @@ import org.robolectric.RobolectricTestRunner;
 import static org.junit.Assert.*;
 
 import static org.robolectric.shadows.support.v4.SupportFragmentTestUtil.startFragment;
+import static org.robolectric.shadows.support.v4.SupportFragmentTestUtil.startVisibleFragment;
 
 @RunWith(RobolectricTestRunner.class)
 public class WeeklyProgressFragmentTest {
-    HomeScreenActivity activity;
-    WeeklyProgressFragment fragment;
+    private HomeScreenActivity activity;
+    private WeeklyProgressFragment fragment;
 
     @Before
     public void init() {
-        activity = Robolectric.setupActivity(HomeScreenActivity.class);
+        //activity = Robolectric.setupActivity(HomeScreenActivity.class);
         fragment = new WeeklyProgressFragment();
-        startFragment(fragment);
+        startVisibleFragment(fragment);
     }
 
     @Test

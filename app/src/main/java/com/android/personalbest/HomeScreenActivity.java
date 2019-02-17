@@ -154,7 +154,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         }
 
         // add the new fragment and commit
-        fragmentTransaction.add(R.id.home_screen_container, fragment);
+        fragmentTransaction.add(R.id.home_screen_container, fragment, "test");
         currentFragment = fragment;
         fragmentTransaction.commit();
     }
