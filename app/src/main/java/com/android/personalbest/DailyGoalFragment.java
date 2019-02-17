@@ -19,11 +19,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.personalbest.fitness.FitnessService;
 import com.android.personalbest.models.EncouragementTracker;
 import com.android.personalbest.models.Model;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
 import com.android.personalbest.util.DateCalculator;
+import com.android.personalbest.util.MockData;
 import com.android.personalbest.util.SpeedCalculator;
 import com.android.personalbest.util.TimeMachine;
 
@@ -165,12 +167,11 @@ public class DailyGoalFragment extends Fragment implements
 
         int tmp = counter.getYesterdayStep();
         long tmp2 = TimeMachine.nowMillis();
-        long tmp3 = DateCalculator.toLocalTime(TimeMachine.nowMillis());
-        long tmp4 = DateCalculator.toLocalTime(TimeMachine.nowMillis()) % (86400 * 1000);
+        long tmp4 = TimeMachine.nowMillis() % (86400 * 1000);
         long tmp5 = 20 * 3600 * 1000;
         boolean tmp6 = encouragementTracker.shouldDisplayEncouragement();
         if (step - counter.getYesterdayStep() >= 500 &&
-            DateCalculator.toLocalTime(TimeMachine.nowMillis()) % (86400 * 1000) > 20 * 3600 * 1000 &&
+            TimeMachine.nowMillis() % (86400 * 1000) > 20 * 3600 * 1000 &&
             encouragementTracker.shouldDisplayEncouragement()) {
             Log.d(TAG, "Showing sub-goal encouragement");
             encouragementTracker.setLastEncouragementTime(TimeMachine.nowMillis());
@@ -239,7 +240,8 @@ public class DailyGoalFragment extends Fragment implements
     }
 
     public void onAddStepsBtnClicked(View view) {
-        counter.setStep(counter.getStep() + 500);
+        FitnessService service = ((HomeScreenActivity)getActivity()).fitnessService;
+        service.addStepCount(MockData.mockFitnessData(getContext(), 500));
     }
 
     @Override

@@ -177,6 +177,8 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         counter.setYesterdayStep((int)stepCount);
     }
 
+    public int getStepCount() {return counter.getStep(); }
+
     @Override
     public boolean onInputResult(String tag, String result, TextView view) {
         return true;
