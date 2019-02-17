@@ -40,6 +40,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     private Runnable updateTimeTask;
     private Handler handler;
 
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
         = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -149,7 +150,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         Log.d(TAG, "Update tasks paused");
     }
 
-    private void putFragment(Fragment fragment) {
+    public void putFragment(Fragment fragment) {
         fragmentTransaction = fragmentManager.beginTransaction();
 
         // dont switch if the new fragment is the same
@@ -180,4 +181,7 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     public boolean onInputResult(String tag, String result, TextView view) {
         return true;
     }
+
+    /* Test method by Haaris */
+    public void setFragmentManager(FragmentManager fragmentManager) {this.fragmentManager = fragmentManager;}
 }

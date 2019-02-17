@@ -45,6 +45,9 @@ public class WeeklyProgressFragment extends Fragment {
         // Required empty public constructor
     }
 
+    public void setProgressChart(CombinedChart progressChart) {this.progressChart = progressChart;}
+
+    public CombinedChart getProgressChart() {return progressChart;}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -284,7 +287,7 @@ public class WeeklyProgressFragment extends Fragment {
                 });
     }
 
-    private void drawChartDummy(int offset) {
+    public void drawChartDummy(int offset) {
 
         Description description = new Description();
         description.setText("Weekly Progress");
