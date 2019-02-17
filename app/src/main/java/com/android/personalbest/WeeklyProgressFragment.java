@@ -33,8 +33,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
-
-
 /**
  * Class to make the chart
  */
@@ -240,7 +238,7 @@ public class WeeklyProgressFragment extends Fragment {
      */
     private void findThisWeekSessions(List<WorkoutRecord.Session> sessions, int offset) {
 
-        //the midnight, that's the last second of the day.
+        //the midnight, that's the first millisecond of the next day.
         Long today = DateCalculator.toClosesetMinightTmr(TimeMachine.nowCal()).getTimeInMillis();
         today = DateCalculator.toLocalTime(today);
 
@@ -251,7 +249,7 @@ public class WeeklyProgressFragment extends Fragment {
         // Counting intentional steps for every day
         int counter = 0;
 
-        for (int i = 1; i <= offset; i++) {
+        for (int i = 1; i <= offset && sessions.size() != 0; i++) {
 
             //The rightmost session is the most recent session
             WorkoutRecord.Session daySession = sessions.get(sessions.size() - counter - 1);
@@ -264,8 +262,7 @@ public class WeeklyProgressFragment extends Fragment {
                 counter++;
             } else {
                 intentionalStepsByDay[offset - i] = 0;
-                speedByDay[offset - i] =
-                        SpeedCalculator.calculateSpeed(daySession.deltaStep, (int) daySession.deltaTime);
+                speedByDay[offset - i] = 0;
             }
 
         }
@@ -302,7 +299,5 @@ public class WeeklyProgressFragment extends Fragment {
                         drawChart(offset);
                     }
                 });
-
-         // the official draw chart
     }
 }
