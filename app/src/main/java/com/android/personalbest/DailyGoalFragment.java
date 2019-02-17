@@ -1,6 +1,7 @@
 package com.android.personalbest;
 
 
+import android.content.DialogInterface;
 import android.icu.text.StringPrepParseException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -8,6 +9,7 @@ import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +23,7 @@ import com.android.personalbest.models.EncouragementTracker;
 import com.android.personalbest.models.Model;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
+import com.android.personalbest.util.DateCalculator;
 import com.android.personalbest.util.SpeedCalculator;
 import com.android.personalbest.util.TimeMachine;
 
@@ -119,7 +122,9 @@ public class DailyGoalFragment extends Fragment implements
         record.removeListener(this);
 
         // save the running session
+        counter.save();
         record.save();
+        encouragementTracker.save();
     }
 
     // utility functions
@@ -135,9 +140,52 @@ public class DailyGoalFragment extends Fragment implements
         currentDistGoalTextView.setText(String.format("%.2f", goalDist));
 
         // check if the user has met the goal
-        if (step >= goal && encouragementTracker.shouldDisplayGoalPrompt()) {
+        if (step >= goal && goal < 15000 && encouragementTracker.shouldDisplayGoalPrompt()) {
+            Log.d(TAG, "Showing meet goal encouragement");
             encouragementTracker.setLastGoalPromptTime(TimeMachine.nowMillis());
-            Toast.makeText(getContext(), R.string.met_goal, Toast.LENGTH_LONG).show();
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+
+            // set dialog message
+            alertDialogBuilder
+                .setMessage(R.string.met_goal)
+                .setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        counter.setGoal(counter.getGoal() + 500);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(R.string.cancel,new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        dialog.dismiss();
+                    }
+                });
+            alertDialogBuilder.create().show();
+            return;
+        }
+
+        int tmp = counter.getYesterdayStep();
+        long tmp2 = TimeMachine.nowMillis();
+        long tmp3 = DateCalculator.toLocalTime(TimeMachine.nowMillis());
+        long tmp4 = DateCalculator.toLocalTime(TimeMachine.nowMillis()) % (86400 * 1000);
+        long tmp5 = 20 * 3600 * 1000;
+        boolean tmp6 = encouragementTracker.shouldDisplayEncouragement();
+        if (step - counter.getYesterdayStep() >= 500 &&
+            DateCalculator.toLocalTime(TimeMachine.nowMillis()) % (86400 * 1000) > 20 * 3600 * 1000 &&
+            encouragementTracker.shouldDisplayEncouragement()) {
+            Log.d(TAG, "Showing sub-goal encouragement");
+            encouragementTracker.setLastEncouragementTime(TimeMachine.nowMillis());
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+
+            // set dialog message
+            alertDialogBuilder
+                .setMessage(String.format("Congrats, you walked over %d more steps than yesterday!",
+                    (step - counter.getYesterdayStep()) / 500 * 500))
+                .setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        dialog.dismiss();
+                    }
+                });
+            alertDialogBuilder.create().show();
         }
     }
 
