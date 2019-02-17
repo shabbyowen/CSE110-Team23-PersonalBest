@@ -17,6 +17,7 @@ public class EncouragementTracker extends Model {
     public static EncouragementTracker getInstance(Context context) {
         if (instance == null) {
             instance = new EncouragementTracker(context);
+            instance = new EncouragementTracker(context);
         }
         return instance;
     }
@@ -29,5 +30,6 @@ public class EncouragementTracker extends Model {
     public void load() {
         lastEncouragement = sharedPreferences.getLong(LAST_TIME_ENCOURAGMENT, 0);
         encouragementDisplayed = sharedPreferences.getBoolean(HAS_DISPLAYED_ENCOURAGMENT, false);
+
     }
 }

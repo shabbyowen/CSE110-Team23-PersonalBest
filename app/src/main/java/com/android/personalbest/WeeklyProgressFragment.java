@@ -1,30 +1,24 @@
 package com.android.personalbest;
 
 
-import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-
+import com.android.personalbest.models.WorkoutRecord;
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.CombinedChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.data.*;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+
 
 
 /**
@@ -32,7 +26,11 @@ import java.util.List;
  */
 public class WeeklyProgressFragment extends Fragment {
 
-    private BarChart mChart;
+    //private CombinedChart progressChart;
+    private BarChart progressChart;
+    private final int[] bar_colors = new int[]{Color.parseColor("#68a0b0"),Color.parseColor("#9178a0")};
+    private final String[] xAxisLabel = new String[]{ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+    private WorkoutRecord weekRecords = WorkoutRecord.getInstance(getContext());
 
     public WeeklyProgressFragment() {
         // Required empty public constructor
@@ -45,67 +43,68 @@ public class WeeklyProgressFragment extends Fragment {
 
         View fragmentView = inflater.inflate(R.layout.fragment_weekly_progress, container, false);
 
-        mChart = fragmentView.findViewById(R.id.barChart);
+        progressChart = fragmentView.findViewById(R.id.barChart);
+
+        List<WorkoutRecord.Session> allSessions = weekRecords.getSessions();
 
         // Inflate the layout for this fragment
-
         drawChart();
+
         return fragmentView;
     }
 
 
+    private void drawChart() {
 
-    private void drawChart(){
+        Description description = new Description();
+        description.setText("Weekly Progress");
+        progressChart.setDescription(description);
 
-        int size = 7;
+        int numberOfDays = 7;
+        List<BarEntry> yVals1 = new ArrayList<BarEntry>();
 
-
-        ArrayList<BarEntry> yVals1 = new ArrayList<BarEntry>();
-
-        for (int i = 0; i < size + 1; i++) {
-            float mult = (size + 1);
-            float val1 = (float) (Math.random() * mult) + mult / 3;
-            float val2 = (float) (Math.random() * mult) + mult / 3;
-            float val3 = (float) (Math.random() * mult) + mult / 3;
-
-            yVals1.add(new BarEntry(
-                    i,
-                    new float[]{val1, val2, val3}));
-
+        for (int i = 0; i < numberOfDays; i++) {
+            yVals1.add(new BarEntry(i, new float[]{1f,2f}));
         }
 
-        BarDataSet set1;
+        BarDataSet barSet;
 
-        if (mChart.getData() != null &&
-                mChart.getData().getDataSetCount() > 0) {
-            set1 = (BarDataSet) mChart.getData().getDataSetByIndex(0);
-            set1.setValues(yVals1);
-            mChart.getData().notifyDataChanged();
-            mChart.notifyDataSetChanged();
-        } else {
+        barSet = new BarDataSet(yVals1, "");
+        barSet.setDrawIcons(false);
+        barSet.setStackLabels(new String[]{"Unintentional", "Intentional"});
 
-            List<Integer> colorList = new LinkedList<>();
-            colorList.add(Color.parseColor("#68a0b0"));
-            colorList.add(Color.parseColor("#9178a0"));
-            colorList.add(Color.parseColor("#6fa991"));
+        barSet.setColors(bar_colors);
 
-            set1 = new BarDataSet(yVals1, "Statistics Vienna 2014");
-            set1.setDrawIcons(false);
-            set1.setColors(colorList);
-            set1.setStackLabels(new String[]{"Births", "Divorces", "Marriages"});
+        //Fixing the X-axis to Weekdays
+        progressChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(){
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return xAxisLabel[(int) value];
+            }
+        });
 
-            ArrayList<IBarDataSet> dataSets = new ArrayList<IBarDataSet>();
-            dataSets.add(set1);
+        //Fixing the left and right axises to integer
+        progressChart.getAxisLeft().setValueFormatter(new IndexAxisValueFormatter(){
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return String.valueOf((int) Math.floor(value));
+            }
+        });
 
-            BarData data = new BarData(dataSets);
-            data.setValueTextColor(Color.WHITE);
 
-            mChart.setData(data);
-        }
+        progressChart.getAxisRight().setValueFormatter(new IndexAxisValueFormatter(){
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return String.valueOf((int) Math.floor(value));
+            }
+        });
 
-        mChart.setFitBars(true);
-        mChart.invalidate();
+        //CombinedData data = new CombinedData();
+        BarData data = new BarData(barSet);
+        //data.setData(barData);
+        progressChart.setData(data);
+        progressChart.setFitBars(true);
+        progressChart.invalidate();
+
     }
-
-
 }
