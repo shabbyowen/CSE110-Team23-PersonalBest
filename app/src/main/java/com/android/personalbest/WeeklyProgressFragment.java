@@ -16,10 +16,7 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -123,6 +120,7 @@ public class WeeklyProgressFragment extends Fragment {
      */
     private int offsetCalculator(){
         Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getDefault());
 
         int day = calendar.get(Calendar.DAY_OF_WEEK);
         switch (day) {
@@ -163,6 +161,7 @@ public class WeeklyProgressFragment extends Fragment {
         c.set(Calendar.HOUR_OF_DAY, 23); //anything 0 - 23
         c.set(Calendar.MINUTE, 59);
         c.set(Calendar.SECOND, 59);
+        c.setTimeZone(TimeZone.getDefault());
 
         Long today = c.getTimeInMillis(); //the midnight, that's the last second of the day.
 
@@ -181,6 +180,18 @@ public class WeeklyProgressFragment extends Fragment {
                 speedByDay[offset-1-counter] =
                         SpeedCalculator.calculateSpeed(daySession.deltaStep, (int)daySession.deltaTime);
             }
+
+
+//            Fitness.getHistoryClient(getActivity(), lastSignedInAccount)
+//                    .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
+//                    .addOnSuccessListener(successListener)
+//                    .addOnFailureListener(
+//                            new OnFailureListener() {
+//                                @Override
+//                                public void onFailure(@NonNull Exception e) {
+//
+//                                }
+//                            });
         }
     }
 }
