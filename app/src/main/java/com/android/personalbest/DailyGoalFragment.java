@@ -142,7 +142,8 @@ public class DailyGoalFragment extends Fragment implements
         currentDistGoalTextView.setText(String.format("%.2f", goalDist));
 
         // check if the user has met the goal
-        if (step >= goal && goal < 15000 && encouragementTracker.shouldDisplayGoalPrompt()) {
+        if (step >= goal && goal < 15000 &&
+            !DateCalculator.dateChanged(counter.getLastSavedTime(), TimeMachine.nowMillis()) && encouragementTracker.shouldDisplayGoalPrompt()) {
             Log.d(TAG, "Showing meet goal encouragement");
             encouragementTracker.setLastGoalPromptTime(TimeMachine.nowMillis());
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
@@ -165,13 +166,14 @@ public class DailyGoalFragment extends Fragment implements
             return;
         }
 
-//        int tmp = counter.getYesterdayStep();
-//        long tmp2 = TimeMachine.nowMillis();
-//        long tmp4 = TimeMachine.nowMillis() % (86400 * 1000);
-//        long tmp5 = 20 * 3600 * 1000;
-//        boolean tmp6 = encouragementTracker.shouldDisplayEncouragement();
+        int tmp = counter.getYesterdayStep();
+        long tmp2 = TimeMachine.nowMillis();
+        long tmp4 = TimeMachine.nowMillis() % (86400 * 1000);
+        long tmp5 = 20 * 3600 * 1000;
+        boolean tmp6 = encouragementTracker.shouldDisplayEncouragement();
         if (step - counter.getYesterdayStep() >= 500 &&
             TimeMachine.nowMillis() % (86400 * 1000) > 20 * 3600 * 1000 &&
+            !DateCalculator.dateChanged(counter.getLastSavedTime(), TimeMachine.nowMillis()) &&
             encouragementTracker.shouldDisplayEncouragement()) {
             Log.d(TAG, "Showing sub-goal encouragement");
             encouragementTracker.setLastEncouragementTime(TimeMachine.nowMillis());
