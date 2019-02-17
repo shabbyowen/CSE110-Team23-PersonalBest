@@ -174,9 +174,7 @@ public class WeeklyProgressFragment extends Fragment {
 
         progressChart.getXAxis().setAxisMaximum(barData.getXMax() + 0.75f);
         progressChart.getXAxis().setAxisMinimum(barData.getXMin() - 0.75f);
-
-        progressChart.getXAxis().setTextSize(30);
-
+        
 
 //        progressChart.getSecondScale().addSeries(series2);
 //        // the y bounds are always manual for second scale
