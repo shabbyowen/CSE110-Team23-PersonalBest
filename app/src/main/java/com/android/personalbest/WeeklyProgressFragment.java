@@ -7,24 +7,31 @@ package com.android.personalbest;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.android.personalbest.models.StepCounter;
 import com.android.personalbest.models.WorkoutRecord;
+import com.android.personalbest.util.DateCalculator;
 import com.android.personalbest.util.SpeedCalculator;
+import com.android.personalbest.util.TimeMachine;
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.data.*;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.android.gms.fitness.data.Bucket;
+import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.result.DataReadResponse;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.TimeZone;
 
 
 
@@ -239,14 +246,9 @@ public class WeeklyProgressFragment extends Fragment {
      */
     private void findThisWeekSessions(List<WorkoutRecord.Session> sessions, int offset) {
 
-
-        Calendar c = new GregorianCalendar();
-        c.set(Calendar.HOUR_OF_DAY, 23); //anything 0 - 23
-        c.set(Calendar.MINUTE, 59);
-        c.set(Calendar.SECOND, 59);
-        c.setTimeZone(TimeZone.getDefault());
-
-        Long today = c.getTimeInMillis(); //the midnight, that's the last second of the day.
+        //the midnight, that's the last second of the day.
+        Long today = DateCalculator.toClosesetMinightTmr(TimeMachine.nowCal()).getTimeInMillis();
+        today = DateCalculator.toLocalTime(today);
 
         intentionalStepsByDay = new int[offset];
         speedByDay = new double[offset];
@@ -279,19 +281,31 @@ public class WeeklyProgressFragment extends Fragment {
                 .updateStepCountWithCallback(new OnSuccessListener<DataReadResponse>() {
                     @Override
                     public void onSuccess(DataReadResponse dataReadResponse) {
-                        List<Bucket> list = dataReadResponse.getBuckets().subList(0, offset);
+                        List<Bucket> list = dataReadResponse.getBuckets();
+                        list = list.subList(list.size()-offset, list.size());
 
                         //The leftmost DataPoint is the most recent steps for the day
                         for(int i = 0; i < offset; i++) {
 
-                            int totalStepOfTheDay = list.get(i).getDataSet(DataType.AGGREGATE_STEP_COUNT_DELTA)
-                                    .getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
+                            int totalStepOfTheDay;
 
-                            WeeklyProgressFragment.this.unIntentionalStepsByDay[offset - i - 1] =
+                            Log.d("WeeklyProgressFragment", list.toString());
+
+                            DataSet totalStepOfTheDayDataSet = list.get(i)
+                                .getDataSet(DataType.AGGREGATE_STEP_COUNT_DELTA);
+
+                             if(totalStepOfTheDayDataSet.isEmpty()){
+                                continue;
+                            }else{
+                                 totalStepOfTheDay = totalStepOfTheDayDataSet
+                                         .getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
+                             }
+
+                            WeeklyProgressFragment.this.unIntentionalStepsByDay[i] =
                                     totalStepOfTheDay -
-                                            WeeklyProgressFragment.this.intentionalStepsByDay[offset - i - 1];
+                                            WeeklyProgressFragment.this.intentionalStepsByDay[i];
                         }
-
+                        drawChart(offset);
                     }
                 });
     }
@@ -414,6 +428,6 @@ public class WeeklyProgressFragment extends Fragment {
         progressChart.getXAxis().setAxisMaximum(barData.getXMax() + 0.75f);
         progressChart.getXAxis().setAxisMinimum(barData.getXMin() - 0.75f);
 
-
+         // the official draw chart
     }
 }
