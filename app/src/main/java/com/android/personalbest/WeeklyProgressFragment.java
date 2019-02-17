@@ -305,6 +305,5 @@ public class WeeklyProgressFragment extends Fragment {
                         drawChart(offset);
                     }
                 });
-
     }
 }
