@@ -15,7 +15,7 @@ public class DateCalculatorTest {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         long gmt = cal.getTimeInMillis();
-        long pst = gmt + TimeZone.getTimeZone("PST").getOffset(System.currentTimeMillis());
+        long pst = gmt + TimeZone.getTimeZone("America/Los_Angeles").getOffset(System.currentTimeMillis());
         Assert.assertEquals(pst, DateCalculator.toLocalTime(gmt));
     }
 

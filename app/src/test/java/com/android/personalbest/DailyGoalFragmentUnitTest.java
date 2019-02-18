@@ -22,7 +22,7 @@ public class DailyGoalFragmentUnitTest {
     }
 
     @Test
-    public void isNotNull() throws Exception {
+    public void isNotNull() {
         //assertNotNull(myFragment);
     }
 }

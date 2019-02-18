@@ -78,7 +78,6 @@ public class WeeklyProgressFragment extends Fragment {
 
         int offset = this.offsetCalculator();
         this.findThisWeekSessions(allSessions, offset);
-
         return fragmentView;
     }
 
