@@ -77,7 +77,12 @@ public class WeeklyProgressFragment extends Fragment {
         List<WorkoutRecord.Session> allSessions = weekRecords.getAggragatedSessions();
 
         int offset = this.offsetCalculator();
-        this.findThisWeekSessions(allSessions, offset);
+
+        if (HomeScreenActivity.fitnessServiceKey.equals("TEST_API")) {
+            drawChartDummy(0);
+        } else {
+            this.findThisWeekSessions(allSessions, offset);
+        }
         return fragmentView;
     }
 
