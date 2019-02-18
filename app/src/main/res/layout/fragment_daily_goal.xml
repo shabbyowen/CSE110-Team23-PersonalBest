@@ -198,9 +198,11 @@
 
         <Button
             android:id="@+id/daily_goal_record_btn"
-            android:layout_width="wrap_content"
+            android:layout_width="152dp"
             android:layout_height="wrap_content"
-            android:text="@string/start_record"/>
+            android:background="@color/green"
+            android:text="@string/start_record"
+            android:textColor="@android:color/background_light" />
 
     </LinearLayout>
 

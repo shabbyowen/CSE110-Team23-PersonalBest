@@ -2,6 +2,7 @@ package com.android.personalbest;
 
 
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.icu.text.StringPrepParseException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -228,9 +229,11 @@ public class DailyGoalFragment extends Fragment implements
     public void onRecordBtnClicked(View view) {
         if (!record.isWorkingout()) {
             record.startWorkout(TimeMachine.nowMillis(), counter.getStep());
+            recordBtn.setBackgroundColor(Color.RED);
             recordBtn.setText(R.string.end_record);
         } else {
             record.endWorkout();
+            recordBtn.setBackgroundColor(getResources().getColor(R.color.green));
             recordBtn.setText(R.string.start_record);
         }
     }
