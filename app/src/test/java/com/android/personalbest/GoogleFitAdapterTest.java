@@ -28,8 +28,8 @@ public class GoogleFitAdapterTest {
 
     @Test
     public void testUpdateStepCountNoSignIn() {
-        // Test updating step count with no google account
-      /*  int beforeSteps = activity.getStepCount();
+        /* Test updating step count with no google account
+        int beforeSteps = activity.getStepCount();
         fitnessService.updateStepCount();
         assertEquals(beforeSteps, activity.getStepCount());  */
     }
