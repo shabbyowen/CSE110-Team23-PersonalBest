@@ -1,7 +1,9 @@
 package com.android.personalbest;
 
 
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.icu.text.StringPrepParseException;
 import android.support.annotation.NonNull;
@@ -38,12 +40,13 @@ public class DailyGoalFragment extends Fragment implements
 
     // use this tag to identify the source of onInputResult
     private static final String SET_GOAL = "set_goal";
-    private static final String ADD_STEP = "add_step";
+    private static final String SET_TIME = "set_time";
 
     // UI elements
     private Button recordBtn;
     private Button changeGoalBtn;
     private Button addStepsBtn;
+    private Button setTimeBtn;
     private TextView currentStepTextView;
     private TextView currentStepGoalTextView;
     private TextView sessionStepTextView;
@@ -85,6 +88,9 @@ public class DailyGoalFragment extends Fragment implements
 
         addStepsBtn = fragmentView.findViewById(R.id.daily_goal_add_steps);
         addStepsBtn.setOnClickListener(this::onAddStepsBtnClicked);
+
+        setTimeBtn = fragmentView.findViewById(R.id.daily_goal_set_time);
+        setTimeBtn.setOnClickListener(this::onSetTimeBtnClicked);
 
         currentStepTextView = fragmentView.findViewById(R.id.daily_goal_steps_tv);
         currentStepGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
@@ -249,6 +255,12 @@ public class DailyGoalFragment extends Fragment implements
         service.addStepCount(MockData.mockFitnessData(getContext(), 500));
     }
 
+    public void onSetTimeBtnClicked(View view) {
+        DialogFragment dialog = InputDialogFragment.newInstance(this, SET_TIME, R.string.change_time_instruction_initial);
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        dialog.show(fm, "time_input_fragment");
+    }
+
     @Override
     public boolean onInputResult(String tag, String result, TextView prompt) {
         // processes the result from the input dialog
@@ -275,6 +287,28 @@ public class DailyGoalFragment extends Fragment implements
                     prompt.setText(R.string.change_goal_instruction_failed);
                     return false;
                 }
+            case SET_TIME:
+
+                //validate entered time.
+                long newTime;
+                try {
+                    newTime = Long.valueOf(result);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+
+                if (newTime < 0)
+                {
+                    prompt.setText(R.string.change_time_instruction_failed);
+                    return false;
+                }
+
+                TimeMachine.setTime(newTime);
+                Toast.makeText(getActivity(), R.string.saved, Toast.LENGTH_LONG).show();
+                Log.d(TAG, String.format("changing current time to %d", newTime));
+                return true;
+
             default:
                 return false;
         }

@@ -11,18 +11,20 @@ public class TimeMachine {
     private static long time = 0;
     private static final int CLOCK_CYCLE = 12;
     private static final int HOURS_IN_DAY = 24;
+    private static Calendar cal = Calendar.getInstance();
 
     public static long nowMillis() {
         return DateCalculator.toLocalTime(nowCal().getTimeInMillis());
     }
 
     public static Calendar nowCal() {
-        Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getDefault());
-
-        /*if (timeSet){
+        if (timeSet){
             cal.setTimeInMillis(time);
-        }*/
+        }
+        else {
+            cal = Calendar.getInstance();
+        }
         return cal;
     }
 
@@ -39,8 +41,7 @@ public class TimeMachine {
         return DateCalculator.toLocalTime(millis);
     }
 
-    public static long getTimeInMillis(int year, int month, int day, int hour, int minutes, int seconds, boolean isPM) {
-        Calendar cal = Calendar.getInstance();
+    public static void setTimeInDate(int year, int month, int day, int hour, int minutes, int seconds, boolean isPM) {
         if (isPM) {
             hour += CLOCK_CYCLE;
             hour = hour % HOURS_IN_DAY;
@@ -48,6 +49,11 @@ public class TimeMachine {
         cal.set(year, month, day, hour, minutes, seconds);
         time = cal.getTimeInMillis();
         timeSet = true;
-        return time;
+    }
+
+    public static void setTimeInMillis(long millis) {
+        cal.setTimeInMillis(millis);
+        time = cal.getTimeInMillis();
+        timeSet = true;
     }
 }

@@ -98,10 +98,10 @@
 
             <!-- daily goal set time button -->
             <Button
-                    android:id="@+id/daily_goal_time_set"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/time_set"/>
+                android:id="@+id/daily_goal_set_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/time_set"/>
 
         </LinearLayout>
 
