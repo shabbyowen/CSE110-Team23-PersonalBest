@@ -100,6 +100,14 @@ public class DailyGoalFragment extends Fragment implements
         sessionStepTextView = fragmentView.findViewById(R.id.daily_goal_current_step_tv);
         sessionSpeedTextView = fragmentView.findViewById(R.id.daily_goal_current_speed_tv);
 
+        if (record.isWorkingout()) {
+            recordBtn.setBackgroundColor(Color.RED);
+            recordBtn.setText(R.string.end_record);
+        } else {
+            recordBtn.setBackgroundColor(getResources().getColor(R.color.green));
+            recordBtn.setText(R.string.start_record);
+        }
+
         return fragmentView;
     }
 
