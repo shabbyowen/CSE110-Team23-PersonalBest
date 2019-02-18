@@ -1,11 +1,14 @@
 package com.android.personalbest;
 
 
-import android.app.Activity;
-import android.renderscript.ScriptGroup;
-import android.support.v4.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.icu.text.StringPrepParseException;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,28 +18,59 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.content.SharedPreferences;
 
 
-import static android.content.Context.MODE_PRIVATE;
+import com.android.personalbest.fitness.FitnessService;
+import com.android.personalbest.models.EncouragementTracker;
+import com.android.personalbest.models.Model;
+import com.android.personalbest.models.StepCounter;
+import com.android.personalbest.models.WorkoutRecord;
+import com.android.personalbest.util.DateCalculator;
+import com.android.personalbest.util.MockData;
+import com.android.personalbest.util.SpeedCalculator;
+import com.android.personalbest.util.TimeMachine;
 
-public class DailyGoalFragment extends Fragment implements InputDialogFragment.InputDialogListener {
+public class DailyGoalFragment extends Fragment implements
+    InputDialogFragment.InputDialogListener,
+    Model.Listener {
 
-    public static final String SET_GOAL = "set_goal";
-    public static final String ADD_STEP = "add_step";
+    private static final String TAG = "DailyGoalFragment";
 
+    // use this tag to identify the source of onInputResult
+    private static final String SET_GOAL = "set_goal";
+    private static final String SET_TIME = "set_time";
+
+    // UI elements
     private Button recordBtn;
-//    private EditText new_goal;
-//    private TextView change_goal_instruction;
-//    private AlertDialog changeGoalDialog;
     private Button changeGoalBtn;
     private Button addStepsBtn;
+    private Button setTimeBtn;
+    private TextView currentStepTextView;
+    private TextView currentStepGoalTextView;
+    private TextView sessionStepTextView;
+    private TextView sessionTimeTextView;
+    private TextView sessionSpeedTextView;
+    private TextView currentDistTextView;
+    private TextView currentDistGoalTextView;
 
-    public DailyGoalFragment() {
-        // Required empty public constructor
+    // models
+    private StepCounter counter;
+    private WorkoutRecord record;
+    private EncouragementTracker encouragementTracker;
+
+    // Required empty public constructor
+    public DailyGoalFragment() {}
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // initialize the model field
+        counter = StepCounter.getInstance(getContext());
+        record = WorkoutRecord.getInstance(getContext());
+        encouragementTracker = EncouragementTracker.getInstance(getContext());
     }
 
     @Override
@@ -45,20 +79,177 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
         // Inflate the layout for this fragment
         View fragmentView = inflater.inflate(R.layout.fragment_daily_goal, container, false);
 
+        // assigning listeners
         recordBtn = fragmentView.findViewById(R.id.daily_goal_record_btn);
         recordBtn.setOnClickListener(this::onRecordBtnClicked);
 
         changeGoalBtn = fragmentView.findViewById(R.id.daily_goal_change_goal_btn);
         changeGoalBtn.setOnClickListener(this::onChangeGoalBtnClicked);
 
-        addStepsBtn = fragmentView.findViewById(R.id.daily_goal_add_steps_btn);
+        addStepsBtn = fragmentView.findViewById(R.id.daily_goal_add_steps);
         addStepsBtn.setOnClickListener(this::onAddStepsBtnClicked);
+
+        setTimeBtn = fragmentView.findViewById(R.id.daily_goal_set_time);
+        setTimeBtn.setOnClickListener(this::onSetTimeBtnClicked);
+
+        currentStepTextView = fragmentView.findViewById(R.id.daily_goal_steps_tv);
+        currentStepGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
+        currentDistTextView = fragmentView.findViewById(R.id.daily_goal_dist_tv);
+        currentDistGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_dist_tv);
+        sessionTimeTextView = fragmentView.findViewById(R.id.daily_goal_current_time_tv);
+        sessionStepTextView = fragmentView.findViewById(R.id.daily_goal_current_step_tv);
+        sessionSpeedTextView = fragmentView.findViewById(R.id.daily_goal_current_speed_tv);
+
+        if (record.isWorkingout()) {
+            recordBtn.setBackgroundColor(Color.RED);
+            recordBtn.setText(R.string.end_record);
+        } else {
+            recordBtn.setBackgroundColor(getResources().getColor(R.color.green));
+            recordBtn.setText(R.string.start_record);
+        }
 
         return fragmentView;
     }
 
-    public void onRecordBtnClicked(View view) {
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        updateCurrentStepAndGoal(counter.getStep(), counter.getGoal());
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // add listener
+        counter.addListener(this);
+        record.addListener(this);
+
+        // the correct the text of the button
+        if (record.isWorkingout()) {
+            recordBtn.setText(R.string.end_record);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // clean up
+        counter.removeListener(this);
+        record.removeListener(this);
+
+        // save the running session
+        counter.save();
+        record.save();
+        encouragementTracker.save();
+    }
+
+    // utility functions
+
+    private void updateCurrentStepAndGoal(int step, int goal) {
+
+        // display step goal and current steps
+        currentStepTextView.setText(String.valueOf(step));
+        currentStepGoalTextView.setText(String.valueOf(goal));
+        double goalDist = SpeedCalculator.stepToMiles(goal);
+        double currDist = SpeedCalculator.stepToMiles(step);
+        currentDistTextView.setText(String.format("%.2f", currDist));
+        currentDistGoalTextView.setText(String.format("%.2f", goalDist));
+
+        // check if the user has met the goal
+        if (step >= goal && goal < 15000 &&
+            !DateCalculator.dateChanged(counter.getLastSavedTime(), TimeMachine.nowMillis()) &&  encouragementTracker.shouldDisplayGoalPrompt()) {
+            Log.d(TAG, "Showing meet goal encouragement");
+            encouragementTracker.setLastGoalPromptTime(TimeMachine.nowMillis());
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+
+            // set dialog message
+            alertDialogBuilder
+                .setMessage(R.string.met_goal)
+                .setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        counter.setGoal(counter.getGoal() + 500);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(R.string.cancel,new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        dialog.dismiss();
+                    }
+                });
+            alertDialogBuilder.create().show();
+            return;
+        }
+
+        int tmp = counter.getYesterdayStep();
+        long tmp2 = TimeMachine.nowMillis();
+        long tmp4 = TimeMachine.nowMillis() % (86400 * 1000);
+        long tmp5 = 20 * 3600 * 1000;
+        boolean tmp6 = encouragementTracker.shouldDisplayEncouragement();
+        if (step - counter.getYesterdayStep() >= 500 &&
+            TimeMachine.nowMillis() % (86400 * 1000) > 20 * 3600 * 1000 &&
+            !DateCalculator.dateChanged(counter.getLastSavedTime(), TimeMachine.nowMillis()) &&
+            encouragementTracker.shouldDisplayEncouragement()) {
+            Log.d(TAG, "Showing sub-goal encouragement");
+            encouragementTracker.setLastEncouragementTime(TimeMachine.nowMillis());
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+
+            // set dialog message
+            alertDialogBuilder
+                .setMessage(String.format("Congrats, you walked over %d more steps than yesterday!",
+                    (step - counter.getYesterdayStep()) / 500 * 500))
+                .setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        dialog.dismiss();
+                    }
+                });
+            alertDialogBuilder.create().show();
+        }
+    }
+
+    private String formatTime(int second) {
+        int hour = 0;
+        while (second >= 3600) {
+            hour++;
+            second -= 3600;
+        }
+        int minute = 0;
+        while (second >= 60) {
+            minute++;
+            second -= 60;
+        }
+        StringBuilder sb = new StringBuilder();
+        padZero(sb, hour);
+        sb.append(':');
+        padZero(sb, minute);
+        sb.append(':');
+        padZero(sb, second);
+        return sb.toString();
+    }
+
+    private void padZero(StringBuilder sb, int number) {
+        if (number == 0) {
+            sb.append("00");
+            return;
+        }
+        if (number < 10) {
+            sb.append(0);
+        }
+        sb.append(number);
+    }
+
+    // event listeners
+
+    public void onRecordBtnClicked(View view) {
+        if (!record.isWorkingout()) {
+            record.startWorkout(TimeMachine.nowMillis(), counter.getStep());
+            recordBtn.setBackgroundColor(Color.RED);
+            recordBtn.setText(R.string.end_record);
+        } else {
+            record.endWorkout();
+            recordBtn.setBackgroundColor(getResources().getColor(R.color.green));
+            recordBtn.setText(R.string.start_record);
+        }
     }
 
     public void onChangeGoalBtnClicked(View view) {
@@ -68,15 +259,25 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
     }
 
     public void onAddStepsBtnClicked(View view) {
-        DialogFragment dialog = InputDialogFragment.newInstance(this, ADD_STEP, R.string.add_step_instruction_initial);
+        FitnessService service = ((HomeScreenActivity)getActivity()).fitnessService;
+        service.addStepCount(MockData.mockFitnessData(getContext(), 500));
+    }
+
+    public void onSetTimeBtnClicked(View view) {
+        DialogFragment dialog = InputDialogFragment.newInstance(this, SET_TIME, R.string.change_time_instruction_initial);
         FragmentManager fm = getActivity().getSupportFragmentManager();
-        dialog.show(fm, "input_fragment");
+        dialog.show(fm, "time_input_fragment");
     }
 
     @Override
     public boolean onInputResult(String tag, String result, TextView prompt) {
+        // processes the result from the input dialog
         switch (tag) {
+
+            // from set goal
             case SET_GOAL:
+
+                // validate entered goal
                 int value;
                 try {
                     value = Integer.valueOf(result);
@@ -85,95 +286,57 @@ public class DailyGoalFragment extends Fragment implements InputDialogFragment.I
                     return false;
                 }
                 if (value > 0) {
-                    SharedPreferences sharedPreferences = getActivity().getSharedPreferences("personal_best", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putInt("daily_goal", value);
-                    editor.apply();
+                    counter.setGoal(value);
+                    counter.save();
                     Toast.makeText(getActivity(), R.string.saved, Toast.LENGTH_LONG).show();
+                    Log.d(TAG, String.format("changing daily goal to %d", value));
                     return true;
                 } else {
                     prompt.setText(R.string.change_goal_instruction_failed);
                     return false;
                 }
-            case ADD_STEP:
-                break;
+            case SET_TIME:
+
+                //validate entered time.
+                long newTime;
+                try {
+                    newTime = Long.valueOf(result);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+
+                if (newTime < 0)
+                {
+                    prompt.setText(R.string.change_time_instruction_failed);
+                    return false;
+                }
+
+                TimeMachine.setTimeInMillis(newTime);
+                Toast.makeText(getActivity(), R.string.saved, Toast.LENGTH_LONG).show();
+                Log.d(TAG, String.format("changing current time to %d", newTime));
+                return true;
+
             default:
                 return false;
         }
-        return false;
     }
 
-    /*
-    public void editDailyGoal() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+    @Override
+    public void onUpdate(Object o) {
 
-        View rootView = inflater.inflate(R.layout.dialog_set_goal, null, false);
+        // counter results
+        if (o instanceof StepCounter.Result) {
+            StepCounter.Result result = (StepCounter.Result) o;
+            updateCurrentStepAndGoal(result.step, result.goal);
 
-        builder.setView(rootView);
-        builder.setTitle("Set Goal");
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-
-            }
-        });
-
-        builder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                dialog.dismiss();
-            }
-        });
-
-        changeGoalDialog = builder.create();
-
-        new_goal = rootView.findViewById(R.id.new_goal);
-
-        change_goal_instruction = rootView.findViewById(R.id.change_daily_goal_instruction);
-
-        changeGoalDialog.show();
-
-        changeGoalDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Boolean isValid = true;
-
-                //The try catch is user to catch potential overflow errors
-                try {
-                    Integer value = Integer.valueOf(new_goal.getText().toString());
-
-                    if (value < 0) {
-                        isValid = false;
-                    }
-
-                } catch (NumberFormatException e) {
-                    isValid = false;
-                }
-
-                if (isValid) {
-
-                    SharedPreferences sharedPreferences =
-                        getActivity().getSharedPreferences("user_name", MODE_PRIVATE);
-
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                    editor.putString("daily_goal", new_goal.getText().toString());
-
-                    editor.apply();
-
-                    Toast.makeText(getActivity(), "Saved", Toast.LENGTH_LONG).show();
-
-                    changeGoalDialog.dismiss();
-
-                } else {
-
-                    change_goal_instruction.setText(R.string.change_goal_instruction_failed);
-
-                }
-            }
-        });
+        // record results
+        } else if (o instanceof WorkoutRecord.Result) {
+            WorkoutRecord.Result result = (WorkoutRecord.Result) o;
+            sessionStepTextView.setText(String.valueOf(result.deltaStep));
+            sessionTimeTextView.setText(formatTime(result.deltaTime / 1000));
+            double mph = SpeedCalculator.calculateSpeed(result.deltaStep, result.deltaTime);
+            sessionSpeedTextView.setText(String.format("%.2f", mph));
+        }
     }
-    */
 }

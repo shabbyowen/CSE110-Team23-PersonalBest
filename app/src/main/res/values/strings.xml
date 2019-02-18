@@ -10,12 +10,13 @@
     <string name="text_divider">/</string>
     <string name="current_session">Current Session</string>
     <string name="time">Time</string>
-    <string name="dist">Distance</string>
+    <string name="step">Step</string>
     <string name="speed">Speed</string>
     <string name="mph">mph</string>
     <string name="mile">mi</string>
-    <string name="add_steps">Add Steps</string>
+    <string name="add_steps">+500</string>
     <string name="change_goal">Change Goal</string>
+    <string name="time_set">Set Time</string>
 
     <!-- input dialog -->
     <string name="ok">OK</string>
@@ -26,6 +27,14 @@
     <string name="change_goal_instruction_initial">Please enter your new step goal.</string>
     <string name="change_goal_instruction_failed">Please enter a number bigger than 0.</string>
 
+    <!-- Increase goal dialog -->
+    <string name="met_goal">Congrats, You have met your goal! Do you want to increase your step by 500?</string>
+
+    <!-- Set Time Dialog -->
+    <string name="change_time_instruction_initial">"Please enter current time (in milliseconds from Epoch)."</string>
+    <string name="change_time_instruction_failed">"Please enter a number that is 0 or higher."</string>
+
+
     <!-- add steps -->
     <string name="add_step_instruction_initial">initial</string>
     <string name="add_step_instruction_failed">failed</string>
@@ -33,9 +42,16 @@
     <!-- Toast texts -->
     <string name="saved">Saved</string>
 
+    <!-- Height Prompt texts -->
+    <string name="ft_str">ft.</string>
+    <string name="inch_str">inch.</string>
+    <string name="prompt_height_str">Please enter your height</string>
+    <string name="height_instruction_failed">Please enter a valid height.</string>
+
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="placeholder_str">Place Holder</string>
-    <string name="placeholder_num">10000</string>
+    <string name="placeholder_num">0</string>
     <string name="placeholder_time">--:--:--</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

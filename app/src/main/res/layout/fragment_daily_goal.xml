@@ -29,12 +29,6 @@
                 android:text="@string/placeholder_num"
                 style="@style/normal_text"/>
 
-            <Button
-                android:id="@+id/daily_goal_add_steps_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/add_steps"/>
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -53,6 +47,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/change_goal"/>
+
+            <Button
+                android:id="@+id/daily_goal_add_steps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_steps"/>
 
         </LinearLayout>
 
@@ -95,6 +95,13 @@
                 android:layout_height="wrap_content"
                 android:text="@string/mile"
                 style="@style/normal_text"/>
+
+            <!-- daily goal set time button -->
+            <Button
+                android:id="@+id/daily_goal_set_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/time_set"/>
 
         </LinearLayout>
 
@@ -151,11 +158,11 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/dist"
+                    android:text="@string/step"
                     style="@style/normal_text" />
 
                 <TextView
-                    android:id="@+id/daily_goal_current_dist_tv"
+                    android:id="@+id/daily_goal_current_step_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/placeholder_num"
@@ -198,9 +205,11 @@
 
         <Button
             android:id="@+id/daily_goal_record_btn"
-            android:layout_width="wrap_content"
+            android:layout_width="152dp"
             android:layout_height="wrap_content"
-            android:text="@string/start_record"/>
+            android:background="@color/green"
+            android:text="@string/start_record"
+            android:textColor="@android:color/background_light" />
 
     </LinearLayout>
 
