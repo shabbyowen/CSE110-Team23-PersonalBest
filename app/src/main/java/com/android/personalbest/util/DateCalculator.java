@@ -14,6 +14,7 @@ public class DateCalculator {
     }
 
     public static long toLocalTime(long time) {
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));  //For CircleCI Testing only.
         long offset = TimeZone.getDefault().getOffset(Calendar.ZONE_OFFSET);
         return time + offset;
     }

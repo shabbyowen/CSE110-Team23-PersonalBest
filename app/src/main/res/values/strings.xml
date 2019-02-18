@@ -16,6 +16,7 @@
     <string name="mile">mi</string>
     <string name="add_steps">+500</string>
     <string name="change_goal">Change Goal</string>
+    <string name="time_set">Set Time</string>
 
     <!-- input dialog -->
     <string name="ok">OK</string>
@@ -28,6 +29,11 @@
 
     <!-- Increase goal dialog -->
     <string name="met_goal">Congrats, You have met your goal! Do you want to increase your step by 500?</string>
+
+    <!-- Set Time Dialog -->
+    <string name="change_time_instruction_initial">"Please enter current time (in milliseconds from Epoch)."</string>
+    <string name="change_time_instruction_failed">"Please enter a number that is 0 or higher."</string>
+
 
     <!-- add steps -->
     <string name="add_step_instruction_initial">initial</string>
