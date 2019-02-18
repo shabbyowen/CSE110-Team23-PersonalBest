@@ -3,6 +3,7 @@ package com.android.personalbest;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
@@ -18,6 +19,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsInstanceOf;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,6 +27,7 @@ import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.*;
+import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.*;
 import static org.hamcrest.Matchers.allOf;
@@ -45,17 +48,22 @@ public class HomeScreenActivityTest {
                 }
             });
             HomeScreenActivity.setFitnessApiKey("TEST_API");
+
         }
     };
 
 
     @Before
     public void setup() {
+
+    }
+
+    @After
+    public void finish() {
         SharedPreferences prefs = mActivityTestRule.getActivity().getSharedPreferences(HeightPromptFragment.HEIGHT_SHARED_PREF, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.remove(HeightPromptFragment.HEIGHT);
+        editor.clear();
         editor.apply();
-        UserHeight.getInstance().load();
     }
 
     @Test
@@ -112,18 +120,6 @@ public class HomeScreenActivityTest {
                                 3),
                         isDisplayed()));
         textView3.check(matches(withText("inch.")));
-
-        /*
-        ViewInteraction button = onView(
-                allOf(withId(android.R.id.button1),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.buttonPanel),
-                                        0),
-                                0),
-                        isDisplayed()));
-        button.check(matches(isDisplayed()));
-        */
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
@@ -242,19 +238,6 @@ public class HomeScreenActivityTest {
                         isDisplayed()));
         button3.check(matches(isDisplayed()));
 
-        /*
-        ViewInteraction frameLayout = onView(
-                allOf(withId(R.id.navigation),
-                        childAtPosition(
-                                allOf(withId(R.id.container),
-                                        childAtPosition(
-                                                withId(android.R.id.content),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        frameLayout.check(matches(isDisplayed()));
-        */
-
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
         // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
@@ -303,14 +286,14 @@ public class HomeScreenActivityTest {
         }
 
         ViewInteraction textView7 = onView(
-                allOf(withId(R.id.daily_goal_current_time_tv), withText("00:00:01"),
+                allOf(withId(R.id.daily_goal_current_time_tv), withText("--:--:--"),
                         childAtPosition(
                                 childAtPosition(
                                         withId(R.id.daily_goal_current_session_info_layout),
                                         0),
                                 1),
                         isDisplayed()));
-        textView7.check(matches(withText("00:00:01")));
+        textView7.check(doesNotExist());
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
@@ -339,19 +322,6 @@ public class HomeScreenActivityTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        /*
-        ViewInteraction frameLayout2 = onView(
-                allOf(withId(R.id.navigation),
-                        childAtPosition(
-                                allOf(withId(R.id.container),
-                                        childAtPosition(
-                                                withId(android.R.id.content),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        frameLayout2.check(matches(isDisplayed()));
-        */
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
