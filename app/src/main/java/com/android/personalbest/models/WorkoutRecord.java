@@ -41,10 +41,14 @@ public class WorkoutRecord extends Model implements Model.Listener {
     private List<Session> sessions;
     private Session currentSession;
 
-    public static WorkoutRecord getInstance(Context context) {
+    public static WorkoutRecord getInstance(Context context, FitnessService fitnessService) {
         if (instance == null) {
-            instance = new WorkoutRecord(context);
+            instance = new WorkoutRecord(context, fitnessService);
         }
+        return instance;
+    }
+
+    public static WorkoutRecord getInstance(Context context) {
         return instance;
     }
 
@@ -74,9 +78,10 @@ public class WorkoutRecord extends Model implements Model.Listener {
         }
     }
 
-    public WorkoutRecord(Context context) {
+    public WorkoutRecord(Context context, FitnessService fitnessService) {
         super();
         sharedPreferences = context.getSharedPreferences(SESSION_SHARED_PREF, Context.MODE_PRIVATE);
+        this.fitnessService = fitnessService;
         sessions = new LinkedList<>();
         currentSession = null;
         load();
@@ -111,8 +116,15 @@ public class WorkoutRecord extends Model implements Model.Listener {
 
     public void setTime(long time) {
         if (currentSession != null) {
-            currentSession.deltaTime = time - currentSession.startTime;
-            updateAll();
+            if (DateCalculator.dateChanged(currentSession.startTime, time)) {
+                currentSession.deltaTime = DateCalculator.toClosesetMidnightTmr(time) - currentSession.startTime;
+                sessions.add(currentSession);
+                updateAll();
+                currentSession = null;
+            } else {
+                currentSession.deltaTime = time - currentSession.startTime;
+                updateAll();
+            }
         }
     }
 
@@ -179,9 +191,11 @@ public class WorkoutRecord extends Model implements Model.Listener {
                         DataSet dataSet = buckets.get(buckets.size() - 2).getDataSet(DataType.AGGREGATE_STEP_COUNT_DELTA);
                         int yesterdayStep = dataSet == null || dataSet.isEmpty() ? 0 :
                             dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
+                        currentSession = session;
                         currentSession.deltaStep = yesterdayStep - currentSession.startStep;
-                        currentSession.deltaTime = 86400L * 1000L - session.startTime;
+                        currentSession.deltaTime = 86400L * 1000L - (session.startTime % (86400L * 1000L));
                         sessions.add(currentSession);
+                        updateAll();
                         currentSession = null;
                         Log.d(TAG, "Date change detected!");
                     }
