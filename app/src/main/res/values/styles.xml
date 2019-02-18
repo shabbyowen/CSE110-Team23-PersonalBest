@@ -8,4 +8,29 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="normal_text">
+        <item name="android:textSize">@dimen/normal_text_size</item>
+    </style>
+
+    <style name="h5_text">
+        <item name="android:textSize">@dimen/h5_text_size</item>
+    </style>
+
+    <style name="column">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="row">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="root_layout">
+        <item name="android:padding">16dp</item>
+    </style>
+    
 </resources>
