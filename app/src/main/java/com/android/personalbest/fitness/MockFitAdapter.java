@@ -21,7 +21,6 @@ public class MockFitAdapter implements FitnessService {
 
     @Override
     public void setup() {
-        updateStepCount();
     }
 
     @Override
