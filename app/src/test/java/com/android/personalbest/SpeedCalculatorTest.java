@@ -28,6 +28,10 @@ public class SpeedCalculatorTest {
         //Testing the arithmetic accuracy of the method
         Assert.assertEquals(result, SpeedCalculator.stepToMiles(1000));
 
+        //Testing when the number of steps is zero
+        result = 0;
+        Assert.assertEquals(result, SpeedCalculator.stepToMiles(0));
+
     }
 
     @Test
