@@ -49,16 +49,16 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    putFragment(
-                        dailyGoalFragment == null ?
-                        new DailyGoalFragment() :
-                        dailyGoalFragment);
+                    if (dailyGoalFragment == null) {
+                        dailyGoalFragment = new DailyGoalFragment();
+                    }
+                    putFragment(dailyGoalFragment);
                     return true;
                 case R.id.navigation_dashboard:
-                    putFragment(
-                        weeklyProgressFragment == null ?
-                        new WeeklyProgressFragment() :
-                        weeklyProgressFragment);
+                    if (weeklyProgressFragment == null) {
+                        weeklyProgressFragment = new WeeklyProgressFragment();
+                    }
+                    putFragment(weeklyProgressFragment);
                     return true;
 
             }
@@ -77,11 +77,21 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
+        // fitness service connection
+        FitnessServiceFactory.put(FITNESS_API_KEY, new FitnessServiceFactory.BluePrint() {
+            @Override
+            public FitnessService create(HomeScreenActivity stepCountActivity) {
+                return new GoogleFitAdapter(stepCountActivity);
+            }
+        });
+
+        fitnessService = FitnessServiceFactory.create(FITNESS_API_KEY, this);
+        fitnessService.setup();
+
         // get models
         userHeight = UserHeight.getInstance(this);
         counter = StepCounter.getInstance(this);
-        record = WorkoutRecord.getInstance(this);
-        record.setFitnessService(fitnessService);
+        record = WorkoutRecord.getInstance(this, fitnessService);
         promptTracker = EncouragementTracker.getInstance(this);
 
         // init fragment manager
@@ -90,16 +100,6 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         // set up bottom navigation menu
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
-        // fitness service connection
-        FitnessServiceFactory.put(FITNESS_API_KEY, new FitnessServiceFactory.BluePrint() {
-            @Override
-            public FitnessService create(HomeScreenActivity stepCountActivity) {
-                return new GoogleFitAdapter(stepCountActivity);
-            }
-        });
-        fitnessService = FitnessServiceFactory.create(FITNESS_API_KEY, this);
-        fitnessService.setup();
 
         // ask user for their height
         int height = getSharedPreferences(HeightPromptFragment.HEIGHT_SHARED_PREF, MODE_PRIVATE)
