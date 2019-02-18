@@ -25,7 +25,7 @@ import java.util.List;
 
 public class HomeScreenActivity extends AppCompatActivity implements HeightPromptFragment.HeightPromptListener{
 
-    private static final String FITNESS_API_KEY = "HOME_SCREEN_KEY";
+    private String fitnessServiceKey = "HOME_SCREEN_KEY";
     private static final String INPUT_HEIGHT = "INPUT_HEIGHT";
     private static final String TAG = "HomeScreenActivity";
     private static final int UPDATE_DELAY_SEC = 5;
@@ -78,14 +78,14 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
         setContentView(R.layout.activity_home_screen);
 
         // fitness service connection
-        FitnessServiceFactory.put(FITNESS_API_KEY, new FitnessServiceFactory.BluePrint() {
+        FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
             @Override
             public FitnessService create(HomeScreenActivity stepCountActivity) {
                 return new GoogleFitAdapter(stepCountActivity);
             }
         });
 
-        fitnessService = FitnessServiceFactory.create(FITNESS_API_KEY, this);
+        fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
         fitnessService.setup();
 
         // get models
@@ -181,6 +181,10 @@ public class HomeScreenActivity extends AppCompatActivity implements HeightPromp
     }
 
     public int getStepCount() {return counter.getStep(); }
+
+    public void setFitnessServiceKey(String fitnessServiceKey) {
+        this.fitnessServiceKey = fitnessServiceKey;
+    }
 
     @Override
     public boolean onInputResult(String tag, String result, TextView view) {

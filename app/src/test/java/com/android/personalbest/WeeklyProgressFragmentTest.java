@@ -24,7 +24,7 @@ public class WeeklyProgressFragmentTest {
     }
 
     @Test
-    public void checkNull() {
+    public void testIsNotNull() {
         assertNotNull(fragment);
 
     }
