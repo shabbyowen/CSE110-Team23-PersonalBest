@@ -14,12 +14,13 @@ public class DateCalculator {
     }
 
     public static long toLocalTime(long time) {
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));  //For CircleCI Testing only.
         long offset = TimeZone.getDefault().getOffset(Calendar.ZONE_OFFSET);
         return time + offset;
     }
 
     public static int toLocalEpochDay(long time) {
-        return (int) Math.floor((toLocalTime(time) / DAY_LENGTH_MILLISEC));
+        return (int)(toLocalTime(time) / DAY_LENGTH_MILLISEC);
     }
 
     public static Calendar toClosesetMinightTmr(Calendar cal) {
