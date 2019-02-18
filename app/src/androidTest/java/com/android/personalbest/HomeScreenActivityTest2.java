@@ -28,7 +28,7 @@ import static org.hamcrest.Matchers.is;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class HomeScreenActivityTest {
+public class HomeScreenActivityTest2 {
     private static final String TEST_SERVICE = "TEST_SERVICE";
 
     @Rule
