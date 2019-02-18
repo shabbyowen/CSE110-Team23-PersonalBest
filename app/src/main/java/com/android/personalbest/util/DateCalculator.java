@@ -5,7 +5,7 @@ import java.util.TimeZone;
 
 public class DateCalculator {
 
-    private static final long DAY_LENGTH_MILLISEC = 84600L * 1000L;
+    private static final long DAY_LENGTH_MILLISEC = 86400L * 1000L;
 
     public static boolean dateChanged(long startMillis, long endMillis) {
         long startDate = toLocalEpochDay(startMillis);
@@ -29,5 +29,12 @@ public class DateCalculator {
         cal.set(Calendar.MILLISECOND, 0);
         cal.add(Calendar.DATE, 1);
         return cal;
+    }
+
+    public static long toClosesetMidnightTmr(long time) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(time);
+        toClosesetMinightTmr(cal);
+        return DateCalculator.toLocalTime(cal.getTimeInMillis());
     }
 }
