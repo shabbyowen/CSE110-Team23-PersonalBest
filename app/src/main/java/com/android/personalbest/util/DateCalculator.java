@@ -19,7 +19,7 @@ public class DateCalculator {
     }
 
     public static int toLocalEpochDay(long time) {
-        return (int)(toLocalTime(time) / DAY_LENGTH_MILLISEC);
+        return (int) Math.floor((toLocalTime(time) / DAY_LENGTH_MILLISEC));
     }
 
     public static Calendar toClosesetMinightTmr(Calendar cal) {
