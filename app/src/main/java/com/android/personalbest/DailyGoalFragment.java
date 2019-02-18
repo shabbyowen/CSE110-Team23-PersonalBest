@@ -150,7 +150,7 @@ public class DailyGoalFragment extends Fragment implements
 
         // check if the user has met the goal
         if (step >= goal && goal < 15000 &&
-            !DateCalculator.dateChanged(counter.getLastSavedTime(), TimeMachine.nowMillis()) && encouragementTracker.shouldDisplayGoalPrompt()) {
+            !DateCalculator.dateChanged(counter.getLastSavedTime(), TimeMachine.nowMillis()) &&  encouragementTracker.shouldDisplayGoalPrompt()) {
             Log.d(TAG, "Showing meet goal encouragement");
             encouragementTracker.setLastGoalPromptTime(TimeMachine.nowMillis());
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
