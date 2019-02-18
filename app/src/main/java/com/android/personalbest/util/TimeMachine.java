@@ -18,11 +18,7 @@ public class TimeMachine {
     }
 
     public static Calendar nowCal() {
-        cal.setTimeZone(TimeZone.getDefault());
-        if (timeSet){
-            cal.setTimeInMillis(time);
-        }
-        else {
+        if (!timeSet) {
             cal = Calendar.getInstance();
         }
         return cal;
