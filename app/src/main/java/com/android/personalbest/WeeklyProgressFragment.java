@@ -80,7 +80,6 @@ public class WeeklyProgressFragment extends Fragment {
         this.findThisWeekSessions(allSessions, offset);
 
         drawChart(offset); // the official draw chart
-//        drawChartDummy(0); // dummy for display purpose
 
         return fragmentView;
     }
@@ -118,10 +117,12 @@ public class WeeklyProgressFragment extends Fragment {
 
         List<Entry> goalDataList = new ArrayList<>();
 
-        // pushing goal data
+        // pushing goal data Note: This line may need to be changed to reflect the change of goals
         for (int i = 0; i < offset; i++) {
             goalDataList.add(new Entry(i, (float)StepCounter.getInstance(getActivity()).getGoal()));
         }
+
+        // In case we are in the middle of the week, pad the rest of the line with the most recent goal
         for (int i = offset; i < 7; i++) {
             goalDataList.add(new BarEntry(i, (float)StepCounter.getInstance(getActivity()).getGoal()));
         }
@@ -141,6 +142,7 @@ public class WeeklyProgressFragment extends Fragment {
         for (int i = 0; i < offset; i++) {
             speedsList.add(new Entry(i, (float)speedByDay[i]));
         }
+        // In case it's in the middle of the week, pad the rest of the day with 0
         for (int i = offset; i < 7; i++) {
             speedsList.add(new BarEntry(i, 0f));
         }
@@ -255,6 +257,7 @@ public class WeeklyProgressFragment extends Fragment {
         // Counting intentional steps for every day
         int counter = 0;
 
+        // There is the possibility that the session list is empty
         for (int i = 1; i <= offset && sessions.size() != 0; i++) {
 
             //The rightmost session is the most recent session
@@ -291,17 +294,23 @@ public class WeeklyProgressFragment extends Fragment {
                             DataSet totalStepOfTheDayDataSet = list.get(i)
                                 .getDataSet(DataType.AGGREGATE_STEP_COUNT_DELTA);
 
-                             if(totalStepOfTheDayDataSet.isEmpty()){
+
+                            // if the dataSet is empty there was no exercise for that day
+                            if(totalStepOfTheDayDataSet.isEmpty()){
                                 continue;
                             }else{
                                  totalStepOfTheDay = totalStepOfTheDayDataSet
                                          .getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
                              }
 
+
                             WeeklyProgressFragment.this.unIntentionalStepsByDay[i] =
                                     totalStepOfTheDay -
                                             WeeklyProgressFragment.this.intentionalStepsByDay[i];
                         }
+
+                        // The drawChart method has to be here to ensure the instances are populated before drawing
+                        // the chart
                         drawChart(offset);
                     }
                 });

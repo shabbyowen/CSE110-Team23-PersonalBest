@@ -30,6 +30,7 @@ public class MockDataTest {
 
         Assert.assertEquals(result, step);
 
+        // Note that Google fitness API doesn't allow the user to go over 100 meters per second
         step = 300;
         canvas = MockData.mockFitnessData(activity, step);
         result = canvas.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
