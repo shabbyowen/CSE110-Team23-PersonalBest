@@ -312,7 +312,7 @@ public class DailyGoalFragment extends Fragment implements
                     return false;
                 }
 
-                TimeMachine.setTime(newTime);
+                TimeMachine.setTimeInMillis(newTime);
                 Toast.makeText(getActivity(), R.string.saved, Toast.LENGTH_LONG).show();
                 Log.d(TAG, String.format("changing current time to %d", newTime));
                 return true;
