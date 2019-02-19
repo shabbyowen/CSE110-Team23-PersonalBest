@@ -33,6 +33,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import static java.lang.Math.min;
+
 /**
  * Class to make the chart
  */
@@ -258,12 +260,17 @@ public class WeeklyProgressFragment extends Fragment {
 
         // Counting intentional steps for every day
         int counter = 0;
+        int index = 0;
 
         // There is the possibility that the session list is empty
         for (int i = 1; i <= offset && sessions.size() != 0; i++) {
 
             //The rightmost session is the most recent session
-            WorkoutRecord.Session daySession = sessions.get(sessions.size() - counter - 1);
+            if (sessions.size() - counter - 1 < 0)
+                index = 0;
+            else
+                index = sessions.size() - counter - 1;
+            WorkoutRecord.Session daySession = sessions.get(index);
             //Checking if the sessions is within the numerical range of a specific day
             if (today - i * numMillInDay < daySession.startTime && daySession.startTime <= today - (i - 1) * numMillInDay) {
                 intentionalStepsByDay[offset - i] = daySession.deltaStep;
