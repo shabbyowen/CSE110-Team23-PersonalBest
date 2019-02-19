@@ -26,7 +26,7 @@ import java.util.List;
 public class HomeScreenActivity extends AppCompatActivity implements HeightPromptFragment.HeightPromptListener{
 
     private static final String GOOGLE_FITNESS = "GOOGLE_FIT_API";
-    private static String fitnessServiceKey = GOOGLE_FITNESS;
+    public static String fitnessServiceKey = GOOGLE_FITNESS;
     private static final String INPUT_HEIGHT = "INPUT_HEIGHT";
     private static final String TAG = "HomeScreenActivity";
     private static final int UPDATE_DELAY_SEC = 5;
