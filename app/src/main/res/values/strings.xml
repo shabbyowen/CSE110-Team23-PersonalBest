@@ -2,7 +2,8 @@
     <string name="app_name">Personal Best</string>
     <string name="title_activity_home_screen">HomeScreenActivity</string>
     <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="title_friends">Friends</string>
+    <string name="title_stats">Stats</string>
 
     <!-- Daily view fragment strings -->
     <string name="start_record">Start Walk/Run</string>
@@ -29,6 +30,9 @@
 
     <!-- Increase goal dialog -->
     <string name="met_goal">Congrats, You have met your goal! Do you want to increase your step by 500?</string>
+
+    <!-- Encouragement dialog -->
+    <string name="encouragement">Congrats, you walked over %d more steps than yesterday!</string>
 
     <!-- Set Time Dialog -->
     <string name="change_time_instruction_initial">"Please enter current time (in milliseconds from Epoch)."</string>

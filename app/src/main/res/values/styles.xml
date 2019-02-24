@@ -32,5 +32,5 @@
     <style name="root_layout">
         <item name="android:padding">16dp</item>
     </style>
-    
+
 </resources>
