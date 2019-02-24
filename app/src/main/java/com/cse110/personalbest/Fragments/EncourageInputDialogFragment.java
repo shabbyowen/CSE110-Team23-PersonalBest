@@ -14,12 +14,16 @@ public class EncourageInputDialogFragment extends InputDialogFragment {
     private static final String TAG = "EncourageInputDialogFragment";
 
     private TextView encouragementTextView;
+    private String initialPrompt;
     private Handler handler = new Handler();
 
     @Override
     public View createView(LayoutInflater inflater) {
         View view = inflater.inflate(R.layout.fragment_encourage_input_dialog, null);
         encouragementTextView = view.findViewById(R.id.fragment_encourage_input_dialog_tv);
+        if (initialPrompt != null) {
+            encouragementTextView.setText(initialPrompt);
+        }
         return view;
     }
 
@@ -44,25 +48,13 @@ public class EncourageInputDialogFragment extends InputDialogFragment {
     }
 
     @Override
-    public void setPrompt(final String prompt) {
+    public void setPrompt(String prompt) {
 
         // retry if this dialog is not read yet
         if (encouragementTextView != null) {
-            Log.d(TAG, "setPrompt: dialog is ready, setting prompt now");
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    encouragementTextView.setText(prompt);
-                }
-            });
+            encouragementTextView.setText(prompt);
         } else {
-            Log.d(TAG, "setPrompt: dialog not ready yet, retry layer");
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    setPrompt(prompt);
-                }
-            }, 500);
+            initialPrompt = prompt;
         }
     }
 }

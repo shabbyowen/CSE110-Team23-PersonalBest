@@ -382,9 +382,9 @@ public class HomeActivity extends AppCompatActivity implements
     public void showInputDialog(String key, String tag, String prompt) {
         InputDialogFragment dialog = (InputDialogFragment) inputDialogFragmentFactory.create(key);
         dialog.registerListener(this);
-        dialog.show(fragmentManager, tag);
         if (prompt != null) {
             dialog.setPrompt(prompt);
         }
+        dialog.show(fragmentManager, tag);
     }
 }
