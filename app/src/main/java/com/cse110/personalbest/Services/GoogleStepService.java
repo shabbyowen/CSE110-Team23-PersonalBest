@@ -56,6 +56,7 @@ public class GoogleStepService extends StepService {
     // binder for activity to communicate with this service
     public class GoogleStepServiceBinder extends MyBinder {
 
+        @Override
         public Service getService() {
             return GoogleStepService.this;
         }

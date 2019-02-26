@@ -25,13 +25,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 public class BasicSessionService extends SessionService implements StepServiceListener {
 
-    public static final String STEP_SERVICE_KEY_EXTRA = "step_service_key_extra";
     public static final String CURRENT_SESSION = "current_session";
     public static final String SESSION_LIST = "session_list";
 
@@ -133,7 +133,7 @@ public class BasicSessionService extends SessionService implements StepServiceLi
     private Intent getStepServiceIntent() {
         ServiceSelector serviceSelector = new StepServiceSelector();
         Intent intent = new Intent(this, serviceSelector.retrieveServiceClass(stepServiceKey));
-        intent.putExtra(GoogleStepService.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);
+        intent.putExtra(StepService.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);
         return intent;
     }
 
@@ -203,7 +203,32 @@ public class BasicSessionService extends SessionService implements StepServiceLi
 
     @Override
     public void getWeekSession(SessionServiceCallback callback) {
+        List<Session> sessions = loadSessionList();
+        List<Session> result = new LinkedList<>();
 
+        for (int i = 0; i < 7; i++) {
+            result.add(new Session());
+        }
+
+        // sessions is chronological
+        Date now = TimeMachine.now();
+        for (int i = sessions.size() - 1; i >= 0; i--) {
+            Session session = sessions.get(i);
+            Date startTime = new Date(session.startTime);
+            int difference = DateCalculator.dateDifference(now, startTime);
+            if (difference >= 7) {
+                break;
+            }
+            Session target = result.get(difference);
+            target.startTime = session.startTime;
+            target.startStep = session.startStep;
+            target.deltaTime += session.deltaTime;
+            target.deltaStep += session.deltaStep;
+        }
+
+        // reverse the order of the list
+        Collections.reverse(result);
+        callback.onSessionResult(result);
     }
 
     public void recordSession(Session session) {

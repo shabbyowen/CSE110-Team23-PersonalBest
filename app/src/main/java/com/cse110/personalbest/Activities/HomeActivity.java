@@ -17,29 +17,19 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cse110.personalbest.Events.GoalInputDialogResult;
-import com.cse110.personalbest.Events.GoalMetInputDialogResult;
-import com.cse110.personalbest.Events.HeightInputDialogResult;
-import com.cse110.personalbest.Events.InputDialogFragmentListener;
-import com.cse110.personalbest.Events.StepServiceCallback;
+import com.cse110.personalbest.Events.*;
 import com.cse110.personalbest.Factories.DailyGoalFragmentFactory;
 import com.cse110.personalbest.Factories.FragmentFactory;
 import com.cse110.personalbest.Factories.InputDialogFragmentFactory;
 import com.cse110.personalbest.Fragments.DailyGoalFragment;
-import com.cse110.personalbest.Events.DailyGoalFragmentInfo;
-import com.cse110.personalbest.Events.DailyGoalFragmentListener;
 import com.cse110.personalbest.Fragments.InputDialogFragment;
 import com.cse110.personalbest.Fragments.WeeklyProgressFragment;
 import com.cse110.personalbest.Factories.WeeklyProgressFragmentFactory;
 import com.cse110.personalbest.R;
 import com.cse110.personalbest.Factories.ServiceSelector;
-import com.cse110.personalbest.Events.Session;
 import com.cse110.personalbest.Services.SessionService;
-import com.cse110.personalbest.Events.SessionServiceListener;
 import com.cse110.personalbest.Factories.SessionServiceSelector;
 import com.cse110.personalbest.Services.StepService;
-import com.cse110.personalbest.Events.MyBinder;
-import com.cse110.personalbest.Events.StepServiceListener;
 import com.cse110.personalbest.Factories.StepServiceSelector;
 import com.cse110.personalbest.Utilities.SpeedCalculator;
 import com.cse110.personalbest.Utilities.StorageSolution;
@@ -130,6 +120,7 @@ public class HomeActivity extends AppCompatActivity implements
                 case R.id.navigation_friend:
                     return true;
                 case R.id.navigation_stats:
+                    updateWeeklyProgressFragment();
                     display(weeklyProgressFragment);
                     return true;
             }
@@ -386,5 +377,31 @@ public class HomeActivity extends AppCompatActivity implements
             dialog.setPrompt(prompt);
         }
         dialog.show(fragmentManager, tag);
+    }
+
+    public void updateWeeklyProgressFragment() {
+        sessionService.getWeekSession(new SessionServiceCallback() {
+            @Override
+            public void onSessionResult(List<Session> result) {
+
+                List<Session> sessionList = result;
+
+                stepService.getWeekStep(new StepServiceCallback(){
+                    @Override
+                    public void onStepResult(List<Integer> result) {
+
+                        List<Integer> totalStepList = result;
+
+                        stepService.getWeekGoal(new StepServiceCallback() {
+                            @Override
+                            public void onGoalResult(List<Integer> result) {
+
+                                List<Integer> goalList = result;
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 }

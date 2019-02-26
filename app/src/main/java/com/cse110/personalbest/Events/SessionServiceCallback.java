@@ -4,5 +4,5 @@ import java.util.List;
 
 public class SessionServiceCallback {
 
-    void onSessionResult(List<Session> result) {}
+    public void onSessionResult(List<Session> result) {}
 }

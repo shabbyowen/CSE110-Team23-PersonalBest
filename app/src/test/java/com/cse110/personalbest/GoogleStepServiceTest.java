@@ -30,7 +30,7 @@ public class GoogleStepServiceTest {
         Intent intent = new Intent(activity, GoogleStepService.class);
         intent.putExtra(GoogleStepService.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.MOCK_DICT_KEY);
         service = new GoogleStepService();
-        ((GoogleStepService) service).onStartCommand(intent, 0, 0);
+        service.onStartCommand(intent, 0, 0);
     }
 
     @Test
