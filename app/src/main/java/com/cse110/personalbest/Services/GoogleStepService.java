@@ -253,6 +253,11 @@ public class GoogleStepService extends StepService {
     public void getWeekGoal(StepServiceCallback callback) {
         List<GoalInfo> list = loadGoalInfo();
         List<Integer> result = new LinkedList<>();
+
+        if (list == null) {
+            return;
+        }
+
         if (list.size() > 7) {
             list = list.subList(list.size() - 7, list.size());
         }

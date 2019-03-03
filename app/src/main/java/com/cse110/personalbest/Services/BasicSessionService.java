@@ -206,6 +206,10 @@ public class BasicSessionService extends SessionService implements StepServiceLi
         List<Session> sessions = loadSessionList();
         List<Session> result = new LinkedList<>();
 
+        if (sessions == null) {
+            return;
+        }
+
         for (int i = 0; i < 7; i++) {
             result.add(new Session());
         }
