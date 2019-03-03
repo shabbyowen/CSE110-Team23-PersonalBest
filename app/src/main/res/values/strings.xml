@@ -52,6 +52,8 @@
     <string name="prompt_height_str">Please enter your height</string>
     <string name="height_instruction_failed">Please enter a valid height.</string>
 
+    <!-- Friends View -->
+    <string name="pending_request">Pending Request</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="placeholder_str">Place Holder</string>

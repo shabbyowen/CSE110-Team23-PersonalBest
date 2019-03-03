@@ -18,22 +18,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cse110.personalbest.Events.*;
-import com.cse110.personalbest.Factories.DailyGoalFragmentFactory;
-import com.cse110.personalbest.Factories.FragmentFactory;
-import com.cse110.personalbest.Factories.InputDialogFragmentFactory;
+import com.cse110.personalbest.Factories.*;
 import com.cse110.personalbest.Fragments.DailyGoalFragment;
+import com.cse110.personalbest.Fragments.FriendsListFragment;
 import com.cse110.personalbest.Fragments.InputDialogFragment;
 import com.cse110.personalbest.Fragments.WeeklyProgressFragment;
-import com.cse110.personalbest.Factories.WeeklyProgressFragmentFactory;
 import com.cse110.personalbest.R;
-import com.cse110.personalbest.Factories.ServiceSelector;
 import com.cse110.personalbest.Services.SessionService;
-import com.cse110.personalbest.Factories.SessionServiceSelector;
 import com.cse110.personalbest.Services.StepService;
-import com.cse110.personalbest.Factories.StepServiceSelector;
 import com.cse110.personalbest.Utilities.SpeedCalculator;
 import com.cse110.personalbest.Utilities.StorageSolution;
-import com.cse110.personalbest.Factories.StorageSolutionFactory;
 import com.cse110.personalbest.Utilities.TimeMachine;
 
 import java.util.List;
@@ -62,6 +56,7 @@ public class HomeActivity extends AppCompatActivity implements
     private StorageSolution storageSolution;
 
     private DailyGoalFragment dailyGoalFragment;
+    private FriendsListFragment friendsListFragment;
     private WeeklyProgressFragment weeklyProgressFragment;
 
     private FragmentManager fragmentManager;
@@ -118,6 +113,7 @@ public class HomeActivity extends AppCompatActivity implements
                     display(dailyGoalFragment);
                     return true;
                 case R.id.navigation_friend:
+                    display(friendsListFragment);
                     return true;
                 case R.id.navigation_stats:
                     updateWeeklyProgressFragment();
@@ -168,6 +164,10 @@ public class HomeActivity extends AppCompatActivity implements
             .create(DailyGoalFragmentFactory.BASIC_DAILY_GOAL_FRAGMENT_KEY);
         dailyGoalFragment.setListener(this);
 
+        // creating friends list fragment
+        friendsListFragment = (FriendsListFragment) new FriendsListFragmentFactory()
+            .create(FriendsListFragmentFactory.BASIC_FRIENDS_LIST_FRAGMENT_KEY);
+
         // creating weekly progress fragment
         weeklyProgressFragment = (WeeklyProgressFragment) new WeeklyProgressFragmentFactory()
             .create(WeeklyProgressFragmentFactory.BASIC_WEEKLY_PROGRESS_FRAGMENT_KEY);
@@ -178,6 +178,7 @@ public class HomeActivity extends AppCompatActivity implements
         currentFragment = dailyGoalFragment;
         ft.add(R.id.home_screen_container, dailyGoalFragment);
         ft.add(R.id.home_screen_container, weeklyProgressFragment).hide(weeklyProgressFragment);
+        ft.add(R.id.home_screen_container, friendsListFragment).hide(friendsListFragment);
         ft.commit();
 
         // set up factory
