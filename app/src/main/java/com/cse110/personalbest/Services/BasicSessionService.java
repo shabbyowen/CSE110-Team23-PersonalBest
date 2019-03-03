@@ -20,6 +20,7 @@ import com.cse110.personalbest.Factories.StepServiceSelector;
 import com.cse110.personalbest.Utilities.DateCalculator;
 import com.cse110.personalbest.Utilities.StorageSolution;
 import com.cse110.personalbest.Factories.StorageSolutionFactory;
+import com.cse110.personalbest.Utilities.TestConfig;
 import com.cse110.personalbest.Utilities.TimeMachine;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -113,7 +114,9 @@ public class BasicSessionService extends SessionService implements StepServiceLi
             stepServiceKey = key2;
         }
         startService(getStepServiceIntent());
-        bindService(getStepServiceIntent(), stepServiceConnection, BIND_AUTO_CREATE);
+        if (!TestConfig.isTesting) {
+            bindService(getStepServiceIntent(), stepServiceConnection, BIND_AUTO_CREATE);
+        }
 
         // start updating sessions
         handler.removeCallbacks(sessionUpdateTask);
