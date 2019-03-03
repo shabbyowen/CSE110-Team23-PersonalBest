@@ -82,3 +82,4 @@ lint/tmp/
 .idea/caches/gradle_models.ser
 .idea/codeStyles/codeStyleConfig.xml
 .idea/misc.xml
+.idea/encodings.xml
