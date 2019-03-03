@@ -30,6 +30,7 @@ import com.cse110.personalbest.Utilities.SpeedCalculator;
 import com.cse110.personalbest.Utilities.StorageSolution;
 import com.cse110.personalbest.Utilities.TimeMachine;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity implements
@@ -381,23 +382,44 @@ public class HomeActivity extends AppCompatActivity implements
     }
 
     public void updateWeeklyProgressFragment() {
+        if (weeklyProgressFragment == null) {
+            return;
+        }
+
         sessionService.getWeekSession(new SessionServiceCallback() {
             @Override
             public void onSessionResult(List<Session> result) {
 
-                List<Session> sessionList = result;
+                final List<Session> sessionList = result;
 
                 stepService.getWeekStep(new StepServiceCallback(){
                     @Override
                     public void onStepResult(List<Integer> result) {
 
-                        List<Integer> totalStepList = result;
+                        final List<Integer> totalStepList = result;
 
                         stepService.getWeekGoal(new StepServiceCallback() {
                             @Override
                             public void onGoalResult(List<Integer> result) {
 
                                 List<Integer> goalList = result;
+                                List<Integer> intentionalStep = new LinkedList<>();
+                                List<Integer> unintentionalStep = new LinkedList<>();
+                                List<Integer> speed = new LinkedList<>();
+                                for (int i = 0; i < sessionList.size(); i++) {
+                                    int intentional = sessionList.get(i).deltaStep;
+                                    int time = (int)sessionList.get(i).deltaTime;
+                                    int total = totalStepList.get(i);
+                                    intentionalStep.add(intentional);
+                                    unintentionalStep.add(total - intentional);
+                                    speed.add((int)Math.round(SpeedCalculator.calculateSpeed(intentional, time, height)));
+                                }
+                                WeeklyProgressFragmentInfo info = new WeeklyProgressFragmentInfo();
+                                info.intentionalSteps = intentionalStep;
+                                info.unintentionalSteps = unintentionalStep;
+                                info.weekGoal = goalList;
+                                info.weekSpeed = speed;
+                                weeklyProgressFragment.updateView(info);
                             }
                         });
                     }

@@ -16,8 +16,6 @@ public class GoalInputDialogFragment extends InputDialogFragment {
     private TextView promptTextView;
     private EditText inputEditText;
 
-    private InputDialogFragmentListener listener;
-
     @Override
     public View createView(LayoutInflater inflater) {
         View view = inflater.inflate(R.layout.fragment_goal_input_dialog, null);

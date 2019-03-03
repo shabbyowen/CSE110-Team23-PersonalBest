@@ -255,7 +255,7 @@ public class GoogleStepService extends StepService {
         List<Integer> result = new LinkedList<>();
 
         if (list == null) {
-            return;
+            list = new LinkedList<>();
         }
 
         if (list.size() > 7) {

@@ -36,7 +36,7 @@ public class BasicFriendsListFragment extends FriendsListFragment {
         friendsListView = fragmentView.findViewById(R.id.lv_friends);
 
         // Get data from Firebase
-        user = FirebaseFirestore.getInstance().
+//        user = FirebaseFirestore.getInstance().
         return fragmentView;
     }
 
