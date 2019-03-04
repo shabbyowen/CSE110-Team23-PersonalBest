@@ -1,32 +1,29 @@
 package com.cse110.personalbest.Fragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import com.cse110.personalbest.Events.FriendsListFragmentInfo;
 import com.cse110.personalbest.Events.FriendsListFragmentListener;
+import com.cse110.personalbest.Friend;
+import com.cse110.personalbest.PendingRequestsAdapter;
 import com.cse110.personalbest.R;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 public class BasicFriendsListFragment extends FriendsListFragment {
-    private static final String COLLECTION_KEY = "users";
-    private static final String FRIENDS_KEY = "friends";
-    private static final String PENDING_REQUESTS_KEY = "pending_requests";
 
     WeakReference<FriendsListFragmentListener> listener;
 
-    private DocumentReference user;
-
     // ui elements
-    private ListView pendingRequestsListView;
-    private ListView friendsListView;
+    private RecyclerView pendingRequestsListView;
+    private RecyclerView friendsListView;
+
+    private PendingRequestsAdapter pendingRequestsAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -35,14 +32,16 @@ public class BasicFriendsListFragment extends FriendsListFragment {
         pendingRequestsListView = fragmentView.findViewById(R.id.lv_pending);
         friendsListView = fragmentView.findViewById(R.id.lv_friends);
 
-        // Get data from Firebase
-//        user = FirebaseFirestore.getInstance().
+        pendingRequestsAdapter = new PendingRequestsAdapter(getActivity(), new ArrayList<Friend>());
+        pendingRequestsListView.setAdapter(pendingRequestsAdapter);
+
         return fragmentView;
     }
 
     @Override
     public void updateView(FriendsListFragmentInfo info) {
-
+        pendingRequestsAdapter = new PendingRequestsAdapter(getActivity(), info.friends);
+        pendingRequestsListView.setAdapter(pendingRequestsAdapter);
     }
 
     @Override

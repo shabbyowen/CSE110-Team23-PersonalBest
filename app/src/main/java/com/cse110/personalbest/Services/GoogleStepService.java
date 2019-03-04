@@ -43,6 +43,7 @@ public class GoogleStepService extends StepService {
     public static final String DAILY_GOAL = "daily_goal";
     public static final String LAST_GOAL_MET = "last_goal_met";
     public static final String LAST_ENCOURAGEMENT = "last_encouragement";
+    public static final String CURRENT_USER_KEY = "user_email";
     private static final String TAG = "GoogleStepService";
     private static final int UPDATE_DELAY = 10 * 1000;
 
@@ -124,6 +125,10 @@ public class GoogleStepService extends StepService {
                 fitnessOptions);
         } else {
             startRecording();
+        }
+
+        if (lastSignedInAccount != null) {
+            storageSolution.put(CURRENT_USER_KEY, lastSignedInAccount.getEmail());
         }
 
         // make sure that we don't have multiple update task running

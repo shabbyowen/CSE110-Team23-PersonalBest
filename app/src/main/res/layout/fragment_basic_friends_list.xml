@@ -15,11 +15,11 @@
             android:text="@string/pending_request"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-        <ListView
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/lv_pending"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-        </ListView>
+        </android.support.v7.widget.RecyclerView>
     </LinearLayout>
 
     <LinearLayout
@@ -30,10 +30,10 @@
             android:text="@string/title_friends"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-        <ListView
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/lv_friends"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-        </ListView>
+        </android.support.v7.widget.RecyclerView>
     </LinearLayout>
 </LinearLayout>

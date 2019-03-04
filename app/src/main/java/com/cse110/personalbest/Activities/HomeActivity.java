@@ -23,12 +23,15 @@ import com.cse110.personalbest.Fragments.DailyGoalFragment;
 import com.cse110.personalbest.Fragments.FriendsListFragment;
 import com.cse110.personalbest.Fragments.InputDialogFragment;
 import com.cse110.personalbest.Fragments.WeeklyProgressFragment;
+import com.cse110.personalbest.Friend;
 import com.cse110.personalbest.R;
+import com.cse110.personalbest.Services.FriendService;
 import com.cse110.personalbest.Services.SessionService;
 import com.cse110.personalbest.Services.StepService;
 import com.cse110.personalbest.Utilities.SpeedCalculator;
 import com.cse110.personalbest.Utilities.StorageSolution;
 import com.cse110.personalbest.Utilities.TimeMachine;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -40,7 +43,7 @@ public class HomeActivity extends AppCompatActivity implements
     private static final String TAG = "HomeActivity";
 
     // storage key
-    public static final String USER_HEIGHT = "user_height";
+    private static final String USER_HEIGHT = "user_height";
 
     // extra string keys
     public static final String STEP_SERVICE_KEY_EXTRA = "step_service_key_extra";
@@ -50,10 +53,12 @@ public class HomeActivity extends AppCompatActivity implements
     // factory keys
     private String stepServiceKey = StepServiceSelector.GOOGLE_STEP_SERVICE_KEY;
     private String sessionServiceKey = SessionServiceSelector.BASIC_SESSION_SERVICE_KEY;
+    private String friendServiceKey = FriendServiceSelector.BASIC_FRIEND_SERVICE_KEY;
     private String storageSolutionKey = StorageSolutionFactory.SHARED_PREF_KEY;
 
     private StepService stepService;
     private SessionService sessionService;
+    private FriendService friendService;
     private StorageSolution storageSolution;
 
     private DailyGoalFragment dailyGoalFragment;
@@ -104,6 +109,21 @@ public class HomeActivity extends AppCompatActivity implements
         }
     };
 
+    // service connection for session service
+    private ServiceConnection friendServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyBinder binder = (MyBinder) service;
+            friendService = (FriendService) binder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            friendService = null;
+        }
+    };
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
         = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -114,6 +134,7 @@ public class HomeActivity extends AppCompatActivity implements
                     display(dailyGoalFragment);
                     return true;
                 case R.id.navigation_friend:
+                    updateFriendsListFragment();
                     display(friendsListFragment);
                     return true;
                 case R.id.navigation_stats:
@@ -152,6 +173,7 @@ public class HomeActivity extends AppCompatActivity implements
         // start the services
         startService(getStepServiceIntent());
         startService(getSessionServiceIntent());
+        startService(getFriendServiceIntent());
 
         // get the storage solution
         storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
@@ -196,6 +218,7 @@ public class HomeActivity extends AppCompatActivity implements
         }
     }
 
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -203,6 +226,7 @@ public class HomeActivity extends AppCompatActivity implements
         // bind to the service
         bindService(getStepServiceIntent(), stepServiceConnection, Context.BIND_AUTO_CREATE);
         bindService(getSessionServiceIntent(), sessionServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService(getFriendServiceIntent(), friendServiceConnection, Context.BIND_AUTO_CREATE);
         Log.d(TAG, "Bind to step service");
     }
 
@@ -214,6 +238,7 @@ public class HomeActivity extends AppCompatActivity implements
         sessionService.saveNow();
         unbindService(stepServiceConnection);
         unbindService(sessionServiceConnection);
+        unbindService(friendServiceConnection);
         Log.d(TAG, "Unbind step service");
     }
 
@@ -228,6 +253,13 @@ public class HomeActivity extends AppCompatActivity implements
         ServiceSelector serviceSelector = new SessionServiceSelector();
         Intent intent = new Intent(this, serviceSelector.retrieveServiceClass(sessionServiceKey));
         intent.putExtra(SessionService.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);
+        return intent;
+    }
+
+    private Intent getFriendServiceIntent() {
+        ServiceSelector serviceSelector = new FriendServiceSelector();
+        Intent intent = new Intent(this, serviceSelector.retrieveServiceClass(friendServiceKey));
+        intent.putExtra(FriendService.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);
         return intent;
     }
 
@@ -424,6 +456,17 @@ public class HomeActivity extends AppCompatActivity implements
                         });
                     }
                 });
+            }
+        });
+    }
+
+    public void updateFriendsListFragment() {
+        friendService.getPendingRequests(new FriendServiceCallback() {
+            @Override
+            public void onPendingRequestsResult(List<Friend> result) {
+                FriendsListFragmentInfo info = new FriendsListFragmentInfo();
+                info.friends = result;
+                friendsListFragment.updateView(info);
             }
         });
     }
