@@ -4,8 +4,14 @@ public class Friend {
     public String nickname;
     public String email;
 
-    public Friend() {
+    public Friend(String email) {
+        this.email = email;
+        this.nickname = "";
+    }
 
+    public Friend(String email, String nickname) {
+        this.email = email;
+        this.nickname = nickname;
     }
 
     public void setNickname(String nickname) {

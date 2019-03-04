@@ -12,6 +12,7 @@ import com.cse110.personalbest.Friend;
 import com.cse110.personalbest.Utilities.StorageSolution;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -61,7 +62,8 @@ public class BasicFriendService extends FriendService {
         return binder;
     }
 
-    public void getPendingRequests(final FriendServiceCallback callback) {
+    @Override
+    public void getPendingRequests(FriendServiceCallback callback) {
         String userEmail= storageSolution.get(CURRENT_USER_KEY, "");
         DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
         userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -69,12 +71,17 @@ public class BasicFriendService extends FriendService {
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
+                    List<String> pendingEmails = (List<String>) document.get(PENDING_REQUESTS_KEY);
+                    List<Friend> friends = new ArrayList<>();
+                    for (String email : pendingEmails) {
+                        friends.add(new Friend(email));
+                    }
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                     } else {
                         Log.d(TAG, "No such document");
                     }
-                    callback.onPendingRequestsResult(new ArrayList<Friend>());
+                    callback.onPendingRequestsResult(friends);
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
                 }
