@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import com.cse110.personalbest.Fragments.GoalInputDialogFragment;
 import com.cse110.personalbest.Fragments.GoalMetInputDialogFragment;
 import com.cse110.personalbest.Fragments.HeightInputDialogFragment;
+import com.cse110.personalbest.Fragments.InputDialogFragment;
 
 public class InputDialogFragmentFactory implements FragmentFactory {
 
