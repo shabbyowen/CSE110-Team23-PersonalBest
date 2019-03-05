@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import com.cse110.personalbest.Events.FriendsListFragmentInfo;
 import com.cse110.personalbest.Events.FriendsListFragmentListener;
 import com.cse110.personalbest.Friend;
@@ -33,6 +34,7 @@ public class BasicFriendsListFragment extends FriendsListFragment {
     private PendingRequestsAdapter pendingRequestsAdapter;
     private PendingRequestsAdapter.PendingRequestsAdapterListener pendingRequestsAdapterListener;
     private FriendsListAdapter friendsListAdapter;
+    private FriendsListAdapter.FriendsListAdapterListener friendsListAdapterListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,16 +63,37 @@ public class BasicFriendsListFragment extends FriendsListFragment {
             }
         };
 
+        friendsListAdapterListener = new FriendsListAdapter.FriendsListAdapterListener() {
+            @Override
+            public void friendListItemOnClick(View v, int position) {
+                Log.d(TAG, "friendListItemOnClick at position "+position);
+                onFriendListItemClick(position);
+            }
+
+            @Override
+            public void editNicknameBtnOnClick(View v, int position) {
+                Log.d(TAG, "editNicknameButtonOnClick at position "+position);
+                onEditNicknameButtonClick(position);
+            }
+
+            @Override
+            public void removeFriendBtnOnClick(View v, int position) {
+                Log.d(TAG, "removeFriendButtonOnClick at position "+position);
+                onRemoveFriendButtonClick(position);
+            }
+        };
+
         pendingRequestsAdapter = new PendingRequestsAdapter(getActivity(), new ArrayList<Friend>(), pendingRequestsAdapterListener);
         pendingRequestsListView.setLayoutManager(new LinearLayoutManager(getActivity()));
         pendingRequestsListView.setAdapter(pendingRequestsAdapter);
 
-        friendsListAdapter = new FriendsListAdapter(getActivity(), new ArrayList<>());
+        friendsListAdapter = new FriendsListAdapter(getActivity(), new ArrayList<>(), friendsListAdapterListener);
         friendsListView.setLayoutManager(new LinearLayoutManager(getActivity()));
         friendsListView.setAdapter(friendsListAdapter);
 
         return fragmentView;
     }
+
 
     @Override
     public void updateView(FriendsListFragmentInfo info) {
@@ -79,9 +102,9 @@ public class BasicFriendsListFragment extends FriendsListFragment {
             pendingRequestsAdapter = new PendingRequestsAdapter(getActivity(), info.pendingFriends, pendingRequestsAdapterListener);
             pendingRequestsListView.setAdapter(pendingRequestsAdapter);
         } else {
-            pendingRequestsLayout.setVisibility(View.INVISIBLE);
+            pendingRequestsLayout.setVisibility(View.GONE);
         }
-        friendsListAdapter = new FriendsListAdapter(getActivity(), info.friends);
+        friendsListAdapter = new FriendsListAdapter(getActivity(), info.friends, friendsListAdapterListener);
         friendsListView.setAdapter(friendsListAdapter);
     }
 
@@ -105,6 +128,26 @@ public class BasicFriendsListFragment extends FriendsListFragment {
             Friend friend = pendingRequestsAdapter.getItem(position);
             Log.d(TAG, "Will reject friend: " + friend.toString());
             ref.onRejectButtonClicked(friend);
+        }
+    }
+
+    private void onEditNicknameButtonClick(int position) {
+    }
+
+    private void onRemoveFriendButtonClick(int position) {
+        FriendsListFragmentListener ref = listener.get();
+        if (ref != null) {
+            Friend friend = friendsListAdapter.getItem(position);
+            Log.d(TAG, "Will remove friend: " + friend.toString());
+            ref.onRemoveButtonClicked(friend);
+        }
+    }
+
+    private void onFriendListItemClick(int position) {
+        FriendsListFragmentListener ref = listener.get();
+        if (ref != null) {
+            Friend friend = friendsListAdapter.getItem(position);
+            Toast.makeText(getActivity(), friend.toString(),Toast.LENGTH_SHORT).show();
         }
     }
 }

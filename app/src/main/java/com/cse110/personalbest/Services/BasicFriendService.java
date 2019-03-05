@@ -135,10 +135,12 @@ public class BasicFriendService extends FriendService {
                 // Add this friend to friend lists
                 List<String> userFriends = (List<String>) userSnapshot.get(FRIENDS_KEY);
                 userFriends.add(friend.getEmail());
+                transaction.update(userRef, FRIENDS_KEY, userFriends);
 
                 // Add current user as a friend of the person who sends the request
                 List<String> requestFriends = (List<String>) requestFriendSnapshot.get(FRIENDS_KEY);
                 requestFriends.add(userEmail);
+                transaction.update(friendRef, FRIENDS_KEY, requestFriends);
 
                 return null;
             }
@@ -148,30 +150,80 @@ public class BasicFriendService extends FriendService {
                 callback.onAcceptFriendResult(true);
                 Log.d(TAG, "Add Friend Transaction success!");
             }
-        })
-        .addOnFailureListener(new OnFailureListener() {
+        }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 callback.onAcceptFriendResult(false);
                 Log.w(TAG, "Add Friend Transaction failure.", e);
             }
         });
+    }
 
-        userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+    @Override
+    public void rejectFriend(Friend rejectedFriend, FriendServiceCallback callback) {
+        DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
+
+        storage.runTransaction(new Transaction.Function<Void>() {
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    List<String> pendingEmails = (List<String>) document.get(FRIENDS_KEY);
-                } else {
-                    Log.d(TAG, "get failed with ", task.getException());
-                }
+            public Void apply(Transaction transaction) throws FirebaseFirestoreException {
+                DocumentSnapshot userSnapshot = transaction.get(userRef);
+
+                // Remove friend from pending lists
+                List<String> pendingEmails = (List<String>) userSnapshot.get(PENDING_REQUESTS_KEY);
+                pendingEmails.remove(rejectedFriend.getEmail());
+                transaction.update(userRef, PENDING_REQUESTS_KEY, pendingEmails);
+                return null;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                callback.onRejectFriendResult(true);
+                Log.d(TAG, "Remove pending request Transaction success!");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                callback.onRejectFriendResult(false);
+                Log.w(TAG, "Remove pending request Transaction failure.", e);
             }
         });
     }
 
     @Override
-    public void rejectFriend(Friend rejectedfriend, FriendServiceCallback callback) {
+    public void removeFriend(Friend removedfriend, FriendServiceCallback callback) {
+        DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
+        DocumentReference removedFriendRef = storage.collection(COLLECTION_KEY).document(removedfriend.getEmail());
 
+        storage.runTransaction(new Transaction.Function<Void>() {
+            @Override
+            public Void apply(Transaction transaction) throws FirebaseFirestoreException {
+                DocumentSnapshot userSnapshot = transaction.get(userRef);
+                DocumentSnapshot toRemoveFriendSnapshot = transaction.get(removedFriendRef);
+
+                // Remove friend from friend list
+                List<String> friends = (List<String>) userSnapshot.get(FRIENDS_KEY);
+                friends.remove(removedfriend.getEmail());
+                transaction.update(userRef, FRIENDS_KEY, friends);
+
+                // Remove user from removed friend's list
+                List<String> toRemoveFriends = (List<String>) toRemoveFriendSnapshot.get(FRIENDS_KEY);
+                toRemoveFriends.remove(userEmail);
+                transaction.update(removedFriendRef, FRIENDS_KEY, toRemoveFriends);
+
+                return null;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                callback.onRemoveFriendResult(true);
+                Log.d(TAG, "Remove friend Transaction success!");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                callback.onRemoveFriendResult(false);
+                Log.w(TAG, "Remove friend Transaction failure.", e);
+            }
+        });
     }
 }

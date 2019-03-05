@@ -39,6 +39,7 @@ public class PendingRequestsAdapter extends RecyclerView.Adapter<PendingRequests
             acceptBtn = itemView.findViewById(R.id.btn_pending_approve);
             rejectBtn = itemView.findViewById(R.id.btn_pending_ignore);
             tvPendingEmail = itemView.findViewById(R.id.tv_pending_email);
+
             acceptBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

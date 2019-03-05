@@ -15,10 +15,18 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
     private List<Friend> dataList;
     private LayoutInflater inflater;
+    private FriendsListAdapterListener onClickListener;
 
-    public FriendsListAdapter(Context context, List<Friend> data) {
+    public FriendsListAdapter(Context context, List<Friend> data, FriendsListAdapterListener onClickListener) {
         inflater = LayoutInflater.from(context);
         dataList = data;
+        this.onClickListener = onClickListener;
+    }
+
+    public interface FriendsListAdapterListener {
+        void friendListItemOnClick(View v, int position);
+        void editNicknameBtnOnClick(View v, int position);
+        void removeFriendBtnOnClick(View v, int position);
     }
 
     // stores and recycles views as they are scrolled off screen
@@ -32,6 +40,26 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
             editBtn = itemView.findViewById(R.id.btn_change_nickname);
             removeBtn = itemView.findViewById(R.id.btn_delete_friend);
             tvFriendEmail = itemView.findViewById(R.id.tv_friend_email);
+
+            tvFriendEmail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onClickListener.friendListItemOnClick(v, getAdapterPosition());
+                }
+            });
+
+            editBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onClickListener.editNicknameBtnOnClick(v, getAdapterPosition());
+                }
+            });
+            removeBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onClickListener.removeFriendBtnOnClick(v, getAdapterPosition());
+                }
+            });
         }
     }
 
@@ -48,7 +76,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         pendingRequestViewHolder.tvFriendEmail.setText(email);
     }
 
-    Friend getItem(int id) {
+    public Friend getItem(int id) {
         return dataList.get(id);
     }
 

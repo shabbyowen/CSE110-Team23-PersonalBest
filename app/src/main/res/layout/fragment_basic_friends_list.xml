@@ -11,7 +11,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="invisible">
+        android:visibility="gone">
         <TextView
             android:text="@string/pending_request"
             android:layout_width="match_parent"

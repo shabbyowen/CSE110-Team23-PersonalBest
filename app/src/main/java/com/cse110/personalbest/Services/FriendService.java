@@ -11,5 +11,6 @@ public abstract class FriendService extends Service {
     public abstract void getPendingRequests(FriendServiceCallback callback);
     public abstract void getFriendList(FriendServiceCallback callback);
     public abstract void addFriend(Friend friend, FriendServiceCallback callback);
-    public abstract void rejectFriend(Friend friend, FriendServiceCallback callback);
+    public abstract void rejectFriend(Friend rejectedfriend, FriendServiceCallback callback);
+    public abstract void removeFriend(Friend removedfriend, FriendServiceCallback callback);
 }

@@ -9,4 +9,5 @@ public class FriendServiceCallback {
     public void onFriendsListResult(List<Friend> result) {}
     public void onAcceptFriendResult(boolean hasAcceptSuccess) {}
     public void onRejectFriendResult(boolean hasRejectSuccess) {}
+    public void onRemoveFriendResult(boolean hasRemoveSuccess) {}
 }

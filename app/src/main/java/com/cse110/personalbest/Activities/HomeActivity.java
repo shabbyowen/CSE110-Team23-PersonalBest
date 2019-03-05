@@ -545,6 +545,20 @@ public class HomeActivity extends AppCompatActivity implements
 
     @Override
     public void onRemoveButtonClicked(Friend removedFriend) {
-
+        if (friendService == null) {
+            Log.d(TAG, "Remove friend from list failed: friendService is null");
+            return;
+        }
+        friendService.removeFriend(removedFriend, new FriendServiceCallback() {
+            @Override
+            public void onRemoveFriendResult(boolean hasRemoveSuccess) {
+                if (hasRemoveSuccess) {
+                    Toast.makeText(HomeActivity.this, R.string.friend_request_reject_success,Toast.LENGTH_LONG).show();
+                    updateFriendsListFragment();
+                } else {
+                    Toast.makeText(HomeActivity.this, R.string.friend_request_reject_fail,Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 }
