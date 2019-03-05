@@ -88,4 +88,31 @@ public class BasicFriendService extends FriendService {
             }
         });
     }
+
+    @Override
+    public void getFriendList(FriendServiceCallback callback) {
+        String userEmail= storageSolution.get(CURRENT_USER_KEY, "");
+        DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
+        userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    List<String> pendingEmails = (List<String>) document.get(FRIENDS_KEY);
+                    List<Friend> friends = new ArrayList<>();
+                    for (String email : pendingEmails) {
+                        friends.add(new Friend(email));
+                    }
+                    if (document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                    callback.onFriendsListResult(friends);
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
 }

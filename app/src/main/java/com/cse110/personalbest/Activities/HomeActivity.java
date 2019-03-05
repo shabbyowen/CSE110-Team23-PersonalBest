@@ -50,14 +50,11 @@ public class HomeActivity extends AppCompatActivity implements
 
     // storage key
     private static final String USER_HEIGHT = "user_height";
-    private static final String USER_EMAIL = "user_email";
-    private static final String USER_DISPLAY_NAME = "user_name";
 
     // extra string keys
     public static final String STEP_SERVICE_KEY_EXTRA = "step_service_key_extra";
     public static final String SESSION_SERVICE_KEY_EXTRA = "session_service_key_extra";
     public static final String STORAGE_SOLUTION_KEY_EXTRA = "storage_solution_key_extra";
-    private static final int RC_SIGN_IN = 12345;
 
     // factory keys
     private String stepServiceKey = StepServiceSelector.GOOGLE_STEP_SERVICE_KEY;
@@ -79,8 +76,6 @@ public class HomeActivity extends AppCompatActivity implements
 
     private FragmentFactory inputDialogFragmentFactory;
 
-    private GoogleSignInClient mGoogleSignInClient;
-    private GoogleSignInAccount account;
     private boolean activityInitialized = false;
 
     private int height = 70;
@@ -162,35 +157,14 @@ public class HomeActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // get the storage solution
-        storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
-
-        /* ----------------------------------------Google Sign in------------------------------------ */
-        account = GoogleSignIn.getLastSignedInAccount(this);
-        if (account == null) {
-            FitnessOptions fitnessOptions = FitnessOptions.builder()
-                    .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-                    .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_WRITE)
-                    .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-                    .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_WRITE)
-                    .build();
-
-            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestEmail()
-                    .requestId()
-                    .addExtension(fitnessOptions)
-                    .build();
-            mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-            startActivityForResult(signInIntent, RC_SIGN_IN);
-        } else {
-            initHomeScreenActivity();
-        }
+        initHomeScreenActivity();
     }
 
     private void initHomeScreenActivity() {
         setContentView(R.layout.activity_home);
+
+        // get the storage solution
+        storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
 
         // retrieve the step service key
         Intent intent = getIntent();
@@ -513,30 +487,15 @@ public class HomeActivity extends AppCompatActivity implements
             public void onPendingRequestsResult(List<Friend> result) {
                 FriendsListFragmentInfo info = new FriendsListFragmentInfo();
                 info.pendingFriends = result;
-                friendsListFragment.updateView(info);
+
+                friendService.getFriendList(new FriendServiceCallback() {
+                    @Override
+                    public void onFriendsListResult(List<Friend> result) {
+                        info.friends = result;
+                        friendsListFragment.updateView(info);
+                    }
+                });
             }
         });
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
-        }
-    }
-
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        try {
-            GoogleSignInAccount googleAccount = completedTask.getResult(ApiException.class);
-            storageSolution.put(USER_EMAIL, googleAccount.getEmail());
-            storageSolution.put(USER_DISPLAY_NAME, googleAccount.getDisplayName());
-            initHomeScreenActivity();
-        } catch (ApiException e) {
-            Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
-        }
     }
 }

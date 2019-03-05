@@ -8,4 +8,5 @@ public abstract class FriendService extends Service {
     public static final String FRIEND_SERVICE_KEY_EXTRA = "friend_service_key_extra";
 
     public abstract void getPendingRequests(FriendServiceCallback callback);
+    public abstract void getFriendList(FriendServiceCallback callback);
 }

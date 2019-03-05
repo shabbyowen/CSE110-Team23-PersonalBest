@@ -2,6 +2,7 @@ package com.cse110.personalbest.Fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import com.cse110.personalbest.Activities.HomeActivity;
 import com.cse110.personalbest.Events.FriendsListFragmentInfo;
 import com.cse110.personalbest.Events.FriendsListFragmentListener;
 import com.cse110.personalbest.Friend;
+import com.cse110.personalbest.FriendsListAdapter;
 import com.cse110.personalbest.PendingRequestsAdapter;
 import com.cse110.personalbest.R;
 
@@ -29,6 +31,7 @@ public class BasicFriendsListFragment extends FriendsListFragment {
     private RecyclerView friendsListView;
 
     private PendingRequestsAdapter pendingRequestsAdapter;
+    private FriendsListAdapter friendsListAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -39,9 +42,16 @@ public class BasicFriendsListFragment extends FriendsListFragment {
         pendingRequestsListView = fragmentView.findViewById(R.id.lv_pending);
         friendsListView = fragmentView.findViewById(R.id.lv_friends);
 
+        pendingRequestsListView.addItemDecoration(new DividerItemDecoration(pendingRequestsListView.getContext(), DividerItemDecoration.VERTICAL));
+        friendsListView.addItemDecoration(new DividerItemDecoration(pendingRequestsListView.getContext(), DividerItemDecoration.VERTICAL));
+
         pendingRequestsAdapter = new PendingRequestsAdapter(getActivity(), new ArrayList<Friend>());
         pendingRequestsListView.setLayoutManager(new LinearLayoutManager(getActivity()));
         pendingRequestsListView.setAdapter(pendingRequestsAdapter);
+
+        friendsListAdapter = new FriendsListAdapter(getActivity(), new ArrayList<>());
+        friendsListView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        friendsListView.setAdapter(friendsListAdapter);
 
         return fragmentView;
     }
@@ -52,7 +62,11 @@ public class BasicFriendsListFragment extends FriendsListFragment {
             pendingRequestsLayout.setVisibility(View.VISIBLE);
             pendingRequestsAdapter = new PendingRequestsAdapter(getActivity(), info.pendingFriends);
             pendingRequestsListView.setAdapter(pendingRequestsAdapter);
+        } else {
+            pendingRequestsLayout.setVisibility(View.INVISIBLE);
         }
+        friendsListAdapter = new FriendsListAdapter(getActivity(), info.friends);
+        friendsListView.setAdapter(friendsListAdapter);
     }
 
     @Override
