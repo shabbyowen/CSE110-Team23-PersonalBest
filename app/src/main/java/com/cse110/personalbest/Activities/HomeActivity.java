@@ -43,7 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity implements
-    StepServiceListener, SessionServiceListener, DailyGoalFragmentListener,
+    StepServiceListener, SessionServiceListener, DailyGoalFragmentListener, FriendsListFragmentListener,
     InputDialogFragmentListener {
 
     private static final String TAG = "HomeActivity";
@@ -203,6 +203,7 @@ public class HomeActivity extends AppCompatActivity implements
         // creating friends list fragment
         friendsListFragment = (FriendsListFragment) new FriendsListFragmentFactory()
             .create(FriendsListFragmentFactory.BASIC_FRIENDS_LIST_FRAGMENT_KEY);
+        friendsListFragment.setListener(this);
 
         // creating weekly progress fragment
         weeklyProgressFragment = (WeeklyProgressFragment) new WeeklyProgressFragmentFactory()
@@ -497,5 +498,53 @@ public class HomeActivity extends AppCompatActivity implements
                 });
             }
         });
+    }
+
+    @Override
+    public void onAcceptButtonClicked(Friend friend) {
+        if (friendService == null) {
+            Log.d(TAG, "Accept friend request failed: friendService is null");
+            return;
+        }
+        friendService.addFriend(friend, new FriendServiceCallback() {
+            @Override
+            public void onAcceptFriendResult(boolean hasAcceptSuccess) {
+                if (hasAcceptSuccess) {
+                    Toast.makeText(HomeActivity.this, R.string.friend_request_accept_success,Toast.LENGTH_LONG).show();
+                    updateFriendsListFragment();
+                } else {
+                    Toast.makeText(HomeActivity.this, R.string.friend_request_accept_fail,Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onRejectButtonClicked(Friend rejectedFriend) {
+        if (friendService == null) {
+            Log.d(TAG, "Reject friend request failed: friendService is null");
+            return;
+        }
+        friendService.rejectFriend(rejectedFriend, new FriendServiceCallback() {
+            @Override
+            public void onRejectFriendResult(boolean hasAcceptSuccess) {
+                if (hasAcceptSuccess) {
+                    Toast.makeText(HomeActivity.this, R.string.friend_request_reject_success,Toast.LENGTH_LONG).show();
+                    updateFriendsListFragment();
+                } else {
+                    Toast.makeText(HomeActivity.this, R.string.friend_request_reject_fail,Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onEditNicknameButtonClicked(Friend friend) {
+
+    }
+
+    @Override
+    public void onRemoveButtonClicked(Friend removedFriend) {
+
     }
 }

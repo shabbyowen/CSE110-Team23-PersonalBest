@@ -11,11 +11,10 @@ import com.cse110.personalbest.Factories.StorageSolutionFactory;
 import com.cse110.personalbest.Friend;
 import com.cse110.personalbest.Utilities.StorageSolution;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.*;
 import org.w3c.dom.Document;
 
 import java.util.ArrayList;
@@ -39,6 +38,7 @@ public class BasicFriendService extends FriendService {
     };
 
     private FirebaseFirestore storage;
+    private String userEmail;
 
     public BasicFriendService() {
         storage = FirebaseFirestore.getInstance();
@@ -53,6 +53,7 @@ public class BasicFriendService extends FriendService {
             storageSolutionKey = key;
         }
         storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
+        userEmail = storageSolution.get(CURRENT_USER_KEY, "");
 
         return START_STICKY;
     }
@@ -91,7 +92,6 @@ public class BasicFriendService extends FriendService {
 
     @Override
     public void getFriendList(FriendServiceCallback callback) {
-        String userEmail= storageSolution.get(CURRENT_USER_KEY, "");
         DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
         userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -114,5 +114,64 @@ public class BasicFriendService extends FriendService {
                 }
             }
         });
+    }
+
+    @Override
+    public void addFriend(Friend friend, FriendServiceCallback callback) {
+        DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
+        DocumentReference friendRef = storage.collection(COLLECTION_KEY).document(friend.getEmail());
+
+        storage.runTransaction(new Transaction.Function<Void>() {
+            @Override
+            public Void apply(Transaction transaction) throws FirebaseFirestoreException {
+                DocumentSnapshot userSnapshot = transaction.get(userRef);
+                DocumentSnapshot requestFriendSnapshot = transaction.get(friendRef);
+
+                // Remove friend from pending lists
+                List<String> pendingEmails = (List<String>) userSnapshot.get(PENDING_REQUESTS_KEY);
+                pendingEmails.remove(friend.getEmail());
+                transaction.update(userRef, PENDING_REQUESTS_KEY, pendingEmails);
+
+                // Add this friend to friend lists
+                List<String> userFriends = (List<String>) userSnapshot.get(FRIENDS_KEY);
+                userFriends.add(friend.getEmail());
+
+                // Add current user as a friend of the person who sends the request
+                List<String> requestFriends = (List<String>) requestFriendSnapshot.get(FRIENDS_KEY);
+                requestFriends.add(userEmail);
+
+                return null;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                callback.onAcceptFriendResult(true);
+                Log.d(TAG, "Add Friend Transaction success!");
+            }
+        })
+        .addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                callback.onAcceptFriendResult(false);
+                Log.w(TAG, "Add Friend Transaction failure.", e);
+            }
+        });
+
+        userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    List<String> pendingEmails = (List<String>) document.get(FRIENDS_KEY);
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
+
+    @Override
+    public void rejectFriend(Friend rejectedfriend, FriendServiceCallback callback) {
+
     }
 }

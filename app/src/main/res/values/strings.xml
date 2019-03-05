@@ -45,6 +45,10 @@
 
     <!-- Toast texts -->
     <string name="saved">Saved</string>
+    <string name="friend_request_accept_success">Friend Added</string>
+    <string name="friend_request_accept_fail">Error: Accept Friend Failed</string>
+    <string name="friend_request_reject_success">Request Deleted</string>
+    <string name="friend_request_reject_fail">Error: Remove Request Failed</string>
 
     <!-- Height Prompt texts -->
     <string name="ft_str">ft.</string>

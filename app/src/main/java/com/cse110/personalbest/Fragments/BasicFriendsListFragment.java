@@ -1,15 +1,14 @@
 package com.cse110.personalbest.Fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import com.cse110.personalbest.Activities.HomeActivity;
 import com.cse110.personalbest.Events.FriendsListFragmentInfo;
 import com.cse110.personalbest.Events.FriendsListFragmentListener;
 import com.cse110.personalbest.Friend;
@@ -21,6 +20,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class BasicFriendsListFragment extends FriendsListFragment {
+    private static final String TAG = "BasicFriendsListFragment";
 
     WeakReference<FriendsListFragmentListener> listener;
 
@@ -31,6 +31,7 @@ public class BasicFriendsListFragment extends FriendsListFragment {
     private RecyclerView friendsListView;
 
     private PendingRequestsAdapter pendingRequestsAdapter;
+    private PendingRequestsAdapter.PendingRequestsAdapterListener pendingRequestsAdapterListener;
     private FriendsListAdapter friendsListAdapter;
 
     @Override
@@ -45,7 +46,22 @@ public class BasicFriendsListFragment extends FriendsListFragment {
         pendingRequestsListView.addItemDecoration(new DividerItemDecoration(pendingRequestsListView.getContext(), DividerItemDecoration.VERTICAL));
         friendsListView.addItemDecoration(new DividerItemDecoration(pendingRequestsListView.getContext(), DividerItemDecoration.VERTICAL));
 
-        pendingRequestsAdapter = new PendingRequestsAdapter(getActivity(), new ArrayList<Friend>());
+        pendingRequestsAdapterListener = new PendingRequestsAdapter.PendingRequestsAdapterListener() {
+
+            @Override
+            public void acceptBtnOnClick(View v, int position) {
+                Log.d(TAG, "acceptFriendButtonOnClick at position "+position);
+                onAcceptButtonClick(position);
+            }
+
+            @Override
+            public void rejectBtnOnClick(View v, int position) {
+                Log.d(TAG, "rejectFriendButtonOnClick at position "+position);
+                onRejectButtonClick(position);
+            }
+        };
+
+        pendingRequestsAdapter = new PendingRequestsAdapter(getActivity(), new ArrayList<Friend>(), pendingRequestsAdapterListener);
         pendingRequestsListView.setLayoutManager(new LinearLayoutManager(getActivity()));
         pendingRequestsListView.setAdapter(pendingRequestsAdapter);
 
@@ -60,7 +76,7 @@ public class BasicFriendsListFragment extends FriendsListFragment {
     public void updateView(FriendsListFragmentInfo info) {
         if (!info.pendingFriends.isEmpty()) {
             pendingRequestsLayout.setVisibility(View.VISIBLE);
-            pendingRequestsAdapter = new PendingRequestsAdapter(getActivity(), info.pendingFriends);
+            pendingRequestsAdapter = new PendingRequestsAdapter(getActivity(), info.pendingFriends, pendingRequestsAdapterListener);
             pendingRequestsListView.setAdapter(pendingRequestsAdapter);
         } else {
             pendingRequestsLayout.setVisibility(View.INVISIBLE);
@@ -72,5 +88,23 @@ public class BasicFriendsListFragment extends FriendsListFragment {
     @Override
     public void setListener(FriendsListFragmentListener listener) {
         this.listener = new WeakReference<>(listener);
+    }
+
+    private void onAcceptButtonClick(int position) {
+        FriendsListFragmentListener ref = listener.get();
+        if (ref != null) {
+            Friend friend = pendingRequestsAdapter.getItem(position);
+            Log.d(TAG, "Will accept friend: " + friend.toString());
+            ref.onAcceptButtonClicked(friend);
+        }
+    }
+
+    private void onRejectButtonClick(int position) {
+        FriendsListFragmentListener ref = listener.get();
+        if (ref != null) {
+            Friend friend = pendingRequestsAdapter.getItem(position);
+            Log.d(TAG, "Will reject friend: " + friend.toString());
+            ref.onRejectButtonClicked(friend);
+        }
     }
 }
