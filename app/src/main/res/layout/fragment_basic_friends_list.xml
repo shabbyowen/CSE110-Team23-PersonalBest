@@ -30,12 +30,14 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <TextView
             android:text="@string/title_friends"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="24sp"
             android:background="@android:color/darker_gray"/>
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/lv_friends"
             android:layout_width="match_parent"

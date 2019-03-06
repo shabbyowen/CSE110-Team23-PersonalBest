@@ -12,7 +12,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -75,6 +77,8 @@ public class HomeActivity extends AppCompatActivity implements
     private Fragment currentFragment;
 
     private FragmentFactory inputDialogFragmentFactory;
+
+    private MenuItem addFriendMenuItem;
 
     private boolean activityInitialized = false;
 
@@ -139,13 +143,16 @@ public class HomeActivity extends AppCompatActivity implements
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
+                    addFriendMenuItem.setVisible(false);
                     display(dailyGoalFragment);
                     return true;
                 case R.id.navigation_friend:
+                    addFriendMenuItem.setVisible(true);
                     updateFriendsListFragment();
                     display(friendsListFragment);
                     return true;
                 case R.id.navigation_stats:
+                    addFriendMenuItem.setVisible(false);
                     updateWeeklyProgressFragment();
                     display(weeklyProgressFragment);
                     return true;
@@ -160,8 +167,19 @@ public class HomeActivity extends AppCompatActivity implements
         initHomeScreenActivity();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.toolbar, menu);
+        addFriendMenuItem = menu.findItem(R.id.action_add_friend);
+        addFriendMenuItem.setVisible(false);
+        return true;
+    }
+
     private void initHomeScreenActivity() {
         setContentView(R.layout.activity_home);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.app_toolbar);
+        setSupportActionBar(myToolbar);
 
         // get the storage solution
         storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
@@ -420,6 +438,28 @@ public class HomeActivity extends AppCompatActivity implements
                 });
             }
             return true;
+        } else if (result instanceof AddFriendInputDialogResult) {
+           AddFriendInputDialogResult addFriendInputDialogResult = ((AddFriendInputDialogResult) result);
+           friendService.sendFriendRequest(addFriendInputDialogResult.userEmail, new FriendServiceCallback(){
+               @Override
+               public void onSendFriendRequestResult(int statusCode) {
+                   switch (statusCode) {
+                       case FriendServiceCallback.OPERATION_SUCCESS:
+                           Toast.makeText(HomeActivity.this, R.string.friend_request_send_success,Toast.LENGTH_LONG).show();
+                           break;
+                       case FriendServiceCallback.USER_DOES_NOT_EXIST:
+                           Toast.makeText(HomeActivity.this, R.string.friend_request_user_nonexist,Toast.LENGTH_LONG).show();
+                           break;
+                       case FriendServiceCallback.NO_INTERNET_CONNECTION:
+                           Toast.makeText(HomeActivity.this, R.string.no_internet_connection,Toast.LENGTH_LONG).show();
+                           break;
+                       case FriendServiceCallback.USER_ALREADY_FRIEND:
+                           Toast.makeText(HomeActivity.this, R.string.friend_already_exists,Toast.LENGTH_LONG).show();
+                           break;
+                   }
+               }
+           });
+           return true;
         } else {
             Log.w(TAG, "Unhandled input dialog result");
             return true;
@@ -553,12 +593,26 @@ public class HomeActivity extends AppCompatActivity implements
             @Override
             public void onRemoveFriendResult(boolean hasRemoveSuccess) {
                 if (hasRemoveSuccess) {
-                    Toast.makeText(HomeActivity.this, R.string.friend_request_reject_success,Toast.LENGTH_LONG).show();
+                    Toast.makeText(HomeActivity.this, R.string.friend_remove_success, Toast.LENGTH_LONG).show();
                     updateFriendsListFragment();
                 } else {
-                    Toast.makeText(HomeActivity.this, R.string.friend_request_reject_fail,Toast.LENGTH_LONG).show();
+                    Toast.makeText(HomeActivity.this, R.string.friend_remove_fail, Toast.LENGTH_LONG).show();
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add_friend:
+                showInputDialog(
+                        InputDialogFragmentFactory.ADD_FRIEND_INPUT_DIALOG_FRAGMENT_KEY,
+                        "add_friend_input_dialog",
+                        null);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

@@ -2,16 +2,14 @@ package com.cse110.personalbest.Factories;
 
 import android.support.v4.app.Fragment;
 
-import com.cse110.personalbest.Fragments.GoalInputDialogFragment;
-import com.cse110.personalbest.Fragments.GoalMetInputDialogFragment;
-import com.cse110.personalbest.Fragments.HeightInputDialogFragment;
-import com.cse110.personalbest.Fragments.InputDialogFragment;
+import com.cse110.personalbest.Fragments.*;
 
 public class InputDialogFragmentFactory implements FragmentFactory {
 
     public static final String GOAL_INPUT_DIALOG_FRAGMENT_KEY = "goal_input_fragment_dialog_key";
     public static final String HEIGHT_INPUT_DIALOG_FRAGMENT_KEY = "height_input_fragment_dialog_key";
     public static final String GOAL_MET_INPUT_DIALOG_FRAGMENT_KEY = "goal_met_input_dialog_fragment_key";
+    public static final String ADD_FRIEND_INPUT_DIALOG_FRAGMENT_KEY = "add_friend_input_dialog_fragment_key";
 
     @Override
     public Fragment create(String key) {
@@ -22,6 +20,8 @@ public class InputDialogFragmentFactory implements FragmentFactory {
                 return new HeightInputDialogFragment();
             case GOAL_MET_INPUT_DIALOG_FRAGMENT_KEY:
                 return new GoalMetInputDialogFragment();
+            case ADD_FRIEND_INPUT_DIALOG_FRAGMENT_KEY:
+                return new AddFriendInputDialogFragment();
             default:
                 return null;
         }

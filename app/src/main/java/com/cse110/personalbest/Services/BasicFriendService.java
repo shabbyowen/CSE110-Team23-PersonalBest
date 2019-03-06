@@ -15,7 +15,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.*;
-import org.w3c.dom.Document;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -134,13 +133,22 @@ public class BasicFriendService extends FriendService {
 
                 // Add this friend to friend lists
                 List<String> userFriends = (List<String>) userSnapshot.get(FRIENDS_KEY);
-                userFriends.add(friend.getEmail());
+                if (!userFriends.contains(friend.getEmail())) {
+                    userFriends.add(friend.getEmail());
+                }
                 transaction.update(userRef, FRIENDS_KEY, userFriends);
 
                 // Add current user as a friend of the person who sends the request
                 List<String> requestFriends = (List<String>) requestFriendSnapshot.get(FRIENDS_KEY);
-                requestFriends.add(userEmail);
+                if (!requestFriends.contains(userEmail)) {
+                    requestFriends.add(userEmail);
+                }
                 transaction.update(friendRef, FRIENDS_KEY, requestFriends);
+
+                // remove current user from pending lists of target friend if exists
+                List<String> targetPending = (List<String>) requestFriendSnapshot.get(PENDING_REQUESTS_KEY);
+                targetPending.remove(userEmail);
+                transaction.update(friendRef, PENDING_REQUESTS_KEY, targetPending);
 
                 return null;
             }
@@ -223,6 +231,53 @@ public class BasicFriendService extends FriendService {
             public void onFailure(@NonNull Exception e) {
                 callback.onRemoveFriendResult(false);
                 Log.w(TAG, "Remove friend Transaction failure.", e);
+            }
+        });
+    }
+
+    @Override
+    public void sendFriendRequest(String friendToAddEmail, FriendServiceCallback callback) {
+        DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
+        DocumentReference friendToAddRef = storage.collection(COLLECTION_KEY).document(friendToAddEmail);
+        storage.runTransaction(new Transaction.Function<Void>() {
+            @Override
+            public Void apply(Transaction transaction) throws FirebaseFirestoreException {
+                DocumentSnapshot toAddFriendSnapshot = transaction.get(friendToAddRef);
+
+                if (!toAddFriendSnapshot.exists()) {
+                    throw new FirebaseFirestoreException("User does not exist", FirebaseFirestoreException.Code.NOT_FOUND);
+                } else if (((List<String>) toAddFriendSnapshot.get(PENDING_REQUESTS_KEY)).contains(userEmail)
+                    || ((List<String>) toAddFriendSnapshot.get(FRIENDS_KEY)).contains(userEmail)) {
+                    throw new FirebaseFirestoreException("Friend Exists", FirebaseFirestoreException.Code.ALREADY_EXISTS);
+                } else {
+                    // Add current user to target pending requests list
+                    List<String> targetPendingList = (List<String>) toAddFriendSnapshot.get(PENDING_REQUESTS_KEY);
+                    if (!targetPendingList.contains(userEmail)) {
+                        targetPendingList.add(userEmail);
+                    }
+                    transaction.update(friendToAddRef, PENDING_REQUESTS_KEY, targetPendingList);
+                }
+                return null;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                callback.onSendFriendRequestResult(0);
+                Log.d(TAG, "Friend Request Send Transaction success!");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                FirebaseFirestoreException ffe = (FirebaseFirestoreException) e;
+
+                if (ffe.getCode() == FirebaseFirestoreException.Code.NOT_FOUND) {
+                    callback.onSendFriendRequestResult(FriendServiceCallback.USER_DOES_NOT_EXIST);
+                } else if (ffe.getCode() == FirebaseFirestoreException.Code.ALREADY_EXISTS) {
+                    callback.onSendFriendRequestResult(FriendServiceCallback.USER_ALREADY_FRIEND);
+                } else {
+                    callback.onSendFriendRequestResult(FriendServiceCallback.NO_INTERNET_CONNECTION);
+                }
+                Log.w(TAG, "Friend Request Send Transaction failure.", e);
             }
         });
     }
