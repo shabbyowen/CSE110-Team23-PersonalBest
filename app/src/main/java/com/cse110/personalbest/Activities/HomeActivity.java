@@ -56,6 +56,7 @@ public class HomeActivity extends AppCompatActivity implements
     // extra string keys
     public static final String STEP_SERVICE_KEY_EXTRA = "step_service_key_extra";
     public static final String SESSION_SERVICE_KEY_EXTRA = "session_service_key_extra";
+    public static final String FRIEND_SERVICE_KEY_EXTRA = "friend_service_key_extra";
     public static final String STORAGE_SOLUTION_KEY_EXTRA = "storage_solution_key_extra";
 
     // factory keys
@@ -181,9 +182,6 @@ public class HomeActivity extends AppCompatActivity implements
         Toolbar myToolbar = (Toolbar) findViewById(R.id.app_toolbar);
         setSupportActionBar(myToolbar);
 
-        // get the storage solution
-        storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
-
         // retrieve the step service key
         Intent intent = getIntent();
         String key1 = intent.getStringExtra(STEP_SERVICE_KEY_EXTRA);
@@ -203,11 +201,19 @@ public class HomeActivity extends AppCompatActivity implements
             sessionServiceKey = key3;
         }
 
+        // retrieve the session service key
+        String key4 = intent.getStringExtra(FRIEND_SERVICE_KEY_EXTRA);
+        if (key3 != null) {
+            friendServiceKey = key4;
+        }
+
+        // get the storage solution
+        storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
+
         // start the services
         startService(getStepServiceIntent());
         startService(getSessionServiceIntent());
         startService(getFriendServiceIntent());
-
 
         // ui init
         BottomNavigationView navigation = findViewById(R.id.navigation);
@@ -270,7 +276,7 @@ public class HomeActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
 
-        if (!activityInitialized) {
+        if (!activityInitialized || sessionService == null) {
             return;
         }
 
@@ -523,6 +529,9 @@ public class HomeActivity extends AppCompatActivity implements
     }
 
     public void updateFriendsListFragment() {
+        if (friendService == null) {
+            return;
+        }
         friendService.getPendingRequests(new FriendServiceCallback() {
             @Override
             public void onPendingRequestsResult(List<Friend> result) {
