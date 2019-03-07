@@ -51,7 +51,12 @@ public class HomeActivity extends AppCompatActivity implements
     private static final String TAG = "HomeActivity";
 
     // storage key
+    private static final String USER_EMAIL = "user_email";
     private static final String USER_HEIGHT = "user_height";
+
+    // Messaging keys
+    private static final String SENDER = "sender";
+    private static final String RECEIVER = "receiver";
 
     // extra string keys
     public static final String STEP_SERVICE_KEY_EXTRA = "step_service_key_extra";
@@ -589,7 +594,6 @@ public class HomeActivity extends AppCompatActivity implements
 
     @Override
     public void onEditNicknameButtonClicked(Friend friend) {
-
     }
 
     @Override
@@ -609,6 +613,14 @@ public class HomeActivity extends AppCompatActivity implements
                 }
             }
         });
+    }
+
+    @Override
+    public void onFriendItemClicked(Friend friend) {
+        Intent intent = new Intent(this, MonthlyHistoryActivity.class);
+        intent.putExtra(SENDER, storageSolution.get(USER_EMAIL, ""));
+        intent.putExtra(RECEIVER, friend.getEmail());
+        startActivity(intent);
     }
 
     @Override

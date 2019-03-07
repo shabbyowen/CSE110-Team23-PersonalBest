@@ -147,7 +147,8 @@ public class BasicFriendsListFragment extends FriendsListFragment {
         FriendsListFragmentListener ref = listener.get();
         if (ref != null) {
             Friend friend = friendsListAdapter.getItem(position);
-            Toast.makeText(getActivity(), friend.toString(),Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Will open friend's summary: " + friend.toString());
+            ref.onFriendItemClicked(friend);
         }
     }
 }

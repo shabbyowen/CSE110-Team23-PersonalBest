@@ -7,4 +7,5 @@ public interface FriendsListFragmentListener {
     void onRejectButtonClicked(Friend rejectedFriend);
     void onEditNicknameButtonClicked(Friend friend);
     void onRemoveButtonClicked(Friend removedFriend);
+    void onFriendItemClicked(Friend friend);
 }

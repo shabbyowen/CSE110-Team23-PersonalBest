@@ -1,10 +1,16 @@
 package com.cse110.personalbest.Activities;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import com.cse110.personalbest.Events.MonthlyProgressFragmentInfo;
 import com.cse110.personalbest.Events.WeeklyProgressFragmentInfo;
 import com.cse110.personalbest.Factories.MonthlyProgressFragmentFactory;
@@ -14,19 +20,45 @@ import com.cse110.personalbest.R;
 import java.util.Arrays;
 
 public class MonthlyHistoryActivity extends AppCompatActivity {
+    private static final String SENDER = "sender";
+    private static final String RECEIVER = "receiver";
+
     MonthlyProgressFragment monthlyProgressFragment;
+
+    private TextView titleTextView;
+    private Button sendMessageBtn;
+    private EditText sendMessageEditText;
+    private String sender;
+    private String receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monthly_history);
 
+        // Get extra info
+        Intent intent = getIntent();
+        String sender = intent.getStringExtra(SENDER);
+        String receiver = intent.getStringExtra(RECEIVER);
+
+        // Setup Toolbar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        titleTextView = findViewById(R.id.tv_monthly_history);
+        sendMessageEditText = findViewById(R.id.et_send_message);
+        sendMessageBtn = findViewById(R.id.btn_send_message);
+
+        titleTextView.setText(receiver + " Monthly Progress");
+
         monthlyProgressFragment = (MonthlyProgressFragment) new MonthlyProgressFragmentFactory()
                 .create(MonthlyProgressFragmentFactory.BASIC_WEEKLY_PROGRESS_FRAGMENT_KEY);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.add(R.id.monthly_history_container, monthlyProgressFragment);
+//        ft.add(R.id.monthly_history_container, monthlyProgressFragment);
         ft.commit();
 
         //updateMonthlyProgressFragment();
@@ -64,5 +96,21 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         info.week4Info.weekGoal = Arrays.asList();
         info.week4Info.weekSpeed = Arrays.asList();
         */
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK)
+        {
+            finish();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }
