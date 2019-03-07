@@ -38,6 +38,11 @@ public class MockFriendService extends FriendService {
     }
 
     @Override
+    public void sendMessage(String friendEmail, String message, FriendServiceCallback callback) {
+
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         return null;
     }

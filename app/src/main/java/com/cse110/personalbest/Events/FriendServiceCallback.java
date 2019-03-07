@@ -15,4 +15,5 @@ public class FriendServiceCallback {
     public void onRejectFriendResult(boolean hasRejectSuccess) {}
     public void onRemoveFriendResult(boolean hasRemoveSuccess) {}
     public void onSendFriendRequestResult(int statusCode) {}
+    public void onSendMessageResult(boolean hasSendMessageSuccess) {}
 }

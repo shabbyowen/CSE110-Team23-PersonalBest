@@ -620,6 +620,7 @@ public class HomeActivity extends AppCompatActivity implements
         Intent intent = new Intent(this, MonthlyHistoryActivity.class);
         intent.putExtra(SENDER, storageSolution.get(USER_EMAIL, ""));
         intent.putExtra(RECEIVER, friend.getEmail());
+        intent.putExtra(FRIEND_SERVICE_KEY_EXTRA, friendServiceKey);
         startActivity(intent);
     }
 

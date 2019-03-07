@@ -73,4 +73,6 @@
     <string name="friend_request_user_nonexist">Error: User does not exist</string>
     <string name="no_internet_connection">Error: No Internet Connection</string>
     <string name="friend_already_exists">Already Friends / Pending Approve</string>
+    <string name="send_message_success">Message Sent!</string>
+    <string name="send_message_fail">Error: No Internet Connection</string>
 </resources>

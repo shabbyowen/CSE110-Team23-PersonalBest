@@ -1,27 +1,44 @@
 package com.cse110.personalbest.Activities;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+import com.cse110.personalbest.Events.FriendServiceCallback;
 import com.cse110.personalbest.Events.MonthlyProgressFragmentInfo;
+import com.cse110.personalbest.Events.MyBinder;
 import com.cse110.personalbest.Events.WeeklyProgressFragmentInfo;
+import com.cse110.personalbest.Factories.FriendServiceSelector;
 import com.cse110.personalbest.Factories.MonthlyProgressFragmentFactory;
+import com.cse110.personalbest.Factories.ServiceSelector;
+import com.cse110.personalbest.Factories.StorageSolutionFactory;
 import com.cse110.personalbest.Fragments.MonthlyProgressFragment;
 import com.cse110.personalbest.R;
+import com.cse110.personalbest.Services.FriendService;
 
 import java.util.Arrays;
 
 public class MonthlyHistoryActivity extends AppCompatActivity {
+    public static final String FRIEND_SERVICE_KEY_EXTRA = "friend_service_key_extra";
     private static final String SENDER = "sender";
     private static final String RECEIVER = "receiver";
+    private static final String TAG = "MonthlyHistoryActivity";
 
     MonthlyProgressFragment monthlyProgressFragment;
 
@@ -31,15 +48,38 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
     private String sender;
     private String receiver;
 
+    private String friendServiceKey = FriendServiceSelector.BASIC_FRIEND_SERVICE_KEY;
+    private FriendService friendService;
+
+    // service connection for friend service
+    private ServiceConnection friendServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyBinder binder = (MyBinder) service;
+            friendService = (FriendService) binder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            friendService = null;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monthly_history);
 
         // Get extra info
+        // retrieve the step service key
         Intent intent = getIntent();
-        String sender = intent.getStringExtra(SENDER);
-        String receiver = intent.getStringExtra(RECEIVER);
+        String key1 = intent.getStringExtra(FRIEND_SERVICE_KEY_EXTRA);
+        if (key1 != null) {
+            friendServiceKey = key1;
+        }
+        sender = intent.getStringExtra(SENDER);
+        receiver = intent.getStringExtra(RECEIVER);
 
         // Setup Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
@@ -47,11 +87,43 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        // Bind friend service
+        bindService(intent, friendServiceConnection, Context.BIND_AUTO_CREATE);
+
+        // Setup UI elements
         titleTextView = findViewById(R.id.tv_monthly_history);
         sendMessageEditText = findViewById(R.id.et_send_message);
         sendMessageBtn = findViewById(R.id.btn_send_message);
+        titleTextView.setText("Monthly Progress for " + receiver);
 
-        titleTextView.setText(receiver + " Monthly Progress");
+        // Setup Listeners
+        sendMessageEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString().equals("")) {
+                    sendMessageBtn.setEnabled(false);
+                } else {
+                    sendMessageBtn.setEnabled(true);
+                }
+            }
+        });
+        sendMessageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String message = sendMessageEditText.getText().toString();
+                sendMessage(receiver, message);
+            }
+        });
 
         monthlyProgressFragment = (MonthlyProgressFragment) new MonthlyProgressFragmentFactory()
                 .create(MonthlyProgressFragmentFactory.BASIC_WEEKLY_PROGRESS_FRAGMENT_KEY);
@@ -62,6 +134,13 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         ft.commit();
 
         //updateMonthlyProgressFragment();
+    }
+
+    private Intent getFriendServiceIntent() {
+        ServiceSelector serviceSelector = new FriendServiceSelector();
+        Intent intent = new Intent(this, serviceSelector.retrieveServiceClass(friendServiceKey));
+        intent.putExtra(FriendService.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);
+        return intent;
     }
 
     public void updateMonthlyProgressFragment() {
@@ -112,5 +191,22 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    private void sendMessage(String receiver, String message) {
+        if (friendService == null) {
+            Log.d(TAG, "Send Message to a friend failed: friendService is null");
+            return;
+        }
+        friendService.sendMessage(receiver, message, new FriendServiceCallback() {
+            @Override
+            public void onSendMessageResult(boolean hasSendMessageSuccess){
+                if (hasSendMessageSuccess) {
+                    Toast.makeText(MonthlyHistoryActivity.this, R.string.send_message_success, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(MonthlyHistoryActivity.this, R.string.send_message_fail, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 }

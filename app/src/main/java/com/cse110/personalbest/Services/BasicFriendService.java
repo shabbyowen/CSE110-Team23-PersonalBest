@@ -25,6 +25,8 @@ public class BasicFriendService extends FriendService {
     private static final String COLLECTION_KEY = "users";
     private static final String FRIENDS_KEY = "friends";
     private static final String PENDING_REQUESTS_KEY = "pending_requests";
+    private static final String CHATS_KEY = "chats";
+    private static final String CHATS_ID_KEY = "chats_id";
 
     private StorageSolution storageSolution;
     private String storageSolutionKey;
@@ -280,5 +282,38 @@ public class BasicFriendService extends FriendService {
                 Log.w(TAG, "Friend Request Send Transaction failure.", e);
             }
         });
+    }
+
+    @Override
+    public void sendMessage(String friendEmail, String message, FriendServiceCallback callback) {
+        /*
+        DocumentReference userChatRef = storage.collection(COLLECTION_KEY).document(userEmail).collection(CHATS_KEY).document(friendEmail);
+        DocumentReference friendChatRef = storage.collection(COLLECTION_KEY).document(friendEmail).collection(CHATS_KEY).document(userEmail);
+        storage.runTransaction(new Transaction.Function<Void>() {
+            @Override
+            public Void apply(Transaction transaction) throws FirebaseFirestoreException {
+                DocumentSnapshot userChatIdSnapshot = transaction.get(userChatRef);
+                DocumentSnapshot friendChatIdSnapshot = transaction.get(friendChatRef);
+
+                if (!userChatIdSnapshot.exists() && !friendChatIdSnapshot.exists()) {
+                    transaction.update(userChatIdSnapshot, CHATS_ID_KEY, );
+                } else {
+                    // Add current user to target pending requests list
+                }
+                return null;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                callback.onSendFriendRequestResult(0);
+                Log.d(TAG, "Friend Request Send Transaction success!");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "Friend Request Send Transaction failure.", e);
+            }
+        });
+        */
     }
 }
