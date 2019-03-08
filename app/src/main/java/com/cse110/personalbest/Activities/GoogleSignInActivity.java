@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * GOogle standalone sign in Activity
+ */
 public class GoogleSignInActivity extends AppCompatActivity {
     private static final String TAG = "GoogleSigninActivity";
 
