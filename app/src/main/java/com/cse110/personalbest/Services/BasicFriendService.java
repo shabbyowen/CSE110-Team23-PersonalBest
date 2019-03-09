@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BasicFriendService extends FriendService {
-    private static final String TAG = "FRIEND_LOG";
+    private static final String TAG = "BasicFriendService";
     public static final String CURRENT_USER_KEY = "user_email";
     private static final String COLLECTION_USERS_KEY = "users";
     private static final String COLLECTION_CHATS_KEY = "chats";
@@ -293,7 +293,7 @@ public class BasicFriendService extends FriendService {
 
     @Override
     public void sendMessage(String friendEmail, String message, FriendServiceCallback callback) {
-        CollectionReference userChatRef = storage.collection(COLLECTION_KEY).document(userEmail).collection(CHATS_KEY);
+        CollectionReference userChatRef = storage.collection(COLLECTION_USERS_KEY).document(userEmail).collection(CHATS_KEY);
         Map<String, Object> chatData = new HashMap<>();
         chatData.put("to", friendEmail);
         chatData.put("content", message);
@@ -329,18 +329,31 @@ public class BasicFriendService extends FriendService {
     }
 
     public void retrieveMessage(String friendEmail, FriendServiceCallback callback) {
-        CollectionReference userChatRef = storage.collection(COLLECTION_KEY).document(userEmail).collection(CHATS_KEY);
-        CollectionReference friendChatRef = storage.collection(COLLECTION_KEY).document(friendEmail).collection(CHATS_KEY);
+        CollectionReference userChatRef = storage.collection(COLLECTION_USERS_KEY).document(userEmail).collection(CHATS_KEY);
+        CollectionReference friendChatRef = storage.collection(COLLECTION_USERS_KEY).document(friendEmail).collection(CHATS_KEY);
+
         userChatRef.whereEqualTo("to", friendEmail).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                QuerySnapshot querySnapshot = task.getResult();
-                if (querySnapshot != null) {
-                    List<DocumentSnapshot> documents = querySnapshot.getDocuments();
-                    Log.d(TAG, documents.toString());
-                } else {
-                    Log.d(TAG, "retrieve message query snapshot is null!");
-                }
+            public void onComplete(@NonNull Task<QuerySnapshot> userChatTask) {
+                QuerySnapshot userChatQuerySnapshot = userChatTask.getResult();
+                List<DocumentSnapshot> userChatDocuments = userChatQuerySnapshot.getDocuments();
+                Log.d(TAG, "user chat documents" + userChatDocuments.toString());
+
+                friendChatRef.whereEqualTo("to", userEmail).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> friendChatTask) {
+                        QuerySnapshot friendChatQuerySnapshot = friendChatTask.getResult();
+                        List<DocumentSnapshot> friendChatDocuments = friendChatQuerySnapshot.getDocuments();
+                        Log.d(TAG, "friend chat documents" + friendChatDocuments.toString());
+
+
+
+                        // TODO: fix this callback to let it actually return things
+                        callback.onRetrieveMessageResult();
+                    }
+                });
             }
         });
 //        friendChatRef.whereEqualTo("to", userEmail).get();
