@@ -63,6 +63,14 @@ public class BasicDailyGoalFragment extends DailyGoalFragment {
             }
         });
 
+        addStepsBtn = fragmentView.findViewById(R.id.daily_goal_add_steps);
+        addStepsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onAddStepBtnClicked();
+            }
+        });
+
         currentStepTextView = fragmentView.findViewById(R.id.daily_goal_steps_tv);
         currentStepGoalTextView = fragmentView.findViewById(R.id.daily_goal_goal_steps_tv);
         currentDistTextView = fragmentView.findViewById(R.id.daily_goal_dist_tv);
@@ -86,7 +94,7 @@ public class BasicDailyGoalFragment extends DailyGoalFragment {
                 currentStepGoalTextView.setText(String.valueOf(info.goal));
             }
             if (info.currentDist != null) {
-                currentDistTextView.setText(String.valueOf(info.currentDist));
+                currentDistTextView.setText(String.format("%.2f", info.currentDist));
             }
             if (info.goalDist != null) {
                 currentDistGoalTextView.setText(String.format("%.2f", info.goalDist));
@@ -98,7 +106,7 @@ public class BasicDailyGoalFragment extends DailyGoalFragment {
                 sessionStepTextView.setText(String.valueOf(info.sessionStep));
             }
             if (info.sessionSpeed != null) {
-                sessionSpeedTextView.setText(String.valueOf(info.sessionSpeed));
+                sessionSpeedTextView.setText(String.format("%.2f", info.sessionSpeed));
             }
             if (info.isWorkingOut != null) {
 
@@ -134,6 +142,13 @@ public class BasicDailyGoalFragment extends DailyGoalFragment {
         DailyGoalFragmentListener ref = listener.get();
         if (ref != null) {
             ref.onChangeGoalBtnClicked();
+        }
+    }
+
+    public void onAddStepBtnClicked() {
+        DailyGoalFragmentListener ref = listener.get();
+        if (ref != null) {
+            ref.onAddStepBtnClicked();
         }
     }
 }

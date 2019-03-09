@@ -16,7 +16,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cse110.personalbest.Events.*;
@@ -33,13 +32,6 @@ import com.cse110.personalbest.Services.StepService;
 import com.cse110.personalbest.Utilities.SpeedCalculator;
 import com.cse110.personalbest.Utilities.StorageSolution;
 import com.cse110.personalbest.Utilities.TimeMachine;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.*;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.fitness.FitnessOptions;
-import com.google.android.gms.fitness.data.DataType;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -85,6 +77,7 @@ public class HomeActivity extends AppCompatActivity implements
     private FragmentFactory inputDialogFragmentFactory;
 
     private MenuItem addFriendMenuItem;
+    private MenuItem refreshFriendsMenuItem;
 
     private boolean activityInitialized = false;
 
@@ -149,15 +142,18 @@ public class HomeActivity extends AppCompatActivity implements
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
+                    refreshFriendsMenuItem.setVisible(false);
                     addFriendMenuItem.setVisible(false);
                     display(dailyGoalFragment);
                     return true;
                 case R.id.navigation_friend:
+                    refreshFriendsMenuItem.setVisible(true);
                     addFriendMenuItem.setVisible(true);
                     updateFriendsListFragment();
                     display(friendsListFragment);
                     return true;
                 case R.id.navigation_stats:
+                    refreshFriendsMenuItem.setVisible(false);
                     addFriendMenuItem.setVisible(false);
                     updateWeeklyProgressFragment();
                     display(weeklyProgressFragment);
@@ -177,7 +173,9 @@ public class HomeActivity extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.toolbar, menu);
+        refreshFriendsMenuItem = menu.findItem(R.id.action_refresh_friends);
         addFriendMenuItem = menu.findItem(R.id.action_add_friend);
+        refreshFriendsMenuItem.setVisible(false);
         addFriendMenuItem.setVisible(false);
         return true;
     }
@@ -206,7 +204,7 @@ public class HomeActivity extends AppCompatActivity implements
             sessionServiceKey = key3;
         }
 
-        // retrieve the session service key
+        // retrieve the friend service key
         String key4 = intent.getStringExtra(FRIEND_SERVICE_KEY_EXTRA);
         if (key3 != null) {
             friendServiceKey = key4;
@@ -389,6 +387,11 @@ public class HomeActivity extends AppCompatActivity implements
             InputDialogFragmentFactory.GOAL_INPUT_DIALOG_FRAGMENT_KEY,
             "goal_input_dialog",
             null);
+    }
+
+    @Override
+    public void onAddStepBtnClicked() {
+        stepService.addStep(500);
     }
 
     @Override
@@ -633,8 +636,16 @@ public class HomeActivity extends AppCompatActivity implements
                         "add_friend_input_dialog",
                         null);
                 return true;
+            case R.id.action_refresh_friends:
+                updateFriendsListFragment();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        // prevent user to press the back button
     }
 }
