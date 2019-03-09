@@ -47,6 +47,11 @@ public class MockStepService extends StepService {
     }
 
     @Override
+    public void addStep(int step) {
+
+    }
+
+    @Override
     public void getWeekStep(StepServiceCallback callback) {
 
     }

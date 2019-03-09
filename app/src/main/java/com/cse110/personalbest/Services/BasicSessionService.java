@@ -210,7 +210,7 @@ public class BasicSessionService extends SessionService implements StepServiceLi
         List<Session> result = new LinkedList<>();
 
         if (sessions == null) {
-            return;
+            sessions = new LinkedList<>();
         }
 
         for (int i = 0; i < 7; i++) {

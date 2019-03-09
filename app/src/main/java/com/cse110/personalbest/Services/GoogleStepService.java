@@ -18,13 +18,17 @@ import com.cse110.personalbest.Utilities.StorageSolution;
 import com.cse110.personalbest.Utilities.TimeMachine;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.Bucket;
+import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
+import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.request.DataReadRequest;
+import com.google.android.gms.fitness.request.DataUpdateRequest;
 import com.google.android.gms.fitness.result.DataReadResponse;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -37,6 +41,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 
 public class GoogleStepService extends StepService {
 
@@ -167,6 +172,53 @@ public class GoogleStepService extends StepService {
     }
 
     @Override
+    public void addStep(int step) {
+
+        // calculate time
+        Calendar cal = Calendar.getInstance();
+        Date now = TimeMachine.now();
+        cal.setTime(now);
+        long endTime = cal.getTimeInMillis();
+        cal.add(Calendar.MINUTE, -1);
+        long startTime = cal.getTimeInMillis();
+
+        // Create a data source
+        DataSource dataSource =
+            new DataSource.Builder()
+                .setAppPackageName(this)
+                .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
+                .setStreamName("step count")
+                .setType(DataSource.TYPE_RAW)
+                .build();
+
+        // Create a data set
+        DataSet dataSet = DataSet.create(dataSource);
+        DataPoint dataPoint = dataSet.createDataPoint().setTimeInterval(startTime, endTime, TimeUnit.MILLISECONDS);
+        dataPoint.getValue(Field.FIELD_STEPS).setInt(step);
+        dataSet.add(dataPoint);
+
+        // build the request
+        DataUpdateRequest request =
+            new DataUpdateRequest.Builder()
+                .setDataSet(dataSet)
+                .setTimeInterval(startTime, endTime, TimeUnit.MILLISECONDS)
+                .build();
+
+        // Invoke the History API to update data.
+        Fitness.getHistoryClient(this, GoogleSignIn.getLastSignedInAccount(this))
+            .updateData(request)
+            .addOnCompleteListener(
+                task -> {
+                    if (task.isSuccessful()) {
+                        // At this point the data has been updated and can be read.
+                        Log.i(TAG, "Data update was successful.");
+                    } else {
+                        Log.e(TAG, "There was a problem updating the dataset.", task.getException());
+                    }
+                });
+    }
+
+    @Override
     public void getWeekStep(final StepServiceCallback callback) {
         GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(this);
         if (lastSignedInAccount == null) {
@@ -249,6 +301,7 @@ public class GoogleStepService extends StepService {
         callback.onGoalResult(result);
     }
 
+    // TODO: week goal is not displayed properly
     @Override
     public void getWeekGoal(StepServiceCallback callback) {
         List<GoalInfo> list = loadGoalInfo();

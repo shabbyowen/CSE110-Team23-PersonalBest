@@ -206,7 +206,7 @@ public class HomeActivity extends AppCompatActivity implements
             sessionServiceKey = key3;
         }
 
-        // retrieve the session service key
+        // retrieve the friend service key
         String key4 = intent.getStringExtra(FRIEND_SERVICE_KEY_EXTRA);
         if (key3 != null) {
             friendServiceKey = key4;
@@ -389,6 +389,11 @@ public class HomeActivity extends AppCompatActivity implements
             InputDialogFragmentFactory.GOAL_INPUT_DIALOG_FRAGMENT_KEY,
             "goal_input_dialog",
             null);
+    }
+
+    @Override
+    public void onAddStepBtnClicked() {
+        stepService.addStep(500);
     }
 
     @Override
@@ -636,5 +641,10 @@ public class HomeActivity extends AppCompatActivity implements
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        // prevent user to press the back button
     }
 }
