@@ -638,6 +638,7 @@ public class HomeActivity extends AppCompatActivity implements
                         null);
                 return true;
             case R.id.action_refresh_friends:
+                Toast.makeText(HomeActivity.this, R.string.refresh, Toast.LENGTH_SHORT).show();
                 updateFriendsListFragment();
                 return true;
             default:
