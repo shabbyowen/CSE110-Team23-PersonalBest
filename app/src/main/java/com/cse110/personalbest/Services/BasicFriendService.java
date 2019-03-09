@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.*;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -360,7 +361,14 @@ public class BasicFriendService extends FriendService {
                         Log.d(TAG, "friend chat documents" + friendChatDocuments.toString());
 
                         userChatDocuments.addAll(friendChatDocuments);
-                        userChatDocuments.get(0);
+                        userChatDocuments.sort(new Comparator<DocumentSnapshot>() {
+                            @Override
+                            public int compare(DocumentSnapshot o1, DocumentSnapshot o2) {
+                                Timestamp t1 = (Timestamp)o1.get("timestamp");
+                                Timestamp t2 = (Timestamp)o2.get("timestamp");
+                                return t1.compareTo(t2);
+                            }
+                        });
 
                         // TODO: fix this callback to let it actually return things
                         callback.onRetrieveMessageResult();
