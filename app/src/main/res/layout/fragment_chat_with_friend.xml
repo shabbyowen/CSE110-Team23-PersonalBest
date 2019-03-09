@@ -41,7 +41,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/btn_send"
-        android:layout_margin="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="0dp"
         android:hint="message" />
 
     <Button
@@ -49,7 +50,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_margin="5dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="56dp"
         android:text="send" />
 
     <Button
@@ -57,7 +59,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_margin="5dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="10dp"
         android:text="Go to Monthly Progress" />
 
 </RelativeLayout>
