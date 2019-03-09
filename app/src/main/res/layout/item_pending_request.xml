@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/tv_pending_email"
+        android:text="email"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4"
+        android:gravity="center_vertical"
+        android:textSize="18sp"/>
+
+    <ImageButton
+        android:id="@+id/btn_pending_approve"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:srcCompat="@drawable/baseline_done_black_24"
+        android:layout_weight="1"
+        android:tint="@color/green"/>
+
+    <ImageButton
+        android:id="@+id/btn_pending_ignore"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:srcCompat="@drawable/baseline_clear_black_24"
+        android:layout_weight="1"
+        android:tint="@android:color/holo_red_dark"/>
+</LinearLayout>
