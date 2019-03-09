@@ -50,6 +50,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 
     private String friendServiceKey = FriendServiceSelector.BASIC_FRIEND_SERVICE_KEY;
     private FriendService friendService;
+    private boolean activityInitialized;
 
     // service connection for friend service
     private ServiceConnection friendServiceConnection = new ServiceConnection() {
@@ -120,6 +121,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         sendMessageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                sendMessageBtn.setEnabled(false);
                 String message = sendMessageEditText.getText().toString();
                 sendMessage(receiver, message);
             }
@@ -134,6 +136,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         ft.commit();
 
         //updateMonthlyProgressFragment();
+        activityInitialized = true;
     }
 
     private Intent getFriendServiceIntent() {
@@ -141,6 +144,28 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         Intent intent = new Intent(this, serviceSelector.retrieveServiceClass(friendServiceKey));
         intent.putExtra(FriendService.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);
         return intent;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!activityInitialized) {
+            return;
+        }
+
+        // bind to the service
+        bindService(getFriendServiceIntent(), friendServiceConnection, Context.BIND_AUTO_CREATE);
+        Log.d(TAG, "Bind to friend service");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // unbind the service
+        unbindService(friendServiceConnection);
+        Log.d(TAG, "Unbind friend service");
     }
 
     public void updateMonthlyProgressFragment() {
@@ -179,6 +204,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
+        unbindService(friendServiceConnection);
         finish();
         return true;
     }
@@ -187,6 +213,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK)
         {
+            unbindService(friendServiceConnection);
             finish();
             return true;
         }
@@ -202,8 +229,10 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
             @Override
             public void onSendMessageResult(boolean hasSendMessageSuccess){
                 if (hasSendMessageSuccess) {
+                    sendMessageEditText.setText("");
                     Toast.makeText(MonthlyHistoryActivity.this, R.string.send_message_success, Toast.LENGTH_LONG).show();
                 } else {
+                    sendMessageBtn.setEnabled(true);
                     Toast.makeText(MonthlyHistoryActivity.this, R.string.send_message_fail, Toast.LENGTH_LONG).show();
                 }
             }

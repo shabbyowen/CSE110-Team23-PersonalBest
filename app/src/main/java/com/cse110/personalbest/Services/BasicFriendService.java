@@ -24,11 +24,16 @@ import java.util.Map;
 public class BasicFriendService extends FriendService {
     private static final String TAG = "FRIEND_LOG";
     public static final String CURRENT_USER_KEY = "user_email";
-    private static final String COLLECTION_KEY = "users";
+    private static final String COLLECTION_USERS_KEY = "users";
+    private static final String COLLECTION_CHATS_KEY = "chats";
+    private static final String COLLECTION_MESSAGES_KEY = "messages";
     private static final String FRIENDS_KEY = "friends";
     private static final String PENDING_REQUESTS_KEY = "pending_requests";
     private static final String CHATS_KEY = "chats";
     private static final String CHATS_ID_KEY = "chats_id";
+    private static final String MESSAGE_FROM_KEY = "from";
+    private static final String MESSAGE_TO_KEY = "to";
+    private static final String MESSAGE_TEXT_KEY = "text";
 
     private StorageSolution storageSolution;
     private String storageSolutionKey;
@@ -69,7 +74,7 @@ public class BasicFriendService extends FriendService {
     @Override
     public void getPendingRequests(FriendServiceCallback callback) {
         String userEmail= storageSolution.get(CURRENT_USER_KEY, "");
-        DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
+        DocumentReference userRef = storage.collection(COLLECTION_USERS_KEY).document(userEmail);
         userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -95,7 +100,7 @@ public class BasicFriendService extends FriendService {
 
     @Override
     public void getFriendList(FriendServiceCallback callback) {
-        DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
+        DocumentReference userRef = storage.collection(COLLECTION_USERS_KEY).document(userEmail);
         userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -121,8 +126,8 @@ public class BasicFriendService extends FriendService {
 
     @Override
     public void addFriend(Friend friend, FriendServiceCallback callback) {
-        DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
-        DocumentReference friendRef = storage.collection(COLLECTION_KEY).document(friend.getEmail());
+        DocumentReference userRef = storage.collection(COLLECTION_USERS_KEY).document(userEmail);
+        DocumentReference friendRef = storage.collection(COLLECTION_USERS_KEY).document(friend.getEmail());
 
         storage.runTransaction(new Transaction.Function<Void>() {
             @Override
@@ -173,7 +178,7 @@ public class BasicFriendService extends FriendService {
 
     @Override
     public void rejectFriend(Friend rejectedFriend, FriendServiceCallback callback) {
-        DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
+        DocumentReference userRef = storage.collection(COLLECTION_USERS_KEY).document(userEmail);
 
         storage.runTransaction(new Transaction.Function<Void>() {
             @Override
@@ -203,8 +208,8 @@ public class BasicFriendService extends FriendService {
 
     @Override
     public void removeFriend(Friend removedfriend, FriendServiceCallback callback) {
-        DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
-        DocumentReference removedFriendRef = storage.collection(COLLECTION_KEY).document(removedfriend.getEmail());
+        DocumentReference userRef = storage.collection(COLLECTION_USERS_KEY).document(userEmail);
+        DocumentReference removedFriendRef = storage.collection(COLLECTION_USERS_KEY).document(removedfriend.getEmail());
 
         storage.runTransaction(new Transaction.Function<Void>() {
             @Override
@@ -241,8 +246,8 @@ public class BasicFriendService extends FriendService {
 
     @Override
     public void sendFriendRequest(String friendToAddEmail, FriendServiceCallback callback) {
-        DocumentReference userRef = storage.collection(COLLECTION_KEY).document(userEmail);
-        DocumentReference friendToAddRef = storage.collection(COLLECTION_KEY).document(friendToAddEmail);
+        DocumentReference userRef = storage.collection(COLLECTION_USERS_KEY).document(userEmail);
+        DocumentReference friendToAddRef = storage.collection(COLLECTION_USERS_KEY).document(friendToAddEmail);
         storage.runTransaction(new Transaction.Function<Void>() {
             @Override
             public Void apply(Transaction transaction) throws FirebaseFirestoreException {
