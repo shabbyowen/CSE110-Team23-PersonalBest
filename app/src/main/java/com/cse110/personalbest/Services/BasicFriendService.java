@@ -21,6 +21,9 @@ import com.google.firebase.firestore.*;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +69,9 @@ public class BasicFriendService extends FriendService {
         }
         storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
         userEmail = storageSolution.get(CURRENT_USER_KEY, "");
+
+        // subscribe to self email
+        subscribeToNotificationsTopic(userEmail);
 
         return START_STICKY;
     }
@@ -170,7 +176,6 @@ public class BasicFriendService extends FriendService {
             public void onSuccess(Void aVoid) {
                 callback.onAcceptFriendResult(true);
                 Log.d(TAG, "Add Friend Transaction success!");
-                subscribeToNotificationsTopic(friend.getEmail());
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -278,7 +283,6 @@ public class BasicFriendService extends FriendService {
             public void onSuccess(Void aVoid) {
                 callback.onSendFriendRequestResult(0);
                 Log.d(TAG, "Friend Request Send Transaction success!");
-                subscribeToNotificationsTopic(friendToAddEmail);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -301,6 +305,7 @@ public class BasicFriendService extends FriendService {
     public void sendMessage(String friendEmail, String message, FriendServiceCallback callback) {
         CollectionReference userChatRef = storage.collection(COLLECTION_USERS_KEY).document(userEmail).collection(CHATS_KEY);
         Map<String, Object> chatData = new HashMap<>();
+        chatData.put("from", userEmail);
         chatData.put("to", friendEmail);
         chatData.put("content", message);
         userChatRef.add(chatData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -354,7 +359,8 @@ public class BasicFriendService extends FriendService {
                         List<DocumentSnapshot> friendChatDocuments = friendChatQuerySnapshot.getDocuments();
                         Log.d(TAG, "friend chat documents" + friendChatDocuments.toString());
 
-
+                        userChatDocuments.addAll(friendChatDocuments);
+                        userChatDocuments.get(0);
 
                         // TODO: fix this callback to let it actually return things
                         callback.onRetrieveMessageResult();
@@ -366,8 +372,8 @@ public class BasicFriendService extends FriendService {
     }
 
 
-    private void subscribeToNotificationsTopic(String DOCUMENT_KEY) {
-        FirebaseMessaging.getInstance().subscribeToTopic(DOCUMENT_KEY)
+    private void subscribeToNotificationsTopic(String topic) {
+        FirebaseMessaging.getInstance().subscribeToTopic(topic.replace("@", ""))
                 .addOnCompleteListener(task -> {
                             String msg = "Subscribed to notifications";
                             if (!task.isSuccessful()) {

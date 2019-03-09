@@ -27,7 +27,7 @@ exports.addTimeStamp = functions.firestore
 
 
 exports.sendChatNotifications = functions.firestore
-   .document('chats/{chatId}/messages/{messageId}')
+   .document('users/{userId}/chats/{chatId}')
    .onCreate((snap, context) => {
      // Get an object with the current document value.
      // If the document does not exist, it has been deleted.
@@ -37,9 +37,9 @@ exports.sendChatNotifications = functions.firestore
        var message = {
          notification: {
            title: document.from + ' sent you a message',
-           body: document.text
+           body: document.content
          },
-         topic: context.params.chatId
+         topic: document.to.replace('@', '')
        };
 
        return admin.messaging().send(message)
