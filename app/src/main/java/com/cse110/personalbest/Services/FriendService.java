@@ -15,4 +15,5 @@ public abstract class FriendService extends Service {
     public abstract void removeFriend(Friend removedfriend, FriendServiceCallback callback);
     public abstract void sendFriendRequest(String userEmail, FriendServiceCallback callback);
     public abstract void sendMessage(String friendEmail, String message, FriendServiceCallback callback);
+    public abstract void retrieveMessage(String friendEmail, FriendServiceCallback callback);
 }

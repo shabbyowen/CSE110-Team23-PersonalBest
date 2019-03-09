@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import com.cse110.personalbest.Factories.StorageSolutionFactory;
+import com.cse110.personalbest.R;
 import com.cse110.personalbest.Utilities.StorageSolution;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -47,6 +48,7 @@ public class GoogleSignInActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_google_sign_in);
 
         // get the storage solution
         storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);

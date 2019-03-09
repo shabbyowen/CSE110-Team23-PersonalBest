@@ -88,7 +88,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         // Bind friend service
-        bindService(intent, friendServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService(getFriendServiceIntent(), friendServiceConnection, Context.BIND_AUTO_CREATE);
 
         // Setup UI elements
         titleTextView = findViewById(R.id.tv_monthly_history);

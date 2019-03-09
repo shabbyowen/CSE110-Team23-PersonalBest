@@ -17,7 +17,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BasicFriendService extends FriendService {
     private static final String TAG = "FRIEND_LOG";
@@ -286,34 +288,56 @@ public class BasicFriendService extends FriendService {
 
     @Override
     public void sendMessage(String friendEmail, String message, FriendServiceCallback callback) {
-        /*
-        DocumentReference userChatRef = storage.collection(COLLECTION_KEY).document(userEmail).collection(CHATS_KEY).document(friendEmail);
-        DocumentReference friendChatRef = storage.collection(COLLECTION_KEY).document(friendEmail).collection(CHATS_KEY).document(userEmail);
-        storage.runTransaction(new Transaction.Function<Void>() {
+        CollectionReference userChatRef = storage.collection(COLLECTION_KEY).document(userEmail).collection(CHATS_KEY);
+        Map<String, Object> chatData = new HashMap<>();
+        chatData.put("to", friendEmail);
+        chatData.put("content", message);
+        userChatRef.add(chatData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
-            public Void apply(Transaction transaction) throws FirebaseFirestoreException {
-                DocumentSnapshot userChatIdSnapshot = transaction.get(userChatRef);
-                DocumentSnapshot friendChatIdSnapshot = transaction.get(friendChatRef);
-
-                if (!userChatIdSnapshot.exists() && !friendChatIdSnapshot.exists()) {
-                    transaction.update(userChatIdSnapshot, CHATS_ID_KEY, );
-                } else {
-                    // Add current user to target pending requests list
-                }
-                return null;
-            }
-        }).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                callback.onSendFriendRequestResult(0);
-                Log.d(TAG, "Friend Request Send Transaction success!");
+            public void onSuccess(DocumentReference documentReference) {
+                callback.onSendMessageResult(true);
+                Log.d(TAG, "Friend Message Send Transaction success!");
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.w(TAG, "Friend Request Send Transaction failure.", e);
+                callback.onSendMessageResult(false);
+                Log.w(TAG, "Friend Message Send Transaction failure.", e);
             }
         });
-        */
+
+//        storage.runTransaction(new Transaction.Function<Void>() {
+//            @Override
+//            public Void apply(Transaction transaction) throws FirebaseFirestoreException {
+//
+//                DocumentSnapshot userChatIdSnapshot = transaction.get(userChatRef);
+//                DocumentSnapshot friendChatIdSnapshot = transaction.get(friendChatRef);
+//
+//                if (!userChatIdSnapshot.exists() && !friendChatIdSnapshot.exists()) {
+//                    transaction.update(userChatIdSnapshot, CHATS_ID_KEY, );
+//                } else {
+//                    // Add current user to target pending requests list
+//                }
+//                return null;
+//            }
+//        });
+    }
+
+    public void retrieveMessage(String friendEmail, FriendServiceCallback callback) {
+        CollectionReference userChatRef = storage.collection(COLLECTION_KEY).document(userEmail).collection(CHATS_KEY);
+        CollectionReference friendChatRef = storage.collection(COLLECTION_KEY).document(friendEmail).collection(CHATS_KEY);
+        userChatRef.whereEqualTo("to", friendEmail).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                QuerySnapshot querySnapshot = task.getResult();
+                if (querySnapshot != null) {
+                    List<DocumentSnapshot> documents = querySnapshot.getDocuments();
+                    Log.d(TAG, documents.toString());
+                } else {
+                    Log.d(TAG, "retrieve message query snapshot is null!");
+                }
+            }
+        });
+//        friendChatRef.whereEqualTo("to", userEmail).get();
     }
 }

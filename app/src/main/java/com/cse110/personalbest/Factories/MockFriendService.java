@@ -43,6 +43,11 @@ public class MockFriendService extends FriendService {
     }
 
     @Override
+    public void retrieveMessage(String friendEmail, FriendServiceCallback callback) {
+
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         return null;
     }

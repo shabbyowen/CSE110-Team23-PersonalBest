@@ -646,6 +646,12 @@ public class HomeActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        // prevent user to press the back button
+        // prevent user exit the home activity
+        friendService.retrieveMessage("kra008@ucsd.edu", new FriendServiceCallback() {
+            @Override
+            public void onRetrieveMessageResult() {
+                // lol
+            }
+        });
     }
 }

@@ -4,6 +4,7 @@
     <string name="title_home">Home</string>
     <string name="title_friends">Friends</string>
     <string name="title_stats">Stats</string>
+    <string name="please_wait">Please Wait</string>
 
     <!-- Daily view fragment strings -->
     <string name="start_record">Start Walk/Run</string>
