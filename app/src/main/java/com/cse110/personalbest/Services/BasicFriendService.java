@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.cse110.personalbest.Activities.HomeActivity;
 import com.cse110.personalbest.Events.FriendServiceCallback;
 import com.cse110.personalbest.Events.MyBinder;
 import com.cse110.personalbest.Factories.StorageSolutionFactory;
@@ -15,6 +18,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.*;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -166,6 +170,7 @@ public class BasicFriendService extends FriendService {
             public void onSuccess(Void aVoid) {
                 callback.onAcceptFriendResult(true);
                 Log.d(TAG, "Add Friend Transaction success!");
+                subscribeToNotificationsTopic(friend.getEmail());
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -273,6 +278,7 @@ public class BasicFriendService extends FriendService {
             public void onSuccess(Void aVoid) {
                 callback.onSendFriendRequestResult(0);
                 Log.d(TAG, "Friend Request Send Transaction success!");
+                subscribeToNotificationsTopic(friendToAddEmail);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -357,5 +363,19 @@ public class BasicFriendService extends FriendService {
             }
         });
 //        friendChatRef.whereEqualTo("to", userEmail).get();
+    }
+
+
+    private void subscribeToNotificationsTopic(String DOCUMENT_KEY) {
+        FirebaseMessaging.getInstance().subscribeToTopic(DOCUMENT_KEY)
+                .addOnCompleteListener(task -> {
+                            String msg = "Subscribed to notifications";
+                            if (!task.isSuccessful()) {
+                                msg = "Subscribe to notifications failed";
+                            }
+                            Log.d(TAG, msg);
+                            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                        }
+                );
     }
 }

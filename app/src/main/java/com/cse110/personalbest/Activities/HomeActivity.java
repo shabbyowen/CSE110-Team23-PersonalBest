@@ -32,6 +32,7 @@ import com.cse110.personalbest.Services.StepService;
 import com.cse110.personalbest.Utilities.SpeedCalculator;
 import com.cse110.personalbest.Utilities.StorageSolution;
 import com.cse110.personalbest.Utilities.TimeMachine;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -654,4 +655,7 @@ public class HomeActivity extends AppCompatActivity implements
             }
         });
     }
+
+
+
 }
