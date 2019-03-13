@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.cse110.personalbest.Activities.HomeActivity;
 import com.cse110.personalbest.Events.FriendServiceCallback;
 import com.cse110.personalbest.Events.MyBinder;
 import com.cse110.personalbest.Factories.StorageSolutionFactory;
@@ -14,9 +17,14 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.*;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +70,9 @@ public class BasicFriendService extends FriendService {
         }
         storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
         userEmail = storageSolution.get(CURRENT_USER_KEY, "");
+
+        // subscribe to self email
+        subscribeToNotificationsTopic(userEmail);
 
         return START_STICKY;
     }
@@ -295,6 +306,7 @@ public class BasicFriendService extends FriendService {
     public void sendMessage(String friendEmail, String message, FriendServiceCallback callback) {
         CollectionReference userChatRef = storage.collection(COLLECTION_USERS_KEY).document(userEmail).collection(CHATS_KEY);
         Map<String, Object> chatData = new HashMap<>();
+        chatData.put("from", userEmail);
         chatData.put("to", friendEmail);
         chatData.put("content", message);
         userChatRef.add(chatData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -348,7 +360,15 @@ public class BasicFriendService extends FriendService {
                         List<DocumentSnapshot> friendChatDocuments = friendChatQuerySnapshot.getDocuments();
                         Log.d(TAG, "friend chat documents" + friendChatDocuments.toString());
 
-
+                        userChatDocuments.addAll(friendChatDocuments);
+                        userChatDocuments.sort(new Comparator<DocumentSnapshot>() {
+                            @Override
+                            public int compare(DocumentSnapshot o1, DocumentSnapshot o2) {
+                                Timestamp t1 = (Timestamp)o1.get("timestamp");
+                                Timestamp t2 = (Timestamp)o2.get("timestamp");
+                                return t1.compareTo(t2);
+                            }
+                        });
 
                         // TODO: fix this callback to let it actually return things
                         callback.onRetrieveMessageResult();
@@ -357,5 +377,19 @@ public class BasicFriendService extends FriendService {
             }
         });
 //        friendChatRef.whereEqualTo("to", userEmail).get();
+    }
+
+
+    private void subscribeToNotificationsTopic(String topic) {
+        FirebaseMessaging.getInstance().subscribeToTopic(topic.replace("@", ""))
+                .addOnCompleteListener(task -> {
+                            String msg = "Subscribed to notifications";
+                            if (!task.isSuccessful()) {
+                                msg = "Subscribe to notifications failed";
+                            }
+                            Log.d(TAG, msg);
+                            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                        }
+                );
     }
 }

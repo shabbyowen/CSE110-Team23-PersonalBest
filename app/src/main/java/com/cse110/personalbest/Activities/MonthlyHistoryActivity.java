@@ -164,7 +164,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         super.onPause();
 
         // unbind the service
-        unbindService(friendServiceConnection);
+        //unbindService(friendServiceConnection);
         Log.d(TAG, "Unbind friend service");
     }
 
@@ -237,5 +237,13 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "back button pressed");
+        Intent intent = new Intent(MonthlyHistoryActivity.this, HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 }

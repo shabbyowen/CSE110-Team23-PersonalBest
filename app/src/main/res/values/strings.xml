@@ -47,6 +47,7 @@
 
     <!-- Toast texts -->
     <string name="saved">Saved</string>
+    <string name="refresh">Refreshing</string>
     <string name="friend_request_accept_success">Friend Added</string>
     <string name="friend_request_accept_fail">Error: Accept Friend Failed</string>
     <string name="friend_request_reject_success">Request Deleted</string>
