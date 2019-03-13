@@ -346,7 +346,7 @@ public class GoogleStepService extends StepService {
                             public void onStepResult(List<Integer> result) {
 
                                 int yesterdayStep = result.get(result.size() - 2);
-                                Date lastEncouragementDate = new Date(storageSolution.get(LAST_ENCOURAGEMENT, 0));
+                                Date lastEncouragementDate = new Date(storageSolution.get(LAST_ENCOURAGEMENT, (long) 0));
                                 Date lastGoalMetDate = new Date(storageSolution.get(LAST_GOAL_MET, 0));
                                 Date now = TimeMachine.now();
                                 Calendar cal = Calendar.getInstance();
