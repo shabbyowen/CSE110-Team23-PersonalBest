@@ -16,6 +16,7 @@ import com.cse110.personalbest.Events.WeeklyProgressFragmentInfo;
 import com.cse110.personalbest.Factories.StorageSolutionFactory;
 import com.cse110.personalbest.Friend;
 import com.cse110.personalbest.Utilities.StorageSolution;
+import com.cse110.personalbest.Utilities.TimeMachine;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -307,6 +308,7 @@ public class BasicFriendService extends FriendService {
         chatData.put("from", userEmail);
         chatData.put("to", friendEmail);
         chatData.put("content", message);
+        chatData.put("timestamp", TimeMachine.now());
         userChatRef.add(chatData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
@@ -359,13 +361,19 @@ public class BasicFriendService extends FriendService {
                             String toEmail = (String) doc.get(MESSAGE_TO_KEY);
                             String chatText = (String) doc.get(MESSAGE_CONTENT_KEY);
                             Timestamp timestamp = (Timestamp) doc.get("timestamp");
+                            Date date;
+                            if (timestamp == null) {
+                                date = TimeMachine.now();
+                            } else {
+                                date = timestamp.toDate();
+                            }
                             ChatMessage chatMessage;
                             if (fromEmail.equals(friendEmail)) {
                                 // Received Message
-                                chatMessage = new ChatMessage(fromEmail, chatText, simpleDateFormat.format(timestamp.toDate()), ChatMessage.MSG_TYPE.FROM_FRIEND);
+                                chatMessage = new ChatMessage(fromEmail, chatText, simpleDateFormat.format(date), ChatMessage.MSG_TYPE.FROM_FRIEND);
                             } else {
                                 // Sent Message
-                                chatMessage = new ChatMessage(toEmail, chatText, simpleDateFormat.format(timestamp.toDate()), ChatMessage.MSG_TYPE.TO_FRIEND);
+                                chatMessage = new ChatMessage(toEmail, chatText, simpleDateFormat.format(date), ChatMessage.MSG_TYPE.TO_FRIEND);
                             }
                             convertedMessages.add(chatMessage);
                         }

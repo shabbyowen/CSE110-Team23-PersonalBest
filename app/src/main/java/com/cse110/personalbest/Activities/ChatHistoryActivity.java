@@ -10,11 +10,15 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.cse110.personalbest.*;
 import com.cse110.personalbest.Events.FriendServiceCallback;
 import com.cse110.personalbest.Events.MyBinder;
@@ -98,6 +102,36 @@ public class ChatHistoryActivity extends AppCompatActivity {
         sendMessageBtn = findViewById(R.id.btn_send_message);
         titleTextView.setText(friendEmail);
 
+        // Setup Listeners
+        sendMessageEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString().equals("")) {
+                    sendMessageBtn.setEnabled(false);
+                } else {
+                    sendMessageBtn.setEnabled(true);
+                }
+            }
+        });
+        sendMessageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessageBtn.setEnabled(false);
+                String message = sendMessageEditText.getText().toString();
+                sendMessage(friendEmail, message);
+            }
+        });
+
         // Setup Recycler view
         chatMessagesListView = findViewById(R.id.lv_chat_messages);
         chatMessagesAdapter = new ChatMessagesListAdapter(this, new ArrayList<ChatMessage>());
@@ -158,5 +192,30 @@ public class ChatHistoryActivity extends AppCompatActivity {
     private void updateChatMessages(List<ChatMessage> result) {
         chatMessagesAdapter = new ChatMessagesListAdapter(this, result);
         chatMessagesListView.setAdapter(chatMessagesAdapter);
+    }
+
+    private void sendMessage(String receiver, String message) {
+        if (friendService == null) {
+            Log.d(TAG, "Send Message to a friend failed: friendService is null");
+            return;
+        }
+        friendService.sendMessage(receiver, message, new FriendServiceCallback() {
+            @Override
+            public void onSendMessageResult(boolean hasSendMessageSuccess){
+                if (hasSendMessageSuccess) {
+                    sendMessageEditText.setText("");
+                    Toast.makeText(ChatHistoryActivity.this, R.string.send_message_success, Toast.LENGTH_LONG).show();
+                    friendService.retrieveMessage(receiver, new FriendServiceCallback() {
+                        @Override
+                        public void onRetrieveMessageResult(List<ChatMessage> messages) {
+                            updateChatMessages(messages);
+                        }
+                    });
+                } else {
+                    sendMessageBtn.setEnabled(true);
+                    Toast.makeText(ChatHistoryActivity.this, R.string.send_message_fail, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 }
