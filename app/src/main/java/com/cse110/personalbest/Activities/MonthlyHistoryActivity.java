@@ -46,6 +46,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 
     private TextView titleTextView;
     private Button sendMessageBtn;
+    private Button toChatBtn;
     private EditText sendMessageEditText;
     private String sender;
     private String receiver;
@@ -106,6 +107,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         titleTextView = findViewById(R.id.tv_monthly_history);
         sendMessageEditText = findViewById(R.id.et_send_message);
         sendMessageBtn = findViewById(R.id.btn_send_message);
+        toChatBtn = findViewById(R.id.btn_to_chat);
         titleTextView.setText("Monthly Progress for " + receiver);
 
         // Setup Listeners
@@ -137,6 +139,12 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
                 sendMessage(receiver, message);
             }
         });
+        toChatBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openChatActivity();
+            }
+        });
 
         monthlyProgressFragment = (MonthlyProgressFragment) new MonthlyProgressFragmentFactory()
                 .create(MonthlyProgressFragmentFactory.BASIC_WEEKLY_PROGRESS_FRAGMENT_KEY);
@@ -148,6 +156,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 
         activityInitialized = true;
     }
+
 
     private Intent getFriendServiceIntent() {
         ServiceSelector serviceSelector = new FriendServiceSelector();
@@ -291,5 +300,8 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         Intent intent = new Intent(MonthlyHistoryActivity.this, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+    }
+
+    private void openChatActivity() {
     }
 }
