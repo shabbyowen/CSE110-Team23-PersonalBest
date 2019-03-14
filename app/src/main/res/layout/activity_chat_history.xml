@@ -23,15 +23,16 @@
             android:id="@+id/tv_chat_history_toolbar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="?android:attr/actionBarSize"
             android:text="Toolbar Title"
             android:layout_gravity="center"
-            android:textSize="20sp"/>
+            android:textSize="16sp"/>
     </android.support.v7.widget.Toolbar>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/lv_chat_messages"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/app_toolbar"
         app:layout_constraintBottom_toTopOf="@id/layout_send_message"
         app:layout_constraintLeft_toLeftOf="parent"

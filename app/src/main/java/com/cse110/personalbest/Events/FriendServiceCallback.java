@@ -1,5 +1,6 @@
 package com.cse110.personalbest.Events;
 
+import com.cse110.personalbest.ChatMessage;
 import com.cse110.personalbest.Friend;
 
 import java.util.List;
@@ -16,6 +17,6 @@ public class FriendServiceCallback {
     public void onRemoveFriendResult(boolean hasRemoveSuccess) {}
     public void onSendFriendRequestResult(int statusCode) {}
     public void onSendMessageResult(boolean hasSendMessageSuccess) {}
-    public void onRetrieveMessageResult() {}
+    public void onRetrieveMessageResult(List<ChatMessage> result) {}
     public void onRetrieveProgressResult(WeeklyProgressFragmentInfo info) {}
 }

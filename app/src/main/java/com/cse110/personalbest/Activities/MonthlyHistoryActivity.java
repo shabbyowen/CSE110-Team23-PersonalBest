@@ -40,6 +40,8 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
     private static final String SENDER = "sender";
     private static final String RECEIVER = "receiver";
     private static final String TAG = "MonthlyHistoryActivity";
+    private static final String CHAT_FRIEND_EMAIL = "chat_friend_email";
+    private static final String MY_EMAIL = "my_email";
 
     private MonthlyProgressFragment monthlyProgressFragment;
     private WeeklyProgressFragmentInfo friendInfo;
@@ -303,5 +305,10 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
     }
 
     private void openChatActivity() {
+        Intent intent = new Intent(this, ChatHistoryActivity.class);
+        intent.putExtra(MY_EMAIL, sender);
+        intent.putExtra(CHAT_FRIEND_EMAIL, receiver);
+        intent.putExtra(FRIEND_SERVICE_KEY_EXTRA, friendServiceKey);
+        startActivity(intent);
     }
 }

@@ -2,12 +2,14 @@ package com.cse110.personalbest.Services;
 
 import android.app.Service;
 import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.cse110.personalbest.Activities.HomeActivity;
+import com.cse110.personalbest.ChatMessage;
 import com.cse110.personalbest.Events.FriendServiceCallback;
 import com.cse110.personalbest.Events.MyBinder;
 import com.cse110.personalbest.Events.WeeklyProgressFragmentInfo;
@@ -23,13 +25,7 @@ import com.google.firebase.firestore.*;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BasicFriendService extends FriendService {
     private static final String TAG = "BasicFriendService";
@@ -43,7 +39,7 @@ public class BasicFriendService extends FriendService {
     private static final String CHATS_ID_KEY = "chats_id";
     private static final String MESSAGE_FROM_KEY = "from";
     private static final String MESSAGE_TO_KEY = "to";
-    private static final String MESSAGE_TEXT_KEY = "text";
+    private static final String MESSAGE_CONTENT_KEY = "content";
 
     private StorageSolution storageSolution;
     private String storageSolutionKey;
@@ -324,22 +320,6 @@ public class BasicFriendService extends FriendService {
                 Log.w(TAG, "Friend Message Send Transaction failure.", e);
             }
         });
-
-//        storage.runTransaction(new Transaction.Function<Void>() {
-//            @Override
-//            public Void apply(Transaction transaction) throws FirebaseFirestoreException {
-//
-//                DocumentSnapshot userChatIdSnapshot = transaction.get(userChatRef);
-//                DocumentSnapshot friendChatIdSnapshot = transaction.get(friendChatRef);
-//
-//                if (!userChatIdSnapshot.exists() && !friendChatIdSnapshot.exists()) {
-//                    transaction.update(userChatIdSnapshot, CHATS_ID_KEY, );
-//                } else {
-//                    // Add current user to target pending requests list
-//                }
-//                return null;
-//            }
-//        });
     }
 
     public void retrieveMessage(String friendEmail, FriendServiceCallback callback) {
@@ -368,17 +348,34 @@ public class BasicFriendService extends FriendService {
                             public int compare(DocumentSnapshot o1, DocumentSnapshot o2) {
                                 Timestamp t1 = (Timestamp)o1.get("timestamp");
                                 Timestamp t2 = (Timestamp)o2.get("timestamp");
-                                return t1.compareTo(t2);
+                                return -t1.compareTo(t2);
                             }
                         });
 
+                        List<ChatMessage> convertedMessages = new ArrayList<>();
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.US);
+                        for (DocumentSnapshot doc : userChatDocuments) {
+                            String fromEmail = (String) doc.get(MESSAGE_FROM_KEY);
+                            String toEmail = (String) doc.get(MESSAGE_TO_KEY);
+                            String chatText = (String) doc.get(MESSAGE_CONTENT_KEY);
+                            Timestamp timestamp = (Timestamp) doc.get("timestamp");
+                            ChatMessage chatMessage;
+                            if (fromEmail.equals(friendEmail)) {
+                                // Received Message
+                                chatMessage = new ChatMessage(fromEmail, chatText, simpleDateFormat.format(timestamp.toDate()), ChatMessage.MSG_TYPE.FROM_FRIEND);
+                            } else {
+                                // Sent Message
+                                chatMessage = new ChatMessage(toEmail, chatText, simpleDateFormat.format(timestamp.toDate()), ChatMessage.MSG_TYPE.TO_FRIEND);
+                            }
+                            convertedMessages.add(chatMessage);
+                        }
+
                         // TODO: fix this callback to let it actually return things
-                        callback.onRetrieveMessageResult();
+                        callback.onRetrieveMessageResult(convertedMessages);
                     }
                 });
             }
         });
-//        friendChatRef.whereEqualTo("to", userEmail).get();
     }
 
     @Override
@@ -402,7 +399,6 @@ public class BasicFriendService extends FriendService {
             }
         });
     }
-
 
     private void subscribeToNotificationsTopic(String topic) {
         FirebaseMessaging.getInstance().subscribeToTopic(topic.replace("@", ""))
