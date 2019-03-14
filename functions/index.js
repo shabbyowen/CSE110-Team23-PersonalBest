@@ -39,6 +39,10 @@ exports.sendChatNotifications = functions.firestore
            title: document.from + ' sent you a message',
            body: document.content
          },
+         data: {
+           chat_friend_email: document.from,
+           my_email: document.to
+         },
          topic: document.to.replace('@', '')
        };
 
