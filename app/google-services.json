@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1081075798002",
+    "firebase_url": "https://cse110-personalbest.firebaseio.com",
+    "project_id": "cse110-personalbest",
+    "storage_bucket": "cse110-personalbest.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1081075798002:android:8abe330aa97e5240",
+        "android_client_info": {
+          "package_name": "com.cse110.personalbest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1081075798002-g6prr4pr4u472t420li0rkes4fule95d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cse110.personalbest",
+            "certificate_hash": "9d593ba95126d6973287c59e97a66be371a448cf"
+          }
+        },
+        {
+          "client_id": "1081075798002-12a46ub0qsnhbt05uc1nndrmk7eiqev3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBY1MH_7_Eki9A4zYDdvc1yfHlgrtC7_ys"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1081075798002-12a46ub0qsnhbt05uc1nndrmk7eiqev3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

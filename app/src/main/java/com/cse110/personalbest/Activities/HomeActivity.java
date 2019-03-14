@@ -18,24 +18,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cse110.personalbest.Events.*;
-import com.cse110.personalbest.Factories.DailyGoalFragmentFactory;
-import com.cse110.personalbest.Factories.FragmentFactory;
-import com.cse110.personalbest.Factories.InputDialogFragmentFactory;
+import com.cse110.personalbest.Factories.*;
 import com.cse110.personalbest.Fragments.DailyGoalFragment;
+import com.cse110.personalbest.Fragments.FriendsListFragment;
 import com.cse110.personalbest.Fragments.InputDialogFragment;
 import com.cse110.personalbest.Fragments.WeeklyProgressFragment;
-import com.cse110.personalbest.Factories.WeeklyProgressFragmentFactory;
+import com.cse110.personalbest.Friend;
 import com.cse110.personalbest.R;
-import com.cse110.personalbest.Factories.ServiceSelector;
+import com.cse110.personalbest.Services.FriendService;
 import com.cse110.personalbest.Services.SessionService;
-import com.cse110.personalbest.Factories.SessionServiceSelector;
 import com.cse110.personalbest.Services.StepService;
-import com.cse110.personalbest.Factories.StepServiceSelector;
 import com.cse110.personalbest.Utilities.SpeedCalculator;
 import com.cse110.personalbest.Utilities.StorageSolution;
-import com.cse110.personalbest.Factories.StorageSolutionFactory;
 import com.cse110.personalbest.Utilities.TimeMachine;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.*;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.fitness.FitnessOptions;
+import com.google.android.gms.fitness.data.DataType;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity implements
@@ -45,29 +49,39 @@ public class HomeActivity extends AppCompatActivity implements
     private static final String TAG = "HomeActivity";
 
     // storage key
-    public static final String USER_HEIGHT = "user_height";
+    private static final String USER_HEIGHT = "user_height";
+    private static final String USER_EMAIL = "user_email";
+    private static final String USER_DISPLAY_NAME = "user_name";
 
     // extra string keys
     public static final String STEP_SERVICE_KEY_EXTRA = "step_service_key_extra";
     public static final String SESSION_SERVICE_KEY_EXTRA = "session_service_key_extra";
     public static final String STORAGE_SOLUTION_KEY_EXTRA = "storage_solution_key_extra";
+    private static final int RC_SIGN_IN = 12345;
 
     // factory keys
     private String stepServiceKey = StepServiceSelector.GOOGLE_STEP_SERVICE_KEY;
     private String sessionServiceKey = SessionServiceSelector.BASIC_SESSION_SERVICE_KEY;
+    private String friendServiceKey = FriendServiceSelector.BASIC_FRIEND_SERVICE_KEY;
     private String storageSolutionKey = StorageSolutionFactory.SHARED_PREF_KEY;
 
     private StepService stepService;
     private SessionService sessionService;
+    private FriendService friendService;
     private StorageSolution storageSolution;
 
     private DailyGoalFragment dailyGoalFragment;
+    private FriendsListFragment friendsListFragment;
     private WeeklyProgressFragment weeklyProgressFragment;
 
     private FragmentManager fragmentManager;
     private Fragment currentFragment;
 
     private FragmentFactory inputDialogFragmentFactory;
+
+    private GoogleSignInClient mGoogleSignInClient;
+    private GoogleSignInAccount account;
+    private boolean activityInitialized = false;
 
     private int height = 70;
 
@@ -108,6 +122,21 @@ public class HomeActivity extends AppCompatActivity implements
         }
     };
 
+    // service connection for friend service
+    private ServiceConnection friendServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyBinder binder = (MyBinder) service;
+            friendService = (FriendService) binder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            friendService = null;
+        }
+    };
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
         = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -118,6 +147,8 @@ public class HomeActivity extends AppCompatActivity implements
                     display(dailyGoalFragment);
                     return true;
                 case R.id.navigation_friend:
+                    updateFriendsListFragment();
+                    display(friendsListFragment);
                     return true;
                 case R.id.navigation_stats:
                     updateWeeklyProgressFragment();
@@ -131,6 +162,34 @@ public class HomeActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // get the storage solution
+        storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
+
+        /* ----------------------------------------Google Sign in------------------------------------ */
+        account = GoogleSignIn.getLastSignedInAccount(this);
+        if (account == null) {
+            FitnessOptions fitnessOptions = FitnessOptions.builder()
+                    .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                    .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_WRITE)
+                    .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                    .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_WRITE)
+                    .build();
+
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .requestId()
+                    .addExtension(fitnessOptions)
+                    .build();
+            mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+            startActivityForResult(signInIntent, RC_SIGN_IN);
+        } else {
+            initHomeScreenActivity();
+        }
+    }
+
+    private void initHomeScreenActivity() {
         setContentView(R.layout.activity_home);
 
         // retrieve the step service key
@@ -155,9 +214,8 @@ public class HomeActivity extends AppCompatActivity implements
         // start the services
         startService(getStepServiceIntent());
         startService(getSessionServiceIntent());
+        startService(getFriendServiceIntent());
 
-        // get the storage solution
-        storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
 
         // ui init
         BottomNavigationView navigation = findViewById(R.id.navigation);
@@ -167,6 +225,10 @@ public class HomeActivity extends AppCompatActivity implements
         dailyGoalFragment = (DailyGoalFragment) new DailyGoalFragmentFactory()
             .create(DailyGoalFragmentFactory.BASIC_DAILY_GOAL_FRAGMENT_KEY);
         dailyGoalFragment.setListener(this);
+
+        // creating friends list fragment
+        friendsListFragment = (FriendsListFragment) new FriendsListFragmentFactory()
+            .create(FriendsListFragmentFactory.BASIC_FRIENDS_LIST_FRAGMENT_KEY);
 
         // creating weekly progress fragment
         weeklyProgressFragment = (WeeklyProgressFragment) new WeeklyProgressFragmentFactory()
@@ -178,6 +240,7 @@ public class HomeActivity extends AppCompatActivity implements
         currentFragment = dailyGoalFragment;
         ft.add(R.id.home_screen_container, dailyGoalFragment);
         ft.add(R.id.home_screen_container, weeklyProgressFragment).hide(weeklyProgressFragment);
+        ft.add(R.id.home_screen_container, friendsListFragment).hide(friendsListFragment);
         ft.commit();
 
         // set up factory
@@ -192,15 +255,21 @@ public class HomeActivity extends AppCompatActivity implements
                 "height_input_dialog",
                 null);
         }
+        activityInitialized = true;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        if (!activityInitialized) {
+            return;
+        }
+
         // bind to the service
         bindService(getStepServiceIntent(), stepServiceConnection, Context.BIND_AUTO_CREATE);
         bindService(getSessionServiceIntent(), sessionServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService(getFriendServiceIntent(), friendServiceConnection, Context.BIND_AUTO_CREATE);
         Log.d(TAG, "Bind to step service");
     }
 
@@ -208,10 +277,15 @@ public class HomeActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
 
+        if (!activityInitialized) {
+            return;
+        }
+
         // unbind the service
         sessionService.saveNow();
         unbindService(stepServiceConnection);
         unbindService(sessionServiceConnection);
+        unbindService(friendServiceConnection);
         Log.d(TAG, "Unbind step service");
     }
 
@@ -226,6 +300,13 @@ public class HomeActivity extends AppCompatActivity implements
         ServiceSelector serviceSelector = new SessionServiceSelector();
         Intent intent = new Intent(this, serviceSelector.retrieveServiceClass(sessionServiceKey));
         intent.putExtra(SessionService.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);
+        return intent;
+    }
+
+    private Intent getFriendServiceIntent() {
+        ServiceSelector serviceSelector = new FriendServiceSelector();
+        Intent intent = new Intent(this, serviceSelector.retrieveServiceClass(friendServiceKey));
+        intent.putExtra(FriendService.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);
         return intent;
     }
 
@@ -380,28 +461,82 @@ public class HomeActivity extends AppCompatActivity implements
     }
 
     public void updateWeeklyProgressFragment() {
+        if (weeklyProgressFragment == null) {
+            return;
+        }
+
         sessionService.getWeekSession(new SessionServiceCallback() {
             @Override
             public void onSessionResult(List<Session> result) {
 
-                List<Session> sessionList = result;
+                final List<Session> sessionList = result;
 
                 stepService.getWeekStep(new StepServiceCallback(){
                     @Override
                     public void onStepResult(List<Integer> result) {
 
-                        List<Integer> totalStepList = result;
+                        final List<Integer> totalStepList = result;
 
                         stepService.getWeekGoal(new StepServiceCallback() {
                             @Override
                             public void onGoalResult(List<Integer> result) {
 
                                 List<Integer> goalList = result;
+                                List<Integer> intentionalStep = new LinkedList<>();
+                                List<Integer> unintentionalStep = new LinkedList<>();
+                                List<Integer> speed = new LinkedList<>();
+                                for (int i = 0; i < sessionList.size(); i++) {
+                                    int intentional = sessionList.get(i).deltaStep;
+                                    int time = (int)sessionList.get(i).deltaTime;
+                                    int total = totalStepList.get(i);
+                                    intentionalStep.add(intentional);
+                                    unintentionalStep.add(total - intentional);
+                                    speed.add((int)Math.round(SpeedCalculator.calculateSpeed(intentional, time, height)));
+                                }
+                                WeeklyProgressFragmentInfo info = new WeeklyProgressFragmentInfo();
+                                info.intentionalSteps = intentionalStep;
+                                info.unintentionalSteps = unintentionalStep;
+                                info.weekGoal = goalList;
+                                info.weekSpeed = speed;
+                                weeklyProgressFragment.updateView(info);
                             }
                         });
                     }
                 });
             }
         });
+    }
+
+    public void updateFriendsListFragment() {
+        friendService.getPendingRequests(new FriendServiceCallback() {
+            @Override
+            public void onPendingRequestsResult(List<Friend> result) {
+                FriendsListFragmentInfo info = new FriendsListFragmentInfo();
+                info.pendingFriends = result;
+                friendsListFragment.updateView(info);
+            }
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
+        }
+    }
+
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount googleAccount = completedTask.getResult(ApiException.class);
+            storageSolution.put(USER_EMAIL, googleAccount.getEmail());
+            storageSolution.put(USER_DISPLAY_NAME, googleAccount.getDisplayName());
+            initHomeScreenActivity();
+        } catch (ApiException e) {
+            Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
+        }
     }
 }
