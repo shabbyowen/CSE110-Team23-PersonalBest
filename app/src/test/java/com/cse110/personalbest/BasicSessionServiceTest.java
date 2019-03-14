@@ -38,7 +38,7 @@ public class BasicSessionServiceTest {
     @Test
     public void testGetWeekSession() {
         SessionService service = serviceController.create().startCommand(0, 0).get();
-        service.getWeekSession(new SessionServiceCallback() {
+        service.getSession(7, new SessionServiceCallback() {
             @Override
             public void onSessionResult(List<Session> result) {
                 System.out.println(result.toString());

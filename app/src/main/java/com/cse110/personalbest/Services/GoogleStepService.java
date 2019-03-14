@@ -18,7 +18,6 @@ import com.cse110.personalbest.Utilities.StorageSolution;
 import com.cse110.personalbest.Utilities.TimeMachine;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.Bucket;
@@ -219,7 +218,7 @@ public class GoogleStepService extends StepService {
     }
 
     @Override
-    public void getWeekStep(final StepServiceCallback callback) {
+    public void getStep(int day, final StepServiceCallback callback) {
         GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(this);
         if (lastSignedInAccount == null) {
             Log.w(TAG, "No account signed in!");
@@ -228,7 +227,7 @@ public class GoogleStepService extends StepService {
 
         Log.d(TAG, "Trying to get this week step count...");
         Fitness.getHistoryClient(this, lastSignedInAccount)
-            .readData(readRequest())
+            .readData(readRequest(day))
             .addOnSuccessListener(new OnSuccessListener<DataReadResponse>() {
                 @Override
                 public void onSuccess(DataReadResponse dataReadResponse) {
@@ -303,7 +302,7 @@ public class GoogleStepService extends StepService {
 
     // TODO: week goal is not displayed properly
     @Override
-    public void getWeekGoal(StepServiceCallback callback) {
+    public void getGoal(int day, StepServiceCallback callback) {
         List<GoalInfo> list = loadGoalInfo();
         List<Integer> result = new LinkedList<>();
 
@@ -311,11 +310,11 @@ public class GoogleStepService extends StepService {
             list = new LinkedList<>();
         }
 
-        if (list.size() > 7) {
-            list = list.subList(list.size() - 7, list.size());
+        if (list.size() > day) {
+            list = list.subList(list.size() - day, list.size());
         }
-        if (list.size() < 7) {
-            while (list.size() < 7) {
+        if (list.size() < day) {
+            while (list.size() < day) {
                 list.add(0, new GoalInfo(5000, 0));
             }
         }
@@ -341,7 +340,7 @@ public class GoogleStepService extends StepService {
                         final int goal = result.get(0);
 
                         // check if should display encouragement
-                        getWeekStep(new StepServiceCallback() {
+                        getStep(2, new StepServiceCallback() {
                             @Override
                             public void onStepResult(List<Integer> result) {
 
@@ -425,13 +424,13 @@ public class GoogleStepService extends StepService {
             });
     }
 
-    public DataReadRequest readRequest() {
+    public DataReadRequest readRequest(int day) {
 
         // get today midnight
         Date end = DateCalculator.toClosestMidnightTmr(TimeMachine.now());
         Calendar cal = Calendar.getInstance();
         cal.setTime(end);
-        cal.add(Calendar.WEEK_OF_YEAR, -1);
+        cal.add(Calendar.DATE, -day);
         Date start = cal.getTime();
 
         // create request

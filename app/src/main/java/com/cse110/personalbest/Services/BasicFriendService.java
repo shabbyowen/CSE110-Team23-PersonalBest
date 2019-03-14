@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.cse110.personalbest.Activities.HomeActivity;
 import com.cse110.personalbest.Events.FriendServiceCallback;
 import com.cse110.personalbest.Events.MyBinder;
+import com.cse110.personalbest.Events.WeeklyProgressFragmentInfo;
 import com.cse110.personalbest.Factories.StorageSolutionFactory;
 import com.cse110.personalbest.Friend;
 import com.cse110.personalbest.Utilities.StorageSolution;
@@ -20,6 +21,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.*;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -377,6 +379,28 @@ public class BasicFriendService extends FriendService {
             }
         });
 //        friendChatRef.whereEqualTo("to", userEmail).get();
+    }
+
+    @Override
+    public void retrieveProgress(String email, FriendServiceCallback callback) {
+        DocumentReference userRef = storage.collection(COLLECTION_USERS_KEY).document(email);
+
+        // retrieve friend's monthly progress from the cloud, the result is null when the friend has
+        // no uploaded any monthly progress
+        userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    Gson gson = new Gson();
+                    String json = (String) task.getResult().get("progress");
+                    WeeklyProgressFragmentInfo info = gson.fromJson(json, WeeklyProgressFragmentInfo.class);
+                    callback.onRetrieveProgressResult(info);
+                    Log.d(TAG, "onComplete: Retrieve progress successful");
+                } else {
+                    Log.d(TAG, "onComplete: Retrieve progress failed");
+                }
+            }
+        });
     }
 
 

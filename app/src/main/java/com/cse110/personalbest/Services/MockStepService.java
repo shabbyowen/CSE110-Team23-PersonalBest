@@ -52,7 +52,7 @@ public class MockStepService extends StepService {
     }
 
     @Override
-    public void getWeekStep(StepServiceCallback callback) {
+    public void getStep(int day, StepServiceCallback callback) {
 
     }
 
@@ -67,7 +67,7 @@ public class MockStepService extends StepService {
     }
 
     @Override
-    public void getWeekGoal(StepServiceCallback callback) {
+    public void getGoal(int day, StepServiceCallback callback) {
 
     }
 
