@@ -40,12 +40,15 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
     private static final String SENDER = "sender";
     private static final String RECEIVER = "receiver";
     private static final String TAG = "MonthlyHistoryActivity";
+    private static final String CHAT_FRIEND_EMAIL = "chat_friend_email";
+    private static final String MY_EMAIL = "my_email";
 
     private MonthlyProgressFragment monthlyProgressFragment;
     private WeeklyProgressFragmentInfo friendInfo;
 
     private TextView titleTextView;
     private Button sendMessageBtn;
+    private Button toChatBtn;
     private EditText sendMessageEditText;
     private String sender;
     private String receiver;
@@ -106,6 +109,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         titleTextView = findViewById(R.id.tv_monthly_history);
         sendMessageEditText = findViewById(R.id.et_send_message);
         sendMessageBtn = findViewById(R.id.btn_send_message);
+        toChatBtn = findViewById(R.id.btn_to_chat);
         titleTextView.setText("Monthly Progress for " + receiver);
 
         // Setup Listeners
@@ -137,6 +141,12 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
                 sendMessage(receiver, message);
             }
         });
+        toChatBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openChatActivity();
+            }
+        });
 
         monthlyProgressFragment = (MonthlyProgressFragment) new MonthlyProgressFragmentFactory()
                 .create(MonthlyProgressFragmentFactory.BASIC_WEEKLY_PROGRESS_FRAGMENT_KEY);
@@ -148,6 +158,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 
         activityInitialized = true;
     }
+
 
     private Intent getFriendServiceIntent() {
         ServiceSelector serviceSelector = new FriendServiceSelector();
@@ -290,6 +301,14 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         Log.d(TAG, "back button pressed");
         Intent intent = new Intent(MonthlyHistoryActivity.this, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    private void openChatActivity() {
+        Intent intent = new Intent(this, ChatHistoryActivity.class);
+        intent.putExtra(MY_EMAIL, sender);
+        intent.putExtra(CHAT_FRIEND_EMAIL, receiver);
+        intent.putExtra(FRIEND_SERVICE_KEY_EXTRA, friendServiceKey);
         startActivity(intent);
     }
 }
