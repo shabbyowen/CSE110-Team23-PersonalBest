@@ -32,7 +32,6 @@ import com.cse110.personalbest.Services.StepService;
 import com.cse110.personalbest.Utilities.SpeedCalculator;
 import com.cse110.personalbest.Utilities.StorageSolution;
 import com.cse110.personalbest.Utilities.TimeMachine;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -44,8 +43,8 @@ public class HomeActivity extends AppCompatActivity implements
     private static final String TAG = "HomeActivity";
 
     // storage key
-    private static final String USER_EMAIL = "user_email";
-    private static final String USER_HEIGHT = "user_height";
+    public static final String USER_EMAIL = "user_email";
+    public static final String USER_HEIGHT = "user_height";
 
     // Messaging keys
     private static final String SENDER = "sender";
@@ -286,6 +285,7 @@ public class HomeActivity extends AppCompatActivity implements
 
         // unbind the service
         sessionService.saveNow();
+        sessionService.uploadMonthlyProgress();
         unbindService(stepServiceConnection);
         unbindService(sessionServiceConnection);
         unbindService(friendServiceConnection);
@@ -495,19 +495,19 @@ public class HomeActivity extends AppCompatActivity implements
             return;
         }
 
-        sessionService.getWeekSession(new SessionServiceCallback() {
+        sessionService.getSession(7, new SessionServiceCallback() {
             @Override
             public void onSessionResult(List<Session> result) {
 
                 final List<Session> sessionList = result;
 
-                stepService.getWeekStep(new StepServiceCallback(){
+                stepService.getStep(7, new StepServiceCallback(){
                     @Override
                     public void onStepResult(List<Integer> result) {
 
                         final List<Integer> totalStepList = result;
 
-                        stepService.getWeekGoal(new StepServiceCallback() {
+                        stepService.getGoal(7, new StepServiceCallback() {
                             @Override
                             public void onGoalResult(List<Integer> result) {
 
@@ -649,10 +649,10 @@ public class HomeActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         // prevent user exit the home activity
-        friendService.retrieveMessage("kra008@ucsd.edu", new FriendServiceCallback() {
+        friendService.retrieveProgress("jit072@ucsd.edu", new FriendServiceCallback() {
             @Override
-            public void onRetrieveMessageResult() {
-                // lol
+            public void onRetrieveProgressResult(WeeklyProgressFragmentInfo info) {
+                Log.d(TAG, "onRetrieveProgressResult: " + info.toString());
             }
         });
     }

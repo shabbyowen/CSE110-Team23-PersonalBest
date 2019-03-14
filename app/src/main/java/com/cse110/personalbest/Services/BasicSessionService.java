@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.cse110.personalbest.Activities.HomeActivity;
 import com.cse110.personalbest.Events.MyBinder;
 import com.cse110.personalbest.Events.ObservableServiceListener;
 import com.cse110.personalbest.Events.Session;
@@ -15,13 +17,19 @@ import com.cse110.personalbest.Events.SessionServiceCallback;
 import com.cse110.personalbest.Events.SessionServiceListener;
 import com.cse110.personalbest.Events.StepServiceCallback;
 import com.cse110.personalbest.Events.StepServiceListener;
+import com.cse110.personalbest.Events.WeeklyProgressFragmentInfo;
 import com.cse110.personalbest.Factories.ServiceSelector;
 import com.cse110.personalbest.Factories.StepServiceSelector;
 import com.cse110.personalbest.Utilities.DateCalculator;
+import com.cse110.personalbest.Utilities.SpeedCalculator;
 import com.cse110.personalbest.Utilities.StorageSolution;
 import com.cse110.personalbest.Factories.StorageSolutionFactory;
 import com.cse110.personalbest.Utilities.TestConfig;
 import com.cse110.personalbest.Utilities.TimeMachine;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -35,6 +43,7 @@ public class BasicSessionService extends SessionService implements StepServiceLi
 
     public static final String CURRENT_SESSION = "current_session";
     public static final String SESSION_LIST = "session_list";
+    public static final String COLLECTION_USERS_KEY = "users";
 
     private static final String TAG = "BasicSessionService";
     private static final int UPDATE_DELAY = 1 * 1000;
@@ -205,7 +214,7 @@ public class BasicSessionService extends SessionService implements StepServiceLi
     }
 
     @Override
-    public void getWeekSession(SessionServiceCallback callback) {
+    public void getSession(int day, SessionServiceCallback callback) {
         List<Session> sessions = loadSessionList();
         List<Session> result = new LinkedList<>();
 
@@ -213,7 +222,7 @@ public class BasicSessionService extends SessionService implements StepServiceLi
             sessions = new LinkedList<>();
         }
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < day; i++) {
             result.add(new Session());
         }
 
@@ -223,7 +232,7 @@ public class BasicSessionService extends SessionService implements StepServiceLi
             Session session = sessions.get(i);
             Date startTime = new Date(session.startTime);
             int difference = DateCalculator.dateDifference(now, startTime);
-            if (difference >= 7) {
+            if (difference >= day) {
                 break;
             }
             Session target = result.get(difference);
@@ -236,6 +245,68 @@ public class BasicSessionService extends SessionService implements StepServiceLi
         // reverse the order of the list
         Collections.reverse(result);
         callback.onSessionResult(result);
+    }
+
+    @Override
+    public void uploadMonthlyProgress() {
+        this.getSession(28, new SessionServiceCallback() {
+            @Override
+            public void onSessionResult(List<Session> result) {
+
+                final List<Session> sessionList = result;
+
+                stepService.getStep(28, new StepServiceCallback(){
+                    @Override
+                    public void onStepResult(List<Integer> result) {
+
+                        final List<Integer> totalStepList = result;
+
+                        stepService.getGoal(28, new StepServiceCallback() {
+                            @Override
+                            public void onGoalResult(List<Integer> result) {
+
+                                List<Integer> goalList = result;
+                                List<Integer> intentionalStep = new LinkedList<>();
+                                List<Integer> unintentionalStep = new LinkedList<>();
+                                List<Integer> speed = new LinkedList<>();
+                                for (int i = 0; i < sessionList.size(); i++) {
+                                    int intentional = sessionList.get(i).deltaStep;
+                                    int time = (int)sessionList.get(i).deltaTime;
+                                    int total = totalStepList.get(i);
+                                    intentionalStep.add(intentional);
+                                    unintentionalStep.add(total - intentional);
+                                    speed.add((int)Math.round(SpeedCalculator.calculateSpeed(intentional, time, storageSolution.get(HomeActivity.USER_HEIGHT, 70))));
+                                }
+                                WeeklyProgressFragmentInfo info = new WeeklyProgressFragmentInfo();
+                                info.intentionalSteps = intentionalStep;
+                                info.unintentionalSteps = unintentionalStep;
+                                info.weekGoal = goalList;
+                                info.weekSpeed = speed;
+
+                                Gson gson = new Gson();
+                                String email = storageSolution.get(HomeActivity.USER_EMAIL, "dummy@gmail.com");
+                                FirebaseFirestore store = FirebaseFirestore.getInstance();
+                                DocumentReference userRef = store.collection(COLLECTION_USERS_KEY).document(email);
+                                String json = gson.toJson(info);
+                                userRef.update("progress", json)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Log.d(TAG, "onSuccess: monthly progress update successful!");
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.d(TAG, "onFailure: monthly progress update failed");
+                                        }
+                                    });
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
     public void recordSession(Session session) {
@@ -281,7 +352,7 @@ public class BasicSessionService extends SessionService implements StepServiceLi
             if (!DateCalculator.isSameDate(now, startDate)) {
 
                 // calculate the delta step
-                stepService.getWeekStep(new StepServiceCallback() {
+                stepService.getStep(7, new StepServiceCallback() {
                     @Override
                     public void onStepResult(List<Integer> result) {
 

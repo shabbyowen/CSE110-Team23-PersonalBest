@@ -17,4 +17,5 @@ public class FriendServiceCallback {
     public void onSendFriendRequestResult(int statusCode) {}
     public void onSendMessageResult(boolean hasSendMessageSuccess) {}
     public void onRetrieveMessageResult() {}
+    public void onRetrieveProgressResult(WeeklyProgressFragmentInfo info) {}
 }

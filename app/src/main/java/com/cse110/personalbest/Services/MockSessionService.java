@@ -38,7 +38,12 @@ public class MockSessionService extends SessionService {
     }
 
     @Override
-    public void getWeekSession(SessionServiceCallback callback) {
+    public void getSession(int day, SessionServiceCallback callback) {
+
+    }
+
+    @Override
+    public void uploadMonthlyProgress() {
 
     }
 

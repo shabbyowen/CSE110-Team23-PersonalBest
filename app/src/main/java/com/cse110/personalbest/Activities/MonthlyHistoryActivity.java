@@ -59,6 +59,8 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             MyBinder binder = (MyBinder) service;
             friendService = (FriendService) binder.getService();
+
+            // update friend's monthly activity
         }
 
         @Override

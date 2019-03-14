@@ -35,7 +35,7 @@ public class GoogleStepServiceTest {
 
     @Test
     public void testGetWeekGoal() {
-        service.getWeekGoal(new StepServiceCallback() {
+        service.getGoal(, new StepServiceCallback() {
             @Override
             public void onGoalResult(List<Integer> result) {
                 List<Integer> expected = Arrays.asList(5000, 5000, 5000, 5000, 5000, 123, 321);
