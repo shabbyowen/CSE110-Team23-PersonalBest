@@ -40,8 +40,8 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
     private static final String SENDER = "sender";
     private static final String RECEIVER = "receiver";
     private static final String TAG = "MonthlyHistoryActivity";
-    private static final String CHAT_FRIEND_EMAIL = "chat_friend_email";
-    private static final String MY_EMAIL = "my_email";
+    public static final String CHAT_FRIEND_EMAIL = "chat_friend_email";
+    public static final String MY_EMAIL = "my_email";
 
     private MonthlyProgressFragment monthlyProgressFragment;
     private WeeklyProgressFragmentInfo friendInfo;

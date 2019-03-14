@@ -69,8 +69,17 @@ public class GoogleSignInActivity extends AppCompatActivity {
     }
 
     private void startHomeScreenActivity() {
+
         Intent intent = new Intent(this, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        // try to get the starting intent
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            String friendEmail = (String)bundle.get(HomeActivity.FRIEND_EMAIL_EXTRA);
+            String myEmail = (String)bundle.get(HomeActivity.MY_EMAIL_EXTRA);
+            intent.putExtra(HomeActivity.FRIEND_EMAIL_EXTRA, friendEmail);
+            intent.putExtra(HomeActivity.MY_EMAIL_EXTRA, myEmail);
+        }
         startActivity(intent);
         finish();
     }

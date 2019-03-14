@@ -370,7 +370,6 @@ public class BasicFriendService extends FriendService {
                             convertedMessages.add(chatMessage);
                         }
 
-                        // TODO: fix this callback to let it actually return things
                         callback.onRetrieveMessageResult(convertedMessages);
                     }
                 });

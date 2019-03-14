@@ -55,6 +55,8 @@ public class HomeActivity extends AppCompatActivity implements
     public static final String SESSION_SERVICE_KEY_EXTRA = "session_service_key_extra";
     public static final String FRIEND_SERVICE_KEY_EXTRA = "friend_service_key_extra";
     public static final String STORAGE_SOLUTION_KEY_EXTRA = "storage_solution_key_extra";
+    public static final String FRIEND_EMAIL_EXTRA = "chat_friend_email";
+    public static final String MY_EMAIL_EXTRA = "my_email";
 
     // factory keys
     private String stepServiceKey = StepServiceSelector.GOOGLE_STEP_SERVICE_KEY;
@@ -258,6 +260,17 @@ public class HomeActivity extends AppCompatActivity implements
                 null);
         }
         activityInitialized = true;
+
+        // handle notification click
+        String friendEmail = intent.getStringExtra(FRIEND_EMAIL_EXTRA);
+        String myEmail = intent.getStringExtra(MY_EMAIL_EXTRA);
+        if (friendEmail != null && myEmail != null) {
+            Intent chatIntent = new Intent(this, ChatHistoryActivity.class);
+            chatIntent.putExtra(MonthlyHistoryActivity.MY_EMAIL, myEmail);
+            chatIntent.putExtra(MonthlyHistoryActivity.CHAT_FRIEND_EMAIL, friendEmail);
+            chatIntent.putExtra(FRIEND_SERVICE_KEY_EXTRA, friendServiceKey);
+            startActivity(chatIntent);
+        }
     }
 
     @Override
