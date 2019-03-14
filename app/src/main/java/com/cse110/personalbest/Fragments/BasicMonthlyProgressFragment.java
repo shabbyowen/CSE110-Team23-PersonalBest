@@ -38,24 +38,24 @@ public class BasicMonthlyProgressFragment extends MonthlyProgressFragment {
 
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.add(R.id.fragment_basic_monthly_progress, week4);
-        ft.add(R.id.fragment_basic_monthly_progress, week3);
-        ft.add(R.id.fragment_basic_monthly_progress, week2);
-        ft.add(R.id.fragment_basic_monthly_progress, week1);
+        ft.add(R.id.fragment_basic_monthly_progress_4, week4);
+        ft.add(R.id.fragment_basic_monthly_progress_3, week3);
+        ft.add(R.id.fragment_basic_monthly_progress_2, week2);
+        ft.add(R.id.fragment_basic_monthly_progress_1, week1);
         ft.commit();
 
         /* TESTING STUFF WE DELETE THIS LATER :) */
-        MonthlyProgressFragmentInfo info = new MonthlyProgressFragmentInfo();
-        info.week1Info = new WeeklyProgressFragmentInfo();
-        info.week1Info.intentionalSteps = Arrays.asList(3000, 3000, 5000, 8000, 1000, 2000, 5000);
-        info.week1Info.unintentionalSteps = Arrays.asList(0, 2000, 1000, 200, 1000, 5000, 1000);
-        info.week1Info.weekGoal = Arrays.asList(3000, 3500, 4000, 4500, 5000, 5500, 6000);
-        info.week1Info.weekSpeed = Arrays.asList(14, 13, 12, 14, 13, 12, 14);
-
-        info.week2Info = info.week1Info;
-        info.week3Info = info.week1Info;
-        info.week4Info = info.week1Info;
-        updateView(info);
+//        MonthlyProgressFragmentInfo info = new MonthlyProgressFragmentInfo();
+//        info.week1Info = new WeeklyProgressFragmentInfo();
+//        info.week1Info.intentionalSteps = Arrays.asList(3000, 3000, 5000, 8000, 1000, 2000, 5000);
+//        info.week1Info.unintentionalSteps = Arrays.asList(0, 2000, 1000, 200, 1000, 5000, 1000);
+//        info.week1Info.weekGoal = Arrays.asList(3000, 3500, 4000, 4500, 5000, 5500, 6000);
+//        info.week1Info.weekSpeed = Arrays.asList(14, 13, 12, 14, 13, 12, 14);
+//
+//        info.week2Info = info.week1Info;
+//        info.week3Info = info.week1Info;
+//        info.week4Info = info.week1Info;
+//        updateView(info);
         /* TESTING STUFF WE DELETE THIS LATER :) */
 
         return view;

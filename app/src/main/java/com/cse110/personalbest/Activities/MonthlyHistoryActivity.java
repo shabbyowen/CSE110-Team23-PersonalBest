@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -40,7 +41,8 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
     private static final String RECEIVER = "receiver";
     private static final String TAG = "MonthlyHistoryActivity";
 
-    MonthlyProgressFragment monthlyProgressFragment;
+    private MonthlyProgressFragment monthlyProgressFragment;
+    private WeeklyProgressFragmentInfo friendInfo;
 
     private TextView titleTextView;
     private Button sendMessageBtn;
@@ -61,6 +63,13 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
             friendService = (FriendService) binder.getService();
 
             // update friend's monthly activity
+            friendService.retrieveProgress(receiver, new FriendServiceCallback() {
+                @Override
+                public void onRetrieveProgressResult(WeeklyProgressFragmentInfo info) {
+                    friendInfo = info;
+                    updateMonthlyProgressFragment();
+                }
+            });
         }
 
         @Override
@@ -134,10 +143,9 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
-//        ft.add(R.id.monthly_history_container, monthlyProgressFragment);
+        ft.add(R.id.monthly_history_container, monthlyProgressFragment);
         ft.commit();
 
-        //updateMonthlyProgressFragment();
         activityInitialized = true;
     }
 
@@ -171,17 +179,53 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
     }
 
     public void updateMonthlyProgressFragment() {
-        MonthlyProgressFragmentInfo info = new MonthlyProgressFragmentInfo();
 
-        info.week1Info = new WeeklyProgressFragmentInfo();
-        info.week1Info.intentionalSteps = Arrays.asList(3000, 3000, 5000, 8000, 1000, 2000, 5000);
-        info.week1Info.unintentionalSteps = Arrays.asList(0, 2000, 1000, 200, 1000, 5000, 1000);
-        info.week1Info.weekGoal = Arrays.asList(3000, 3500, 4000, 4500, 5000, 5500, 6000);
-        info.week1Info.weekSpeed = Arrays.asList(14, 13, 12, 14, 13, 12, 14);
+        if (monthlyProgressFragment != null && friendInfo != null) {
+            WeeklyProgressFragmentInfo week1 = new WeeklyProgressFragmentInfo();
+            week1.intentionalSteps = friendInfo.intentionalSteps.subList(0, 7);
+            week1.unintentionalSteps = friendInfo.unintentionalSteps.subList(0, 7);
+            week1.weekGoal = friendInfo.weekGoal.subList(0, 7);
+            week1.weekSpeed = friendInfo.weekSpeed.subList(0, 7);
 
-        info.week2Info = info.week1Info;
-        info.week3Info = info.week1Info;
-        info.week4Info = info.week1Info;
+            WeeklyProgressFragmentInfo week2 = new WeeklyProgressFragmentInfo();
+            week2.intentionalSteps = friendInfo.intentionalSteps.subList(7, 14);
+            week2.unintentionalSteps = friendInfo.unintentionalSteps.subList(7, 14);
+            week2.weekGoal = friendInfo.weekGoal.subList(7, 14);
+            week2.weekSpeed = friendInfo.weekSpeed.subList(7, 14);
+
+            WeeklyProgressFragmentInfo week3 = new WeeklyProgressFragmentInfo();
+            week3.intentionalSteps = friendInfo.intentionalSteps.subList(14, 21);
+            week3.unintentionalSteps = friendInfo.unintentionalSteps.subList(14, 21);
+            week3.weekGoal = friendInfo.weekGoal.subList(14, 21);
+            week3.weekSpeed = friendInfo.weekSpeed.subList(14, 21);
+
+            WeeklyProgressFragmentInfo week4 = new WeeklyProgressFragmentInfo();
+            week4.intentionalSteps = friendInfo.intentionalSteps.subList(21, 28);
+            week4.unintentionalSteps = friendInfo.unintentionalSteps.subList(21, 28);
+            week4.weekGoal = friendInfo.weekGoal.subList(21, 28);
+            week4.weekSpeed = friendInfo.weekSpeed.subList(21, 28);
+
+            MonthlyProgressFragmentInfo monthInfo = new MonthlyProgressFragmentInfo();
+            monthInfo.week1Info = week1;
+            monthInfo.week2Info = week2;
+            monthInfo.week3Info = week3;
+            monthInfo.week4Info = week4;
+
+            monthlyProgressFragment.updateView(monthInfo);
+        }
+
+        /* TESTING STUFF */
+//        MonthlyProgressFragmentInfo info = new MonthlyProgressFragmentInfo();
+//
+//        info.week1Info = new WeeklyProgressFragmentInfo();
+//        info.week1Info.intentionalSteps = Arrays.asList(3000, 3000, 5000, 8000, 1000, 2000, 5000);
+//        info.week1Info.unintentionalSteps = Arrays.asList(0, 2000, 1000, 200, 1000, 5000, 1000);
+//        info.week1Info.weekGoal = Arrays.asList(3000, 3500, 4000, 4500, 5000, 5500, 6000);
+//        info.week1Info.weekSpeed = Arrays.asList(14, 13, 12, 14, 13, 12, 14);
+//
+//        info.week2Info = info.week1Info;
+//        info.week3Info = info.week1Info;
+//        info.week4Info = info.week1Info;
 
         /*
         info.week2Info = new WeeklyProgressFragmentInfo();
