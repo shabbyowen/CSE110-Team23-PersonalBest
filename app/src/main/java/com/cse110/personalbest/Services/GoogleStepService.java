@@ -90,10 +90,14 @@ public class GoogleStepService extends StepService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        // use the correct storage solution base on key
-        String key = intent.getStringExtra(STORAGE_SOLUTION_KEY_EXTRA);
-        if (key != null) {
-            storageSolutionKey = key;
+        if (intent != null) {
+            // use the correct storage solution base on key
+            String key = intent.getStringExtra(STORAGE_SOLUTION_KEY_EXTRA);
+            if (key != null) {
+                storageSolutionKey = key;
+            }
+        } else {
+            storageSolutionKey = StorageSolutionFactory.SHARED_PREF_KEY;
         }
 
         // TODO: figure out what will happen when onStartCommand is called twice
