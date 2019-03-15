@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ public class ChatHistoryActivity extends AppCompatActivity {
     private static final String CHAT_FRIEND_EMAIL = "chat_friend_email";
     private static final String MY_EMAIL = "my_email";
     private static final String TAG = "ChatHistoryActivity";
+    private static final long UPDATE_DELAY = 5000;
 
     private RecyclerView chatMessagesListView;
     private TextView titleTextView;
@@ -50,6 +52,7 @@ public class ChatHistoryActivity extends AppCompatActivity {
 
     private String friendServiceKey = FriendServiceSelector.BASIC_FRIEND_SERVICE_KEY;
     private FriendService friendService;
+    private Handler handler = new Handler();
     private boolean activityInitialized;
 
     // service connection for friend service
@@ -74,6 +77,19 @@ public class ChatHistoryActivity extends AppCompatActivity {
         }
     };
 
+    private Runnable messageUpdateTask = new Runnable() {
+        @Override
+        public void run() {
+            friendService.retrieveMessage(friendEmail, new FriendServiceCallback() {
+                @Override
+                public void onRetrieveMessageResult(List<ChatMessage> result) {
+                    updateChatMessages(result);
+                }
+            });
+            handler.postDelayed(messageUpdateTask, UPDATE_DELAY);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +108,7 @@ public class ChatHistoryActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         // Bind friend service
         bindService(getFriendServiceIntent(), friendServiceConnection, Context.BIND_AUTO_CREATE);
@@ -140,6 +157,9 @@ public class ChatHistoryActivity extends AppCompatActivity {
         chatMessagesListView.setLayoutManager(chatMessagesLayoutManager);
         chatMessagesListView.setAdapter(chatMessagesAdapter);
 
+        // Setup Handler
+        handler.removeCallbacks(messageUpdateTask);
+
         activityInitialized = true;
     }
 
@@ -152,8 +172,19 @@ public class ChatHistoryActivity extends AppCompatActivity {
         }
 
         // bind to the service
+        handler.post(messageUpdateTask);
         bindService(getFriendServiceIntent(), friendServiceConnection, Context.BIND_AUTO_CREATE);
         Log.d(TAG, "Bind to friend service");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // unbind the service
+        handler.removeCallbacks(messageUpdateTask);
+        unbindService(friendServiceConnection);
+        Log.d(TAG, "ChatHistoryActivity onPause called");
     }
 
     @Override
@@ -177,7 +208,7 @@ public class ChatHistoryActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         Log.d(TAG, "back button pressed");
-        Intent intent = new Intent(ChatHistoryActivity.this, HomeActivity.class);
+        Intent intent = new Intent(ChatHistoryActivity.this, MonthlyHistoryActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }

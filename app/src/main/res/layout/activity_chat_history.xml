@@ -23,8 +23,8 @@
             android:id="@+id/tv_chat_history_toolbar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="?android:attr/actionBarSize"
             android:text="Toolbar Title"
+            android:textColor="#ffffff"
             android:layout_gravity="center"
             android:textSize="16sp"/>
     </android.support.v7.widget.Toolbar>
