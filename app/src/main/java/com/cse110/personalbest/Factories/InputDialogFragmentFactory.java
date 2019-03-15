@@ -10,6 +10,7 @@ public class InputDialogFragmentFactory implements FragmentFactory {
     public static final String HEIGHT_INPUT_DIALOG_FRAGMENT_KEY = "height_input_fragment_dialog_key";
     public static final String GOAL_MET_INPUT_DIALOG_FRAGMENT_KEY = "goal_met_input_dialog_fragment_key";
     public static final String ADD_FRIEND_INPUT_DIALOG_FRAGMENT_KEY = "add_friend_input_dialog_fragment_key";
+    public static final String ENCOURAGEMENT_FRAGMENT_KEY = "encouragement_fragment_key";
 
     @Override
     public Fragment create(String key) {
@@ -22,6 +23,8 @@ public class InputDialogFragmentFactory implements FragmentFactory {
                 return new GoalMetInputDialogFragment();
             case ADD_FRIEND_INPUT_DIALOG_FRAGMENT_KEY:
                 return new AddFriendInputDialogFragment();
+            case ENCOURAGEMENT_FRAGMENT_KEY:
+                return new EncourageInputDialogFragment();
             default:
                 return null;
         }
