@@ -70,8 +70,4 @@ def getTestRunner() {
     project.hasProperty('cucumber') ?
             "edu.ucsd.cse110.calculator.CucumberTestRunner" :
             "android.support.test.runner.AndroidJUnitRunner"
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 26f0e32a3674fd1b53a108f30e88f4792b07da12
