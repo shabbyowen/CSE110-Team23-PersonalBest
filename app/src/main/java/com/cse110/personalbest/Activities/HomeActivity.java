@@ -221,7 +221,7 @@ public class HomeActivity extends AppCompatActivity implements
 
         // retrieve the friend service key
         String key4 = intent.getStringExtra(FRIEND_SERVICE_KEY_EXTRA);
-        if (key3 != null) {
+        if (key4 != null) {
             friendServiceKey = key4;
         }
 

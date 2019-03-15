@@ -16,14 +16,12 @@ import java.util.List;
 public class MockFriendService extends FriendService {
     public static final String STORAGE_SOLUTION_KEY_EXTRA = "storage_solution_key_extra";
     public static final String FRIEND_SERVICE_KEY_EXTRA = "friend_service_key_extra";
-    private final IBinder binder = new MockSessionServiceBinder();
-
-    public class MockSessionServiceBinder extends MyBinder {
+    private final IBinder binder = new MyBinder() {
         @Override
         public Service getService() {
-                      return MockFriendService.this;
+            return MockFriendService.this;
         }
-    }
+    };
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -31,12 +29,12 @@ public class MockFriendService extends FriendService {
     }
 
     public void getPendingRequests(FriendServiceCallback callback){
-
+        callback.onPendingRequestsResult(new ArrayList<>());
     }
     public void getFriendList(FriendServiceCallback callback){
         List<Friend> friendsList = new ArrayList<>();
         friendsList.add(new Friend("yal272@ucsd.edu"));
-        friendsList.add(new Friend("jit072@ucsd.edu"));
+            friendsList.add(new Friend("jit072@ucsd.edu"));
         callback.onFriendsListResult(friendsList);
     }
     public void addFriend(Friend friend, FriendServiceCallback callback){
