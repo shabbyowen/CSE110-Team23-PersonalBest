@@ -142,6 +142,9 @@ public class HomeActivity extends AppCompatActivity implements
         public void onServiceConnected(ComponentName name, IBinder service) {
             MyBinder binder = (MyBinder) service;
             friendService = (FriendService) binder.getService();
+
+            // check if i have friends
+            updateFriendsListFragment();
         }
 
         @Override

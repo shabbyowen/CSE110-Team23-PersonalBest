@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.cse110.personalbest.Activities.HomeActivity;
 import com.cse110.personalbest.ChatMessage;
 import com.cse110.personalbest.Events.FriendServiceCallback;
 import com.cse110.personalbest.Events.MyBinder;
@@ -45,7 +44,7 @@ public class BasicFriendService extends FriendService {
     private StorageSolution storageSolution;
     private String storageSolutionKey;
 
-    private boolean doIHaveFriends = false;
+    private boolean hasFriends = false;
 
     private IBinder binder = new MyBinder() {
         @Override
@@ -132,6 +131,9 @@ public class BasicFriendService extends FriendService {
                     } else {
                         Log.d(TAG, "No such document");
                     }
+
+                    hasFriends = !friends.isEmpty();
+
                     callback.onFriendsListResult(friends);
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
@@ -174,8 +176,6 @@ public class BasicFriendService extends FriendService {
                 List<String> targetPending = (List<String>) requestFriendSnapshot.get(PENDING_REQUESTS_KEY);
                 targetPending.remove(userEmail);
                 transaction.update(friendRef, PENDING_REQUESTS_KEY, targetPending);
-
-                doIHaveFriends = !userFriends.isEmpty();
 
                 return null;
             }
@@ -244,8 +244,6 @@ public class BasicFriendService extends FriendService {
                 List<String> toRemoveFriends = (List<String>) toRemoveFriendSnapshot.get(FRIENDS_KEY);
                 toRemoveFriends.remove(userEmail);
                 transaction.update(removedFriendRef, FRIENDS_KEY, toRemoveFriends);
-
-                doIHaveFriends = !friends.isEmpty();
 
                 return null;
             }
@@ -419,7 +417,7 @@ public class BasicFriendService extends FriendService {
 
     @Override
     public boolean hasFriends() {
-        return doIHaveFriends;
+        return hasFriends;
     }
 
     private void subscribeToNotificationsTopic(String topic) {
