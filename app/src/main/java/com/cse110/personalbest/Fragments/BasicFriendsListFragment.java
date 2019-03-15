@@ -71,12 +71,6 @@ public class BasicFriendsListFragment extends FriendsListFragment {
             }
 
             @Override
-            public void editNicknameBtnOnClick(View v, int position) {
-                Log.d(TAG, "editNicknameButtonOnClick at position "+position);
-                onEditNicknameButtonClick(position);
-            }
-
-            @Override
             public void removeFriendBtnOnClick(View v, int position) {
                 Log.d(TAG, "removeFriendButtonOnClick at position "+position);
                 onRemoveFriendButtonClick(position);

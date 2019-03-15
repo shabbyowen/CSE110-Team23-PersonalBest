@@ -25,19 +25,16 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
     public interface FriendsListAdapterListener {
         void friendListItemOnClick(View v, int position);
-        void editNicknameBtnOnClick(View v, int position);
         void removeFriendBtnOnClick(View v, int position);
     }
 
     // stores and recycles views as they are scrolled off screen
     public class FriendsListViewHolder extends RecyclerView.ViewHolder {
-        ImageButton editBtn;
         ImageButton removeBtn;
         TextView tvFriendEmail;
 
         FriendsListViewHolder(View itemView) {
             super(itemView);
-            editBtn = itemView.findViewById(R.id.btn_change_nickname);
             removeBtn = itemView.findViewById(R.id.btn_delete_friend);
             tvFriendEmail = itemView.findViewById(R.id.tv_friend_email);
 
@@ -48,12 +45,6 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
                 }
             });
 
-            editBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onClickListener.editNicknameBtnOnClick(v, getAdapterPosition());
-                }
-            });
             removeBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
