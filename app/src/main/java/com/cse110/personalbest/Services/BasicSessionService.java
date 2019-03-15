@@ -182,7 +182,7 @@ public class BasicSessionService extends SessionService implements StepServiceLi
     }
 
     private Intent getFriendServiceIntent() {
-        ServiceSelector serviceSelector = new StepServiceSelector();
+        ServiceSelector serviceSelector = new FriendServiceSelector();
         Intent intent = new Intent(this, serviceSelector.retrieveServiceClass(friendServiceKey));
         intent.putExtra(FriendService.FRIEND_SERVICE_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);
         return intent;
