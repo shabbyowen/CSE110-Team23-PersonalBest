@@ -354,7 +354,7 @@ public class BasicFriendService extends FriendService {
                             public int compare(DocumentSnapshot o1, DocumentSnapshot o2) {
                                 Timestamp t1 = (Timestamp)o1.get("timestamp");
                                 Timestamp t2 = (Timestamp)o2.get("timestamp");
-                                return -t1.compareTo(t2);
+                                return t1.compareTo(t2);
                             }
                         });
 
