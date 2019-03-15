@@ -45,6 +45,8 @@ public class BasicFriendService extends FriendService {
     private StorageSolution storageSolution;
     private String storageSolutionKey;
 
+    private boolean doIHaveFriends = false;
+
     private IBinder binder = new MyBinder() {
         @Override
         public Service getService() {
@@ -173,6 +175,8 @@ public class BasicFriendService extends FriendService {
                 targetPending.remove(userEmail);
                 transaction.update(friendRef, PENDING_REQUESTS_KEY, targetPending);
 
+                doIHaveFriends = !userFriends.isEmpty();
+
                 return null;
             }
         }).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -240,6 +244,8 @@ public class BasicFriendService extends FriendService {
                 List<String> toRemoveFriends = (List<String>) toRemoveFriendSnapshot.get(FRIENDS_KEY);
                 toRemoveFriends.remove(userEmail);
                 transaction.update(removedFriendRef, FRIENDS_KEY, toRemoveFriends);
+
+                doIHaveFriends = !friends.isEmpty();
 
                 return null;
             }
@@ -409,6 +415,11 @@ public class BasicFriendService extends FriendService {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean hasFriends() {
+        return doIHaveFriends;
     }
 
     private void subscribeToNotificationsTopic(String topic) {
