@@ -86,4 +86,9 @@ public class MockFriendService extends FriendService {
 
         callback.onRetrieveProgressResult(weeklyProgressInfo);
     }
+
+    @Override
+    public boolean hasFriends() {
+        return false;
+    }
 }

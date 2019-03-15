@@ -53,6 +53,11 @@ public class MockFriendService extends FriendService {
     }
 
     @Override
+    public boolean hasFriends() {
+        return false;
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
