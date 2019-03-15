@@ -18,6 +18,7 @@ import com.cse110.personalbest.Events.SessionServiceListener;
 import com.cse110.personalbest.Events.StepServiceCallback;
 import com.cse110.personalbest.Events.StepServiceListener;
 import com.cse110.personalbest.Events.WeeklyProgressFragmentInfo;
+import com.cse110.personalbest.Factories.FriendServiceSelector;
 import com.cse110.personalbest.Factories.ServiceSelector;
 import com.cse110.personalbest.Factories.StepServiceSelector;
 import com.cse110.personalbest.Utilities.DateCalculator;
@@ -52,10 +53,14 @@ public class BasicSessionService extends SessionService implements StepServiceLi
 
     private String storageSolutionKey = StorageSolutionFactory.SHARED_PREF_KEY;
     private String stepServiceKey = StepServiceSelector.GOOGLE_STEP_SERVICE_KEY;
+    private String friendServiceKey = FriendServiceSelector.BASIC_FRIEND_SERVICE_KEY;
     private StorageSolution storageSolution;
     private Handler handler = new Handler();
     private Session currentSession;
     private StepService stepService;
+    private FriendService friendService;
+
+    private boolean doIHaveFriends = false;
 
     private ServiceConnection stepServiceConnection = new ServiceConnection() {
 
@@ -73,6 +78,22 @@ public class BasicSessionService extends SessionService implements StepServiceLi
         public void onServiceDisconnected(ComponentName name) {
             stepService.unregisterListener(BasicSessionService.this);
             stepService = null;
+        }
+    };
+
+    private ServiceConnection friendServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyBinder binder = (MyBinder) service;
+            friendService = (BasicFriendService) binder.getService();
+
+            // reload current session
+            currentSession = loadCurrentSession();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            friendService = null;
         }
     };
 
@@ -110,7 +131,6 @@ public class BasicSessionService extends SessionService implements StepServiceLi
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-
         if (intent != null) {
             // use the correct storage solution base on key
             String key = intent.getStringExtra(STORAGE_SOLUTION_KEY_EXTRA);
@@ -132,8 +152,10 @@ public class BasicSessionService extends SessionService implements StepServiceLi
             stepServiceKey = StepServiceSelector.GOOGLE_STEP_SERVICE_KEY;
         }
         startService(getStepServiceIntent());
+        startService(getBasicFriendServiceIntent());
         if (!TestConfig.isTesting) {
             bindService(getStepServiceIntent(), stepServiceConnection, BIND_AUTO_CREATE);
+            bindService(getBasicFriendServiceIntent(), friendServiceConnection, BIND_AUTO_CREATE);
         }
 
         // start updating sessions
@@ -149,12 +171,20 @@ public class BasicSessionService extends SessionService implements StepServiceLi
 
         // unbind the service
         unbindService(stepServiceConnection);
+        unbindService(friendServiceConnection);
     }
 
     private Intent getStepServiceIntent() {
         ServiceSelector serviceSelector = new StepServiceSelector();
         Intent intent = new Intent(this, serviceSelector.retrieveServiceClass(stepServiceKey));
         intent.putExtra(StepService.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);
+        return intent;
+    }
+
+    private Intent getBasicFriendServiceIntent() {
+        ServiceSelector serviceSelector = new FriendServiceSelector();
+        Intent intent = new Intent(this, serviceSelector.retrieveServiceClass(friendServiceKey));
+        intent.putExtra(FriendService.FRIEND_SERVICE_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);
         return intent;
     }
 

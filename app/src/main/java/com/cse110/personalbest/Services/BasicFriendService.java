@@ -52,6 +52,16 @@ public class BasicFriendService extends FriendService {
         }
     };
 
+    private boolean hasFriends = false; //Test
+
+    public class BasicFriendServiceBinder extends MyBinder {
+
+        @Override
+        public Service getService() {
+            return BasicFriendService.this;
+        }
+    }
+
     private FirebaseFirestore storage;
     private String userEmail;
 
@@ -173,6 +183,9 @@ public class BasicFriendService extends FriendService {
                 targetPending.remove(userEmail);
                 transaction.update(friendRef, PENDING_REQUESTS_KEY, targetPending);
 
+                //Test: In theory, should only test when adding and removing a friend.
+                hasFriends = !userFriends.isEmpty();
+
                 return null;
             }
         }).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -240,6 +253,9 @@ public class BasicFriendService extends FriendService {
                 List<String> toRemoveFriends = (List<String>) toRemoveFriendSnapshot.get(FRIENDS_KEY);
                 toRemoveFriends.remove(userEmail);
                 transaction.update(removedFriendRef, FRIENDS_KEY, toRemoveFriends);
+
+                //Test: In theory, should only test when adding and removing a friend.
+                hasFriends = !friends.isEmpty();
 
                 return null;
             }
@@ -423,4 +439,6 @@ public class BasicFriendService extends FriendService {
                         }
                 );
     }
+
+    public boolean hasFriends() {return hasFriends;}
 }

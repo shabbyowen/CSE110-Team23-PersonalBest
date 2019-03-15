@@ -17,4 +17,6 @@ public abstract class FriendService extends Service {
     public abstract void sendMessage(String friendEmail, String message, FriendServiceCallback callback);
     public abstract void retrieveMessage(String friendEmail, FriendServiceCallback callback);
     public abstract void retrieveProgress(String email, FriendServiceCallback callback);
+
+    public abstract boolean hasFriends();
 }
