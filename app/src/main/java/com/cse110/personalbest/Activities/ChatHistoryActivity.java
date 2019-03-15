@@ -80,6 +80,7 @@ public class ChatHistoryActivity extends AppCompatActivity {
     private Runnable messageUpdateTask = new Runnable() {
         @Override
         public void run() {
+            if (friendService == null) return;
             friendService.retrieveMessage(friendEmail, new FriendServiceCallback() {
                 @Override
                 public void onRetrieveMessageResult(List<ChatMessage> result) {
@@ -196,7 +197,6 @@ public class ChatHistoryActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK)
         {
-            unbindService(friendServiceConnection);
             finish();
             return true;
         }

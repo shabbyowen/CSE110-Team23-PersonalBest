@@ -34,7 +34,7 @@
     <string name="met_goal">Congrats, You have met your goal! Do you want to increase your step by 500?</string>
 
     <!-- Encouragement dialog -->
-    <string name="encouragement">Congrats, you walked over %d more steps than yesterday!</string>
+    <string name="encouragement">Congrats, you have doubled your steps from yesterday!</string>
 
     <!-- Set Time Dialog -->
     <string name="change_time_instruction_initial">"Please enter current time (in milliseconds from Epoch)."</string>

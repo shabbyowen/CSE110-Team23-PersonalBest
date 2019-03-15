@@ -68,6 +68,8 @@ public class BasicFriendService extends FriendService {
             if (key != null) {
                 storageSolutionKey = key;
             }
+        } else {
+            storageSolutionKey = StorageSolutionFactory.SHARED_PREF_KEY;
         }
         storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
         userEmail = storageSolution.get(CURRENT_USER_KEY, "");

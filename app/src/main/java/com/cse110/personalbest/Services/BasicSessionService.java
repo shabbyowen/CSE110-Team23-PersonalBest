@@ -117,13 +117,19 @@ public class BasicSessionService extends SessionService implements StepServiceLi
             if (key != null) {
                 storageSolutionKey = key;
             }
+        } else {
+            storageSolutionKey = StorageSolutionFactory.SHARED_PREF_KEY;
         }
         storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
 
-        // get the correct service key
-        String key2 = intent.getStringExtra(STEP_SERVICE_KEY_EXTRA);
-        if (key2 != null) {
-            stepServiceKey = key2;
+        if (intent != null) {
+            // get the correct service key
+            String key2 = intent.getStringExtra(STEP_SERVICE_KEY_EXTRA);
+            if (key2 != null) {
+                stepServiceKey = key2;
+            }
+        } else {
+            stepServiceKey = StepServiceSelector.GOOGLE_STEP_SERVICE_KEY;
         }
         startService(getStepServiceIntent());
         if (!TestConfig.isTesting) {

@@ -61,7 +61,7 @@ public class SendFriendRequestUITest {
                                 childAtPosition(
                                         withId(R.id.app_toolbar),
                                         1),
-                                0),
+                                1),
                         isDisplayed()));
         actionMenuItemView.perform(click());
 

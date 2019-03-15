@@ -377,7 +377,10 @@ public class HomeActivity extends AppCompatActivity implements
 
     @Override
     public void onEncouragement() {
-
+        showInputDialog(
+            InputDialogFragmentFactory.ENCOURAGEMENT_FRAGMENT_KEY,
+            "encouragement_input_dialog",
+            null);
     }
 
     @Override
