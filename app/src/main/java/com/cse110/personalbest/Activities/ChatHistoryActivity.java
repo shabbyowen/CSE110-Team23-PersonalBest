@@ -123,7 +123,6 @@ public class ChatHistoryActivity extends AppCompatActivity {
         sendMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
@@ -221,6 +220,7 @@ public class ChatHistoryActivity extends AppCompatActivity {
     private void updateChatMessages(List<ChatMessage> result) {
         chatMessagesAdapter = new ChatMessagesListAdapter(this, result);
         chatMessagesListView.setAdapter(chatMessagesAdapter);
+        chatMessagesListView.scrollToPosition(0);
     }
 
     private void sendMessage(String receiver, String message) {
