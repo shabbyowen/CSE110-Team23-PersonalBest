@@ -185,7 +185,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         super.onPause();
 
         // unbind the service
-        //unbindService(friendServiceConnection);
+        unbindService(friendServiceConnection);
         Log.d(TAG, "Unbind friend service");
     }
 
@@ -261,7 +261,6 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        unbindService(friendServiceConnection);
         finish();
         return true;
     }

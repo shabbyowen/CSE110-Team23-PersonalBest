@@ -189,7 +189,6 @@ public class ChatHistoryActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        unbindService(friendServiceConnection);
         finish();
         return true;
     }
