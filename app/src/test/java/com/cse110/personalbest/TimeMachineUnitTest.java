@@ -19,7 +19,7 @@ public class TimeMachineUnitTest {
     public void testRealTime() {
         long actual = TimeMachine.nowMillis();
         long expected = new Date().getTime();
-        Assert.assertEquals(expected, actual);
+        Assert.assertTrue(Math.abs(expected - actual) < 100);
     }
 
     @Test
@@ -27,7 +27,7 @@ public class TimeMachineUnitTest {
         long expected = 1550613647000L;
         TimeMachine.setTime(expected);
         long actual = TimeMachine.nowMillis();
-        Assert.assertEquals(expected, actual);
+        Assert.assertTrue(Math.abs(expected - actual) < 100);
     }
 
     @Test

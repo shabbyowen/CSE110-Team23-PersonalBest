@@ -15,10 +15,17 @@ public class PendingRequestsAdapter extends RecyclerView.Adapter<PendingRequests
 
     private List<Friend> dataList;
     private LayoutInflater inflater;
+    private PendingRequestsAdapterListener onClickListener;
 
-    public PendingRequestsAdapter(Context context, List<Friend> data) {
+    public PendingRequestsAdapter(Context context, List<Friend> data, PendingRequestsAdapterListener onClickListener) {
         inflater = LayoutInflater.from(context);
         dataList = data;
+        this.onClickListener = onClickListener;
+    }
+
+    public interface PendingRequestsAdapterListener {
+        void acceptBtnOnClick(View v, int position);
+        void rejectBtnOnClick(View v, int position);
     }
 
     // stores and recycles views as they are scrolled off screen
@@ -32,6 +39,19 @@ public class PendingRequestsAdapter extends RecyclerView.Adapter<PendingRequests
             acceptBtn = itemView.findViewById(R.id.btn_pending_approve);
             rejectBtn = itemView.findViewById(R.id.btn_pending_ignore);
             tvPendingEmail = itemView.findViewById(R.id.tv_pending_email);
+
+            acceptBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onClickListener.acceptBtnOnClick(v, getAdapterPosition());
+                }
+            });
+            rejectBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onClickListener.rejectBtnOnClick(v, getAdapterPosition());
+                }
+            });
         }
     }
 
@@ -48,7 +68,7 @@ public class PendingRequestsAdapter extends RecyclerView.Adapter<PendingRequests
         pendingRequestViewHolder.tvPendingEmail.setText(email);
     }
 
-    Friend getItem(int id) {
+    public Friend getItem(int id) {
         return dataList.get(id);
     }
 

@@ -29,4 +29,9 @@ public class Friend {
     public String getNickname() {
         return nickname;
     }
+
+    @Override
+    public String toString() {
+        return this.email;
+    }
 }

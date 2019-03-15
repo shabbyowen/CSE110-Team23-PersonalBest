@@ -37,6 +37,9 @@ public class MockStorageSolution implements StorageSolution {
 
     @Override
     public Integer get(String key, Integer defaultVal) {
+        if (key.equals("user_height")) {
+            return 70;
+        }
         return defaultVal;
     }
 }

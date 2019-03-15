@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- "Mark Favorite", should appear as action button if possible -->
+    <item
+        android:id="@+id/action_refresh_friends"
+        android:icon="@drawable/baseline_refresh_24"
+        android:title="@string/action_refresh_friends"
+        android:visible="false"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_add_friend"
+        android:icon="@drawable/baseline_person_add_24"
+        android:title="@string/action_add_friend"
+        android:visible="false"
+        app:showAsAction="ifRoom"/>
+</menu>

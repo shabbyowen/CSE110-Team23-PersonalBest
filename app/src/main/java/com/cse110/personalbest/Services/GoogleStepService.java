@@ -21,10 +21,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.Bucket;
+import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
+import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.request.DataReadRequest;
+import com.google.android.gms.fitness.request.DataUpdateRequest;
 import com.google.android.gms.fitness.result.DataReadResponse;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -37,6 +40,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 
 public class GoogleStepService extends StepService {
 
@@ -86,10 +90,14 @@ public class GoogleStepService extends StepService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        // use the correct storage solution base on key
-        String key = intent.getStringExtra(STORAGE_SOLUTION_KEY_EXTRA);
-        if (key != null) {
-            storageSolutionKey = key;
+        if (intent != null) {
+            // use the correct storage solution base on key
+            String key = intent.getStringExtra(STORAGE_SOLUTION_KEY_EXTRA);
+            if (key != null) {
+                storageSolutionKey = key;
+            }
+        } else {
+            storageSolutionKey = StorageSolutionFactory.SHARED_PREF_KEY;
         }
 
         // TODO: figure out what will happen when onStartCommand is called twice
@@ -167,7 +175,54 @@ public class GoogleStepService extends StepService {
     }
 
     @Override
-    public void getWeekStep(final StepServiceCallback callback) {
+    public void addStep(int step) {
+
+        // calculate time
+        Calendar cal = Calendar.getInstance();
+        Date now = TimeMachine.now();
+        cal.setTime(now);
+        long endTime = cal.getTimeInMillis();
+        cal.add(Calendar.MINUTE, -1);
+        long startTime = cal.getTimeInMillis();
+
+        // Create a data source
+        DataSource dataSource =
+            new DataSource.Builder()
+                .setAppPackageName(this)
+                .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
+                .setStreamName("step count")
+                .setType(DataSource.TYPE_RAW)
+                .build();
+
+        // Create a data set
+        DataSet dataSet = DataSet.create(dataSource);
+        DataPoint dataPoint = dataSet.createDataPoint().setTimeInterval(startTime, endTime, TimeUnit.MILLISECONDS);
+        dataPoint.getValue(Field.FIELD_STEPS).setInt(step);
+        dataSet.add(dataPoint);
+
+        // build the request
+        DataUpdateRequest request =
+            new DataUpdateRequest.Builder()
+                .setDataSet(dataSet)
+                .setTimeInterval(startTime, endTime, TimeUnit.MILLISECONDS)
+                .build();
+
+        // Invoke the History API to update data.
+        Fitness.getHistoryClient(this, GoogleSignIn.getLastSignedInAccount(this))
+            .updateData(request)
+            .addOnCompleteListener(
+                task -> {
+                    if (task.isSuccessful()) {
+                        // At this point the data has been updated and can be read.
+                        Log.i(TAG, "Data update was successful.");
+                    } else {
+                        Log.e(TAG, "There was a problem updating the dataset.", task.getException());
+                    }
+                });
+    }
+
+    @Override
+    public void getStep(int day, final StepServiceCallback callback) {
         GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(this);
         if (lastSignedInAccount == null) {
             Log.w(TAG, "No account signed in!");
@@ -176,7 +231,7 @@ public class GoogleStepService extends StepService {
 
         Log.d(TAG, "Trying to get this week step count...");
         Fitness.getHistoryClient(this, lastSignedInAccount)
-            .readData(readRequest())
+            .readData(readRequest(day))
             .addOnSuccessListener(new OnSuccessListener<DataReadResponse>() {
                 @Override
                 public void onSuccess(DataReadResponse dataReadResponse) {
@@ -249,8 +304,9 @@ public class GoogleStepService extends StepService {
         callback.onGoalResult(result);
     }
 
+    // TODO: week goal is not displayed properly
     @Override
-    public void getWeekGoal(StepServiceCallback callback) {
+    public void getGoal(int day, StepServiceCallback callback) {
         List<GoalInfo> list = loadGoalInfo();
         List<Integer> result = new LinkedList<>();
 
@@ -258,11 +314,11 @@ public class GoogleStepService extends StepService {
             list = new LinkedList<>();
         }
 
-        if (list.size() > 7) {
-            list = list.subList(list.size() - 7, list.size());
+        if (list.size() > day) {
+            list = list.subList(list.size() - day, list.size());
         }
-        if (list.size() < 7) {
-            while (list.size() < 7) {
+        if (list.size() < day) {
+            while (list.size() < day) {
                 list.add(0, new GoalInfo(5000, 0));
             }
         }
@@ -288,13 +344,13 @@ public class GoogleStepService extends StepService {
                         final int goal = result.get(0);
 
                         // check if should display encouragement
-                        getWeekStep(new StepServiceCallback() {
+                        getStep(2, new StepServiceCallback() {
                             @Override
                             public void onStepResult(List<Integer> result) {
 
                                 int yesterdayStep = result.get(result.size() - 2);
-                                Date lastEncouragementDate = new Date(storageSolution.get(LAST_ENCOURAGEMENT, 0));
-                                Date lastGoalMetDate = new Date(storageSolution.get(LAST_GOAL_MET, 0));
+                                Date lastEncouragementDate = new Date(storageSolution.get(LAST_ENCOURAGEMENT, (long) 0));
+                                Date lastGoalMetDate = new Date(storageSolution.get(LAST_GOAL_MET, 0L));
                                 Date now = TimeMachine.now();
                                 Calendar cal = Calendar.getInstance();
                                 cal.setTime(now);
@@ -305,8 +361,8 @@ public class GoogleStepService extends StepService {
 
                                 boolean shouldPromptEncouragement =
                                     !DateCalculator.isSameDate(lastEncouragementDate, now) &&
-                                    cal.get(Calendar.HOUR_OF_DAY) > 20 &&
-                                    (step - yesterdayStep) / 500 > 0;
+                                    cal.get(Calendar.HOUR_OF_DAY) >= 20 &&
+                                    (step - yesterdayStep - yesterdayStep) >= 0;
 
                                 // notify the listeners
                                 for (ObservableServiceListener listener : listeners) {
@@ -372,13 +428,13 @@ public class GoogleStepService extends StepService {
             });
     }
 
-    public DataReadRequest readRequest() {
+    public DataReadRequest readRequest(int day) {
 
         // get today midnight
         Date end = DateCalculator.toClosestMidnightTmr(TimeMachine.now());
         Calendar cal = Calendar.getInstance();
         cal.setTime(end);
-        cal.add(Calendar.WEEK_OF_YEAR, -1);
+        cal.add(Calendar.DATE, -day);
         Date start = cal.getTime();
 
         // create request

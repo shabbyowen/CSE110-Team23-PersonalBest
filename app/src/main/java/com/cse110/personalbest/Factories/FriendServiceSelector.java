@@ -12,7 +12,7 @@ public class FriendServiceSelector implements ServiceSelector {
             case BASIC_FRIEND_SERVICE_KEY:
                 return BasicFriendService.class;
             case MOCK_FRIEND_SERVICE_KEY:
-                return null;
+                return MockFriendService.class;
             default:
                 return null;
         }
