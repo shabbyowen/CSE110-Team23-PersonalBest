@@ -1,5 +1,9 @@
 package com.cse110.personalbest.Activities;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +14,8 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -27,10 +33,12 @@ import com.cse110.personalbest.Fragments.WeeklyProgressFragment;
 import com.cse110.personalbest.Friend;
 import com.cse110.personalbest.R;
 import com.cse110.personalbest.Services.FriendService;
+import com.cse110.personalbest.Services.GoalNotificationJobService;
 import com.cse110.personalbest.Services.SessionService;
 import com.cse110.personalbest.Services.StepService;
 import com.cse110.personalbest.Utilities.SpeedCalculator;
 import com.cse110.personalbest.Utilities.StorageSolution;
+import com.cse110.personalbest.Utilities.TestConfig;
 import com.cse110.personalbest.Utilities.TimeMachine;
 
 import java.util.LinkedList;
@@ -42,9 +50,14 @@ public class HomeActivity extends AppCompatActivity implements
 
     private static final String TAG = "HomeActivity";
 
+    public static final String CHANNEL_ID = "goal_met_notification";
+
     // storage key
     public static final String USER_EMAIL = "user_email";
     public static final String USER_HEIGHT = "user_height";
+
+    // job id
+    public static final int GOAL_NOTIFICATION_ID = 0xFFABCDEF;
 
     // Messaging keys
     private static final String SENDER = "sender";
@@ -271,6 +284,42 @@ public class HomeActivity extends AppCompatActivity implements
             chatIntent.putExtra(FRIEND_SERVICE_KEY_EXTRA, friendServiceKey);
             startActivity(chatIntent);
         }
+
+        // schedule job
+        if (!TestConfig.isTesting) {
+            ComponentName componentName = new ComponentName(this, GoalNotificationJobService.class);
+            JobInfo jobInfo = new JobInfo.Builder(GOAL_NOTIFICATION_ID, componentName).setPeriodic(1000).build();
+            JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+            if (jobScheduler.schedule(jobInfo) == JobScheduler.RESULT_SUCCESS) {
+                Log.d(TAG, "initHomeScreenActivity: job schedule successful");
+            } else {
+                Log.d(TAG, "initHomeScreenActivity: job schedule unsuccessful");
+            }
+        }
+
+        // create notification channel
+        createNotificationChannel();
+
+        // testing
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, HomeActivity.CHANNEL_ID)
+            .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark)
+            .setContentTitle("Personal Best")
+            .setContentText("no display notification")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(0x12345678, builder.build());
+    }
+
+    public void createNotificationChannel() {
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "personal best", importance);
+        channel.setDescription("");
+        // Register the channel with the system; you can't change the importance
+        // or other notification behaviors after this
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+        Log.d(TAG, "createNotificationChannel: created channel!");
     }
 
     @Override
@@ -302,7 +351,7 @@ public class HomeActivity extends AppCompatActivity implements
         unbindService(stepServiceConnection);
         unbindService(sessionServiceConnection);
         unbindService(friendServiceConnection);
-        Log.d(TAG, "Unbind step service");
+        Log.d(TAG, "Unbind services");
     }
 
     private Intent getStepServiceIntent() {

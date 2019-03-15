@@ -74,7 +74,7 @@ public class BasicSessionService extends SessionService implements StepServiceLi
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            stepService.registerListener(BasicSessionService.this);
+            stepService.unregisterListener(BasicSessionService.this);
             stepService = null;
         }
     };
