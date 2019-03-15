@@ -96,6 +96,8 @@ public class GoogleStepService extends StepService {
             if (key != null) {
                 storageSolutionKey = key;
             }
+        } else {
+            storageSolutionKey = StorageSolutionFactory.SHARED_PREF_KEY;
         }
 
         // TODO: figure out what will happen when onStartCommand is called twice
