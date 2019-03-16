@@ -203,13 +203,13 @@ public class ChatHistoryActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    public void onBackPressed() {
-        Log.d(TAG, "back button pressed");
-        Intent intent = new Intent(ChatHistoryActivity.this, MonthlyHistoryActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
+//    @Override
+//    public void onBackPressed() {
+//        Log.d(TAG, "back button pressed");
+//        Intent intent = new Intent(ChatHistoryActivity.this, MonthlyHistoryActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        startActivity(intent);
+//    }
 
     private Intent getFriendServiceIntent() {
         ServiceSelector serviceSelector = new FriendServiceSelector();

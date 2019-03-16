@@ -722,14 +722,5 @@ public class HomeActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         // prevent user exit the home activity
-        friendService.retrieveProgress("jit072@ucsd.edu", new FriendServiceCallback() {
-            @Override
-            public void onRetrieveProgressResult(WeeklyProgressFragmentInfo info) {
-                Log.d(TAG, "onRetrieveProgressResult: " + info.toString());
-            }
-        });
     }
-
-
-
 }
