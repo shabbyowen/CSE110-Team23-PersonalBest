@@ -60,15 +60,17 @@ public class ChatHistoryActivity extends AppCompatActivity {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MyBinder binder = (MyBinder) service;
-            friendService = (FriendService) binder.getService();
+            if (name != null && service != null) {
+                MyBinder binder = (MyBinder) service;
+                friendService = (FriendService) binder.getService();
 
-            friendService.retrieveMessage(friendEmail, new FriendServiceCallback() {
-                @Override
-                public void onRetrieveMessageResult(List<ChatMessage> result) {
-                    updateChatMessages(result);
-                }
-            });
+                friendService.retrieveMessage(friendEmail, new FriendServiceCallback() {
+                    @Override
+                    public void onRetrieveMessageResult(List<ChatMessage> result) {
+                        updateChatMessages(result);
+                    }
+                });
+            }
         }
 
         @Override
