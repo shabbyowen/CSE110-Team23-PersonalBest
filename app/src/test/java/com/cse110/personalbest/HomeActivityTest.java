@@ -19,7 +19,7 @@ import org.robolectric.shadows.ShadowToast;
 
 @RunWith(RobolectricTestRunner.class)
 public class HomeActivityTest {
-    HomeActivity activity;
+    private HomeActivity activity;
 
     @Before
     public void setup() {

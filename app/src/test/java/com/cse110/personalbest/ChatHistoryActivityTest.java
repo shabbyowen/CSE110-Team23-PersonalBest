@@ -1,11 +1,8 @@
 package com.cse110.personalbest;
 
-import android.content.Intent;
 import android.view.KeyEvent;
 
 import com.cse110.personalbest.Activities.ChatHistoryActivity;
-import com.cse110.personalbest.Activities.HomeActivity;
-import com.cse110.personalbest.Activities.MonthlyHistoryActivity;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,13 +10,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
-import org.robolectric.shadows.ShadowActivity;
 
 
 @RunWith(RobolectricTestRunner.class)
 public class ChatHistoryActivityTest {
-    ChatHistoryActivity activity;
+    private ChatHistoryActivity activity;
 
     @Before
     public void setup() {

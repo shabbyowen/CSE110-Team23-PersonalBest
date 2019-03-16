@@ -24,7 +24,7 @@ import androidx.test.core.app.ApplicationProvider;
 @RunWith(RobolectricTestRunner.class)
 public class BasicSessionServiceTest {
 
-    ServiceController<BasicSessionService> serviceController;
+    private ServiceController<BasicSessionService> serviceController;
 
     @Before
     public void setup() {
