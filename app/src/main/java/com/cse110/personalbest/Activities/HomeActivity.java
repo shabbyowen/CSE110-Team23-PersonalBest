@@ -142,6 +142,9 @@ public class HomeActivity extends AppCompatActivity implements
         public void onServiceConnected(ComponentName name, IBinder service) {
             MyBinder binder = (MyBinder) service;
             friendService = (FriendService) binder.getService();
+
+            // check if i have friends
+            updateFriendsListFragment();
         }
 
         @Override
@@ -221,7 +224,7 @@ public class HomeActivity extends AppCompatActivity implements
 
         // retrieve the friend service key
         String key4 = intent.getStringExtra(FRIEND_SERVICE_KEY_EXTRA);
-        if (key3 != null) {
+        if (key4 != null) {
             friendServiceKey = key4;
         }
 
@@ -402,6 +405,9 @@ public class HomeActivity extends AppCompatActivity implements
             info.step = step;
             info.currentDist = dist;
             dailyGoalFragment.updateView(info);
+        }
+        if (sessionService != null) {
+            sessionService.uploadMonthlyProgress();
         }
     }
 
@@ -716,14 +722,5 @@ public class HomeActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         // prevent user exit the home activity
-        friendService.retrieveProgress("jit072@ucsd.edu", new FriendServiceCallback() {
-            @Override
-            public void onRetrieveProgressResult(WeeklyProgressFragmentInfo info) {
-                Log.d(TAG, "onRetrieveProgressResult: " + info.toString());
-            }
-        });
     }
-
-
-
 }

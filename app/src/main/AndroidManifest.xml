@@ -49,9 +49,14 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
+
         <service
             android:name=".Services.GoalNotificationJobService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
+
+        <service android:name=".Services.MockFriendService"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>

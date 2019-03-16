@@ -295,13 +295,13 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onBackPressed() {
-        Log.d(TAG, "back button pressed");
-        Intent intent = new Intent(MonthlyHistoryActivity.this, HomeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
+//    @Override
+//    public void onBackPressed() {
+//        Log.d(TAG, "back button pressed");
+//        Intent intent = new Intent(MonthlyHistoryActivity.this, HomeActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        startActivity(intent);
+//    }
 
     public void openChatActivity() {
         Intent intent = new Intent(this, ChatHistoryActivity.class);

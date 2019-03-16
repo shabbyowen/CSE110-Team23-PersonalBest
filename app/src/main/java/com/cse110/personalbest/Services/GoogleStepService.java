@@ -362,7 +362,8 @@ public class GoogleStepService extends StepService {
                                 boolean shouldPromptEncouragement =
                                     !DateCalculator.isSameDate(lastEncouragementDate, now) &&
                                     cal.get(Calendar.HOUR_OF_DAY) >= 20 &&
-                                    (step - yesterdayStep - yesterdayStep) >= 0;
+                                    (step - yesterdayStep - yesterdayStep) >= 0 &&
+                                    step != 0;
 
                                 // notify the listeners
                                 for (ObservableServiceListener listener : listeners) {
