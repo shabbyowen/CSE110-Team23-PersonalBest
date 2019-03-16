@@ -12,6 +12,7 @@ import android.view.ViewParent;
 
 import com.cse110.personalbest.Factories.FriendServiceSelector;
 import com.cse110.personalbest.Factories.SessionServiceSelector;
+import com.cse110.personalbest.Factories.StepServiceSelector;
 import com.cse110.personalbest.Factories.StorageSolutionFactory;
 import com.cse110.personalbest.R;
 
@@ -46,6 +47,7 @@ public class FriendListUITest {
     @Test
     public void friendListActivityTest() {
         Intent intent = new Intent();
+        intent.putExtra(HomeActivity.STEP_SERVICE_KEY_EXTRA, StepServiceSelector.MOCK_STEP_SERVICE_KEY);
         intent.putExtra(HomeActivity.FRIEND_SERVICE_KEY_EXTRA, FriendServiceSelector.MOCK_FRIEND_SERVICE_KEY);
         intent.putExtra(HomeActivity.SESSION_SERVICE_KEY_EXTRA, SessionServiceSelector.MOCK_SESSION_SERVICE_KEY);
         intent.putExtra(HomeActivity.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.MOCK_DICT_KEY);
