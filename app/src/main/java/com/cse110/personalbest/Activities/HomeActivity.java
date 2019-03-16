@@ -304,16 +304,6 @@ public class HomeActivity extends AppCompatActivity implements
 
         // create notification channel
         createNotificationChannel();
-
-        // testing
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, HomeActivity.CHANNEL_ID)
-            .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark)
-            .setContentTitle("Personal Best")
-            .setContentText("no display notification")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setAutoCancel(true);
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(0x12345678, builder.build());
     }
 
     public void createNotificationChannel() {
