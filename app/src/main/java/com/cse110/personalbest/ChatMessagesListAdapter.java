@@ -95,4 +95,12 @@ public class ChatMessagesListAdapter extends RecyclerView.Adapter {
     public int getItemCount() {
         return dataList.size();
     }
+
+    public List<ChatMessage> getMessages() {
+        return this.dataList;
+    }
+    public void addMessage(ChatMessage message) {
+        this.dataList.add(message);
+        notifyDataSetChanged();
+    }
 }

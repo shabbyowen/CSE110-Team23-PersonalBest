@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.cse110.personalbest.Activities.HomeActivity;
 import com.cse110.personalbest.ChatMessage;
 import com.cse110.personalbest.Events.FriendServiceCallback;
 import com.cse110.personalbest.Events.MyBinder;
@@ -45,14 +44,14 @@ public class BasicFriendService extends FriendService {
     private StorageSolution storageSolution;
     private String storageSolutionKey;
 
+    private boolean hasFriends = false;
+
     private IBinder binder = new MyBinder() {
         @Override
         public Service getService() {
             return BasicFriendService.this;
         }
     };
-
-    private boolean hasFriends = false; //Test
 
     public class BasicFriendServiceBinder extends MyBinder {
 
@@ -140,6 +139,9 @@ public class BasicFriendService extends FriendService {
                     } else {
                         Log.d(TAG, "No such document");
                     }
+
+                    hasFriends = !friends.isEmpty();
+
                     callback.onFriendsListResult(friends);
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
@@ -370,7 +372,7 @@ public class BasicFriendService extends FriendService {
                             public int compare(DocumentSnapshot o1, DocumentSnapshot o2) {
                                 Timestamp t1 = (Timestamp)o1.get("timestamp");
                                 Timestamp t2 = (Timestamp)o2.get("timestamp");
-                                return -t1.compareTo(t2);
+                                return t1.compareTo(t2);
                             }
                         });
 
@@ -427,6 +429,11 @@ public class BasicFriendService extends FriendService {
         });
     }
 
+    @Override
+    public boolean hasFriends() {
+        return hasFriends;
+    }
+
     private void subscribeToNotificationsTopic(String topic) {
         FirebaseMessaging.getInstance().subscribeToTopic(topic.replace("@", ""))
                 .addOnCompleteListener(task -> {
@@ -439,6 +446,4 @@ public class BasicFriendService extends FriendService {
                         }
                 );
     }
-
-    public boolean hasFriends() {return hasFriends;}
 }

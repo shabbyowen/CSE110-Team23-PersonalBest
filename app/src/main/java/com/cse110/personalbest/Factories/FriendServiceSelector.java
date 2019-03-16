@@ -1,6 +1,7 @@
 package com.cse110.personalbest.Factories;
 
 import com.cse110.personalbest.Services.BasicFriendService;
+import com.cse110.personalbest.Services.MockFriendService;
 
 public class FriendServiceSelector implements ServiceSelector {
     public static final String BASIC_FRIEND_SERVICE_KEY = "basic_friend_service_key";

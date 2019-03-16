@@ -32,4 +32,13 @@ public class ChatMessage {
     public MSG_TYPE getMsgType() {
         return this.msgType;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) return false;
+        if (!(o instanceof ChatMessage)) return false;
+        ChatMessage msg = (ChatMessage) o;
+        return this.chatText.equals(msg.getChatText()) && this.email.equals(msg.getEmail())
+                && this.msgType.equals(msg.getMsgType()) && this.time.equals(msg.getTime());
+    }
 }

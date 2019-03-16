@@ -60,8 +60,6 @@ public class BasicSessionService extends SessionService implements StepServiceLi
     private StepService stepService;
     private FriendService friendService;
 
-    private boolean doIHaveFriends = false;
-
     private ServiceConnection stepServiceConnection = new ServiceConnection() {
 
         @Override
@@ -82,10 +80,11 @@ public class BasicSessionService extends SessionService implements StepServiceLi
     };
 
     private ServiceConnection friendServiceConnection = new ServiceConnection() {
+
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             MyBinder binder = (MyBinder) service;
-            friendService = (BasicFriendService) binder.getService();
+            friendService = (FriendService) binder.getService();
 
             // reload current session
             currentSession = loadCurrentSession();
@@ -152,10 +151,11 @@ public class BasicSessionService extends SessionService implements StepServiceLi
             stepServiceKey = StepServiceSelector.GOOGLE_STEP_SERVICE_KEY;
         }
         startService(getStepServiceIntent());
-        startService(getBasicFriendServiceIntent());
+
+        startService(getFriendServiceIntent());
         if (!TestConfig.isTesting) {
             bindService(getStepServiceIntent(), stepServiceConnection, BIND_AUTO_CREATE);
-            bindService(getBasicFriendServiceIntent(), friendServiceConnection, BIND_AUTO_CREATE);
+            bindService(getFriendServiceIntent(), friendServiceConnection, BIND_AUTO_CREATE);
         }
 
         // start updating sessions
@@ -181,7 +181,7 @@ public class BasicSessionService extends SessionService implements StepServiceLi
         return intent;
     }
 
-    private Intent getBasicFriendServiceIntent() {
+    private Intent getFriendServiceIntent() {
         ServiceSelector serviceSelector = new FriendServiceSelector();
         Intent intent = new Intent(this, serviceSelector.retrieveServiceClass(friendServiceKey));
         intent.putExtra(FriendService.FRIEND_SERVICE_KEY_EXTRA, StorageSolutionFactory.SHARED_PREF_KEY);

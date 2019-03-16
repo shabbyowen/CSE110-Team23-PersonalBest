@@ -153,9 +153,9 @@ public class ChatHistoryActivity extends AppCompatActivity {
         chatMessagesListView = findViewById(R.id.lv_chat_messages);
         chatMessagesAdapter = new ChatMessagesListAdapter(this, new ArrayList<ChatMessage>());
         chatMessagesLayoutManager = new LinearLayoutManager(this);
-        chatMessagesLayoutManager.setReverseLayout(true);
-        chatMessagesListView.setLayoutManager(chatMessagesLayoutManager);
         chatMessagesListView.setAdapter(chatMessagesAdapter);
+        chatMessagesLayoutManager.setStackFromEnd(true);
+        chatMessagesListView.setLayoutManager(chatMessagesLayoutManager);
 
         // Setup Handler
         handler.removeCallbacks(messageUpdateTask);
@@ -203,13 +203,13 @@ public class ChatHistoryActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    public void onBackPressed() {
-        Log.d(TAG, "back button pressed");
-        Intent intent = new Intent(ChatHistoryActivity.this, MonthlyHistoryActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
+//    @Override
+//    public void onBackPressed() {
+//        Log.d(TAG, "back button pressed");
+//        Intent intent = new Intent(ChatHistoryActivity.this, MonthlyHistoryActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        startActivity(intent);
+//    }
 
     private Intent getFriendServiceIntent() {
         ServiceSelector serviceSelector = new FriendServiceSelector();
@@ -219,9 +219,15 @@ public class ChatHistoryActivity extends AppCompatActivity {
     }
 
     private void updateChatMessages(List<ChatMessage> result) {
-        chatMessagesAdapter = new ChatMessagesListAdapter(this, result);
-        chatMessagesListView.setAdapter(chatMessagesAdapter);
-        chatMessagesListView.scrollToPosition(0);
+        List<ChatMessage> currentMessages = chatMessagesAdapter.getMessages();
+        result.removeAll(currentMessages);
+        if (result.isEmpty()) {
+            return;
+        } else {
+            for (ChatMessage msg : result)
+                chatMessagesAdapter.addMessage(msg);
+            chatMessagesListView.scrollToPosition(chatMessagesAdapter.getItemCount() - 1);
+        }
     }
 
     private void sendMessage(String receiver, String message) {

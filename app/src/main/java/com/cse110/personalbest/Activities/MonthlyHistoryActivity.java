@@ -217,10 +217,10 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
             week4.weekSpeed = friendInfo.weekSpeed.subList(21, 28);
 
             MonthlyProgressFragmentInfo monthInfo = new MonthlyProgressFragmentInfo();
-            monthInfo.week1Info = week1;
-            monthInfo.week2Info = week2;
-            monthInfo.week3Info = week3;
-            monthInfo.week4Info = week4;
+            monthInfo.week1Info = week4;
+            monthInfo.week2Info = week3;
+            monthInfo.week3Info = week2;
+            monthInfo.week4Info = week1;
 
             monthlyProgressFragment.updateView(monthInfo);
         }
@@ -294,13 +294,13 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onBackPressed() {
-        Log.d(TAG, "back button pressed");
-        Intent intent = new Intent(MonthlyHistoryActivity.this, HomeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
+//    @Override
+//    public void onBackPressed() {
+//        Log.d(TAG, "back button pressed");
+//        Intent intent = new Intent(MonthlyHistoryActivity.this, HomeActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        startActivity(intent);
+//    }
 
     private void openChatActivity() {
         Intent intent = new Intent(this, ChatHistoryActivity.class);
