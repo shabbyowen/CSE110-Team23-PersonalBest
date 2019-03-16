@@ -34,4 +34,12 @@ public class Friend {
     public String toString() {
         return this.email;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) return false;
+        if (!(o instanceof Friend)) return false;
+        Friend that = (Friend) o;
+        return this.email.equals(that.getEmail());
+    }
 }

@@ -130,7 +130,6 @@ public class BasicSessionService extends SessionService implements StepServiceLi
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-
         if (intent != null) {
             // use the correct storage solution base on key
             String key = intent.getStringExtra(STORAGE_SOLUTION_KEY_EXTRA);
@@ -152,6 +151,7 @@ public class BasicSessionService extends SessionService implements StepServiceLi
             stepServiceKey = StepServiceSelector.GOOGLE_STEP_SERVICE_KEY;
         }
         startService(getStepServiceIntent());
+
         startService(getFriendServiceIntent());
         if (!TestConfig.isTesting) {
             bindService(getStepServiceIntent(), stepServiceConnection, BIND_AUTO_CREATE);

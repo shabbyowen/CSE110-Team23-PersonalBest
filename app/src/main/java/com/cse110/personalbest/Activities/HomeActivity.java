@@ -98,6 +98,8 @@ public class HomeActivity extends AppCompatActivity implements
 
     private int height = 70;
 
+    private boolean doesUserHaveFriends = false;
+
     // service connection for step service
     private ServiceConnection stepServiceConnection = new ServiceConnection() {
 

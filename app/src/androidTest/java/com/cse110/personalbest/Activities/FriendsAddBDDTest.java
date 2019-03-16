@@ -9,49 +9,47 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-
 import com.cse110.personalbest.Factories.FriendServiceSelector;
 import com.cse110.personalbest.Factories.SessionServiceSelector;
 import com.cse110.personalbest.Factories.StepServiceSelector;
 import com.cse110.personalbest.Factories.StorageSolutionFactory;
 import com.cse110.personalbest.R;
-
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static android.support.test.espresso.action.ViewActions.replaceText;
-import static android.support.test.espresso.action.ViewActions.scrollTo;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
-import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static android.support.test.espresso.matcher.ViewMatchers.*;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.is;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class FriendListUITest {
+public class FriendsAddBDDTest {
 
     @Rule
     public ActivityTestRule<HomeActivity> mActivityTestRule = new ActivityTestRule<HomeActivity>(HomeActivity.class, false, false);
 
+    private Intent homeActivityIntent;
+
+    @Before
+    public void setUp() {
+        homeActivityIntent = new Intent();
+        homeActivityIntent.putExtra(HomeActivity.FRIEND_SERVICE_KEY_EXTRA, FriendServiceSelector.MOCK_FRIEND_SERVICE_KEY);
+        homeActivityIntent.putExtra(HomeActivity.SESSION_SERVICE_KEY_EXTRA, SessionServiceSelector.MOCK_SESSION_SERVICE_KEY);
+        homeActivityIntent.putExtra(HomeActivity.STEP_SERVICE_KEY_EXTRA, StepServiceSelector.MOCK_STEP_SERVICE_KEY);
+        homeActivityIntent.putExtra(HomeActivity.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.MOCK_DICT_KEY);
+    }
+
     @Test
     public void friendListActivityTest() {
-        Intent intent = new Intent();
-        intent.putExtra(HomeActivity.STEP_SERVICE_KEY_EXTRA, StepServiceSelector.MOCK_STEP_SERVICE_KEY);
-        intent.putExtra(HomeActivity.FRIEND_SERVICE_KEY_EXTRA, FriendServiceSelector.MOCK_FRIEND_SERVICE_KEY);
-        intent.putExtra(HomeActivity.SESSION_SERVICE_KEY_EXTRA, SessionServiceSelector.MOCK_SESSION_SERVICE_KEY);
-        intent.putExtra(HomeActivity.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.MOCK_DICT_KEY);
-        mActivityTestRule.launchActivity(intent);
+        mActivityTestRule.launchActivity(homeActivityIntent);
 
         ViewInteraction bottomNavigationItemView = onView(
             allOf(withId(R.id.navigation_friend), withContentDescription("Friends"),
@@ -82,6 +80,60 @@ public class FriendListUITest {
                     0),
                 isDisplayed()));
         textView2.check(matches(withText("jit072@ucsd.edu")));
+    }
+
+    @Test
+    public void testAddFriend() {
+        mActivityTestRule.launchActivity(homeActivityIntent);
+        ViewInteraction bottomNavigationItemView = onView(
+                allOf(withId(R.id.navigation_friend), withContentDescription("Friends"),
+                        childAtPosition(
+                                childAtPosition(
+                                        withId(R.id.navigation),
+                                        0),
+                                1),
+                        isDisplayed()));
+        bottomNavigationItemView.perform(click());
+
+        ViewInteraction textView = onView(
+                allOf(withId(R.id.tv_pending_email), withText("test1@ucsd.edu"),
+                        childAtPosition(
+                                childAtPosition(
+                                        withId(R.id.lv_pending),
+                                        0),
+                                0),
+                        isDisplayed()));
+        textView.check(matches(withText("test1@ucsd.edu")));
+
+        ViewInteraction imageButton = onView(
+                allOf(withId(R.id.btn_pending_approve),
+                        childAtPosition(
+                                childAtPosition(
+                                        withId(R.id.lv_pending),
+                                        0),
+                                1),
+                        isDisplayed()));
+        imageButton.check(matches(isDisplayed()));
+
+        ViewInteraction appCompatImageButton = onView(
+                allOf(withId(R.id.btn_pending_approve),
+                        childAtPosition(
+                                childAtPosition(
+                                        withId(R.id.lv_pending),
+                                        0),
+                                1),
+                        isDisplayed()));
+        appCompatImageButton.perform(click());
+
+        ViewInteraction textView2 = onView(
+                allOf(withId(R.id.tv_friend_email), withText("test1@ucsd.edu"),
+                        childAtPosition(
+                                childAtPosition(
+                                        withId(R.id.lv_friends),
+                                        2),
+                                0),
+                        isDisplayed()));
+        textView2.check(matches(withText("test1@ucsd.edu")));
     }
 
     private static Matcher<View> childAtPosition(

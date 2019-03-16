@@ -10,7 +10,9 @@ import com.cse110.personalbest.Events.MyBinder;
 import com.cse110.personalbest.Events.WeeklyProgressFragmentInfo;
 import com.cse110.personalbest.Friend;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MockFriendService extends FriendService {
@@ -22,6 +24,8 @@ public class MockFriendService extends FriendService {
             return MockFriendService.this;
         }
     };
+    private List<Friend> friendsList = new ArrayList<>(Arrays.asList(new Friend("yal272@ucsd.edu"), new Friend("jit072@ucsd.edu")));
+    private List<Friend> pendingList = new ArrayList<>(Arrays.asList(new Friend("test1@ucsd.edu"), new Friend("test2@ucsd.edu")));
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -29,19 +33,19 @@ public class MockFriendService extends FriendService {
     }
 
     public void getPendingRequests(FriendServiceCallback callback){
-        callback.onPendingRequestsResult(new ArrayList<>());
+        callback.onPendingRequestsResult(pendingList);
     }
     public void getFriendList(FriendServiceCallback callback){
-        List<Friend> friendsList = new ArrayList<>();
-        friendsList.add(new Friend("yal272@ucsd.edu"));
-            friendsList.add(new Friend("jit072@ucsd.edu"));
         callback.onFriendsListResult(friendsList);
     }
     public void addFriend(Friend friend, FriendServiceCallback callback){
-
+        ((ArrayList)pendingList).remove(friend);
+        friendsList.add(friend);
+        callback.onAcceptFriendResult(true);
     }
     public void rejectFriend(Friend rejectedfriend, FriendServiceCallback callback){
-
+        ((ArrayList)pendingList).remove(rejectedfriend);
+        callback.onRejectFriendResult(true);
     }
     public void removeFriend(Friend removedfriend, FriendServiceCallback callback){
 
