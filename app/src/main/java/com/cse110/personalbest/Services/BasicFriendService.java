@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.cse110.personalbest.Activities.HomeActivity;
 import com.cse110.personalbest.ChatMessage;
 import com.cse110.personalbest.Events.FriendServiceCallback;
 import com.cse110.personalbest.Events.MyBinder;
@@ -16,6 +15,7 @@ import com.cse110.personalbest.Events.WeeklyProgressFragmentInfo;
 import com.cse110.personalbest.Factories.StorageSolutionFactory;
 import com.cse110.personalbest.Friend;
 import com.cse110.personalbest.Utilities.StorageSolution;
+import com.cse110.personalbest.Utilities.TimeMachine;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -44,12 +44,22 @@ public class BasicFriendService extends FriendService {
     private StorageSolution storageSolution;
     private String storageSolutionKey;
 
+    private boolean hasFriends = false;
+
     private IBinder binder = new MyBinder() {
         @Override
         public Service getService() {
             return BasicFriendService.this;
         }
     };
+
+    public class BasicFriendServiceBinder extends MyBinder {
+
+        @Override
+        public Service getService() {
+            return BasicFriendService.this;
+        }
+    }
 
     private FirebaseFirestore storage;
     private String userEmail;
@@ -61,10 +71,14 @@ public class BasicFriendService extends FriendService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        // use the correct storage solution base on key
-        String key = intent.getStringExtra(STORAGE_SOLUTION_KEY_EXTRA);
-        if (key != null) {
-            storageSolutionKey = key;
+        if (intent != null) {
+            // use the correct storage solution base on key
+            String key = intent.getStringExtra(STORAGE_SOLUTION_KEY_EXTRA);
+            if (key != null) {
+                storageSolutionKey = key;
+            }
+        } else {
+            storageSolutionKey = StorageSolutionFactory.SHARED_PREF_KEY;
         }
         storageSolution = StorageSolutionFactory.create(storageSolutionKey, this);
         userEmail = storageSolution.get(CURRENT_USER_KEY, "");
@@ -125,6 +139,9 @@ public class BasicFriendService extends FriendService {
                     } else {
                         Log.d(TAG, "No such document");
                     }
+
+                    hasFriends = !friends.isEmpty();
+
                     callback.onFriendsListResult(friends);
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
@@ -167,6 +184,9 @@ public class BasicFriendService extends FriendService {
                 List<String> targetPending = (List<String>) requestFriendSnapshot.get(PENDING_REQUESTS_KEY);
                 targetPending.remove(userEmail);
                 transaction.update(friendRef, PENDING_REQUESTS_KEY, targetPending);
+
+                //Test: In theory, should only test when adding and removing a friend.
+                hasFriends = !userFriends.isEmpty();
 
                 return null;
             }
@@ -235,6 +255,9 @@ public class BasicFriendService extends FriendService {
                 List<String> toRemoveFriends = (List<String>) toRemoveFriendSnapshot.get(FRIENDS_KEY);
                 toRemoveFriends.remove(userEmail);
                 transaction.update(removedFriendRef, FRIENDS_KEY, toRemoveFriends);
+
+                //Test: In theory, should only test when adding and removing a friend.
+                hasFriends = !friends.isEmpty();
 
                 return null;
             }
@@ -307,6 +330,7 @@ public class BasicFriendService extends FriendService {
         chatData.put("from", userEmail);
         chatData.put("to", friendEmail);
         chatData.put("content", message);
+        chatData.put("timestamp", TimeMachine.now());
         userChatRef.add(chatData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
@@ -348,7 +372,7 @@ public class BasicFriendService extends FriendService {
                             public int compare(DocumentSnapshot o1, DocumentSnapshot o2) {
                                 Timestamp t1 = (Timestamp)o1.get("timestamp");
                                 Timestamp t2 = (Timestamp)o2.get("timestamp");
-                                return -t1.compareTo(t2);
+                                return t1.compareTo(t2);
                             }
                         });
 
@@ -359,18 +383,23 @@ public class BasicFriendService extends FriendService {
                             String toEmail = (String) doc.get(MESSAGE_TO_KEY);
                             String chatText = (String) doc.get(MESSAGE_CONTENT_KEY);
                             Timestamp timestamp = (Timestamp) doc.get("timestamp");
+                            Date date;
+                            if (timestamp == null) {
+                                date = TimeMachine.now();
+                            } else {
+                                date = timestamp.toDate();
+                            }
                             ChatMessage chatMessage;
                             if (fromEmail.equals(friendEmail)) {
                                 // Received Message
-                                chatMessage = new ChatMessage(fromEmail, chatText, simpleDateFormat.format(timestamp.toDate()), ChatMessage.MSG_TYPE.FROM_FRIEND);
+                                chatMessage = new ChatMessage(fromEmail, chatText, simpleDateFormat.format(date), ChatMessage.MSG_TYPE.FROM_FRIEND);
                             } else {
                                 // Sent Message
-                                chatMessage = new ChatMessage(toEmail, chatText, simpleDateFormat.format(timestamp.toDate()), ChatMessage.MSG_TYPE.TO_FRIEND);
+                                chatMessage = new ChatMessage(toEmail, chatText, simpleDateFormat.format(date), ChatMessage.MSG_TYPE.TO_FRIEND);
                             }
                             convertedMessages.add(chatMessage);
                         }
 
-                        // TODO: fix this callback to let it actually return things
                         callback.onRetrieveMessageResult(convertedMessages);
                     }
                 });
@@ -398,6 +427,11 @@ public class BasicFriendService extends FriendService {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean hasFriends() {
+        return hasFriends;
     }
 
     private void subscribeToNotificationsTopic(String topic) {

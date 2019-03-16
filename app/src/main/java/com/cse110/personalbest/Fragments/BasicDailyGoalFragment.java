@@ -86,7 +86,7 @@ public class BasicDailyGoalFragment extends DailyGoalFragment {
 
     @Override
     public void updateView(DailyGoalFragmentInfo info) {
-        if (viewReady) {
+        if (viewReady && isAdded()) {
             if (info.step != null) {
                 currentStepTextView.setText(String.valueOf(info.step));
             }

@@ -74,7 +74,7 @@ public class GoogleStepService extends StepService {
         }
     };
 
-    private class GoalInfo {
+    public class GoalInfo {
         public int goal;
         public long time;
 
@@ -90,10 +90,14 @@ public class GoogleStepService extends StepService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        // use the correct storage solution base on key
-        String key = intent.getStringExtra(STORAGE_SOLUTION_KEY_EXTRA);
-        if (key != null) {
-            storageSolutionKey = key;
+        if (intent != null) {
+            // use the correct storage solution base on key
+            String key = intent.getStringExtra(STORAGE_SOLUTION_KEY_EXTRA);
+            if (key != null) {
+                storageSolutionKey = key;
+            }
+        } else {
+            storageSolutionKey = StorageSolutionFactory.SHARED_PREF_KEY;
         }
 
         // TODO: figure out what will happen when onStartCommand is called twice
@@ -345,7 +349,7 @@ public class GoogleStepService extends StepService {
                             public void onStepResult(List<Integer> result) {
 
                                 int yesterdayStep = result.get(result.size() - 2);
-                                Date lastEncouragementDate = new Date(storageSolution.get(LAST_ENCOURAGEMENT, (long) 0));
+                                Date lastEncouragementDate = new Date(storageSolution.get(LAST_ENCOURAGEMENT, 0L));
                                 Date lastGoalMetDate = new Date(storageSolution.get(LAST_GOAL_MET, 0L));
                                 Date now = TimeMachine.now();
                                 Calendar cal = Calendar.getInstance();
@@ -357,8 +361,9 @@ public class GoogleStepService extends StepService {
 
                                 boolean shouldPromptEncouragement =
                                     !DateCalculator.isSameDate(lastEncouragementDate, now) &&
-                                    cal.get(Calendar.HOUR_OF_DAY) > 20 &&
-                                    (step - yesterdayStep) / 500 > 0;
+                                    cal.get(Calendar.HOUR_OF_DAY) >= 20 &&
+                                    (step - yesterdayStep - yesterdayStep) >= 0 &&
+                                    step != 0;
 
                                 // notify the listeners
                                 for (ObservableServiceListener listener : listeners) {

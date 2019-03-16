@@ -40,8 +40,8 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
     private static final String SENDER = "sender";
     private static final String RECEIVER = "receiver";
     private static final String TAG = "MonthlyHistoryActivity";
-    private static final String CHAT_FRIEND_EMAIL = "chat_friend_email";
-    private static final String MY_EMAIL = "my_email";
+    public static final String CHAT_FRIEND_EMAIL = "chat_friend_email";
+    public static final String MY_EMAIL = "my_email";
 
     private MonthlyProgressFragment monthlyProgressFragment;
     private WeeklyProgressFragmentInfo friendInfo;
@@ -62,17 +62,19 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MyBinder binder = (MyBinder) service;
-            friendService = (FriendService) binder.getService();
+            if (name != null || service != null) {
+                MyBinder binder = (MyBinder) service;
+                friendService = (FriendService) binder.getService();
 
-            // update friend's monthly activity
-            friendService.retrieveProgress(receiver, new FriendServiceCallback() {
-                @Override
-                public void onRetrieveProgressResult(WeeklyProgressFragmentInfo info) {
-                    friendInfo = info;
-                    updateMonthlyProgressFragment();
-                }
-            });
+                // update friend's monthly activity
+                friendService.retrieveProgress(receiver, new FriendServiceCallback() {
+                    @Override
+                    public void onRetrieveProgressResult(WeeklyProgressFragmentInfo info) {
+                        friendInfo = info;
+                        updateMonthlyProgressFragment();
+                    }
+                });
+            }
         }
 
         @Override
@@ -185,7 +187,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         super.onPause();
 
         // unbind the service
-        //unbindService(friendServiceConnection);
+        unbindService(friendServiceConnection);
         Log.d(TAG, "Unbind friend service");
     }
 
@@ -217,10 +219,10 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
             week4.weekSpeed = friendInfo.weekSpeed.subList(21, 28);
 
             MonthlyProgressFragmentInfo monthInfo = new MonthlyProgressFragmentInfo();
-            monthInfo.week1Info = week1;
-            monthInfo.week2Info = week2;
-            monthInfo.week3Info = week3;
-            monthInfo.week4Info = week4;
+            monthInfo.week1Info = week4;
+            monthInfo.week2Info = week3;
+            monthInfo.week3Info = week2;
+            monthInfo.week4Info = week1;
 
             monthlyProgressFragment.updateView(monthInfo);
         }
@@ -261,16 +263,13 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        unbindService(friendServiceConnection);
         finish();
         return true;
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_BACK)
-        {
-            unbindService(friendServiceConnection);
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
             finish();
             return true;
         }
@@ -296,15 +295,15 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onBackPressed() {
-        Log.d(TAG, "back button pressed");
-        Intent intent = new Intent(MonthlyHistoryActivity.this, HomeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
+//    @Override
+//    public void onBackPressed() {
+//        Log.d(TAG, "back button pressed");
+//        Intent intent = new Intent(MonthlyHistoryActivity.this, HomeActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        startActivity(intent);
+//    }
 
-    private void openChatActivity() {
+    public void openChatActivity() {
         Intent intent = new Intent(this, ChatHistoryActivity.class);
         intent.putExtra(MY_EMAIL, sender);
         intent.putExtra(CHAT_FRIEND_EMAIL, receiver);

@@ -96,7 +96,7 @@ public class BasicWeeklyProgressFragment extends WeeklyProgressFragment {
 
         barSet = new BarDataSet(yVals1, "");
         barSet.setDrawIcons(false);
-        barSet.setStackLabels(new String[]{"Other", "Planned"});
+        barSet.setStackLabels(new String[]{"Planned", "Other"});
         barSet.setValueTextSize(15);
 
         barSet.setColors(bar_colors);
