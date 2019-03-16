@@ -62,17 +62,19 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MyBinder binder = (MyBinder) service;
-            friendService = (FriendService) binder.getService();
+            if (name != null || service != null) {
+                MyBinder binder = (MyBinder) service;
+                friendService = (FriendService) binder.getService();
 
-            // update friend's monthly activity
-            friendService.retrieveProgress(receiver, new FriendServiceCallback() {
-                @Override
-                public void onRetrieveProgressResult(WeeklyProgressFragmentInfo info) {
-                    friendInfo = info;
-                    updateMonthlyProgressFragment();
-                }
-            });
+                // update friend's monthly activity
+                friendService.retrieveProgress(receiver, new FriendServiceCallback() {
+                    @Override
+                    public void onRetrieveProgressResult(WeeklyProgressFragmentInfo info) {
+                        friendInfo = info;
+                        updateMonthlyProgressFragment();
+                    }
+                });
+            }
         }
 
         @Override
@@ -267,8 +269,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_BACK)
-        {
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
             finish();
             return true;
         }
@@ -302,7 +303,7 @@ public class MonthlyHistoryActivity extends AppCompatActivity {
 //        startActivity(intent);
 //    }
 
-    private void openChatActivity() {
+    public void openChatActivity() {
         Intent intent = new Intent(this, ChatHistoryActivity.class);
         intent.putExtra(MY_EMAIL, sender);
         intent.putExtra(CHAT_FRIEND_EMAIL, receiver);
