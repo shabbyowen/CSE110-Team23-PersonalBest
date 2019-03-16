@@ -82,7 +82,7 @@ public class FriendsRejectBDDTest {
         textView2.check(matches(withText("jit072@ucsd.edu")));
     }
 
-    @Test
+    /*@Test
     public void testRejectFriend() {
         mActivityTestRule.launchActivity(homeActivityIntent);
         ViewInteraction bottomNavigationItemView = onView(
@@ -134,7 +134,7 @@ public class FriendsRejectBDDTest {
                                 0),
                         isDisplayed()));
         textView2.check(matches(withText("test2@ucsd.edu")));
-    }
+    }*/
 
     @After
     public void after() {
