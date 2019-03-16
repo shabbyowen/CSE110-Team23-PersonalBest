@@ -45,18 +45,11 @@ public class FriendListUITest {
 
     @Test
     public void friendListActivityTest() {
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
         Intent intent = new Intent();
         intent.putExtra(HomeActivity.FRIEND_SERVICE_KEY_EXTRA, FriendServiceSelector.MOCK_FRIEND_SERVICE_KEY);
         intent.putExtra(HomeActivity.SESSION_SERVICE_KEY_EXTRA, SessionServiceSelector.MOCK_SESSION_SERVICE_KEY);
         intent.putExtra(HomeActivity.STORAGE_SOLUTION_KEY_EXTRA, StorageSolutionFactory.MOCK_DICT_KEY);
         mActivityTestRule.launchActivity(intent);
-
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
 
         ViewInteraction bottomNavigationItemView = onView(
             allOf(withId(R.id.navigation_friend), withContentDescription("Friends"),
@@ -67,11 +60,6 @@ public class FriendListUITest {
                     1),
                 isDisplayed()));
         bottomNavigationItemView.perform(click());
-
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
-
 
         ViewInteraction textView = onView(
             allOf(withId(R.id.tv_friend_email), withText("yal272@ucsd.edu"),
