@@ -406,6 +406,9 @@ public class HomeActivity extends AppCompatActivity implements
             info.currentDist = dist;
             dailyGoalFragment.updateView(info);
         }
+        if (sessionService != null) {
+            sessionService.uploadMonthlyProgress();
+        }
     }
 
     @Override
