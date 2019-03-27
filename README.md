@@ -23,12 +23,11 @@ Personal Best is an Android app for people who want to get more fit but are sens
 * Haaris Tahir-Kheli - [@oneofthem999](https://github.com/oneofthem999)
 
 ## Screenshots & Usages
-Home Screen
 
-Daily Summary & Walking Session                 |  Friend List | Weekly Progress
+Home Screen                       |  Friend List                     | Weekly Progress
 | :-----------------------------: | :------------------------------: | :----------------------------------: |
 | ![](screenshots/daily_goal.gif) | ![](screenshots/friend_list.png) | ![](screenshots/weekly_progress.png) |
 
-Friend's Monthly Summary                |  Live Chat
-| :----------------------------------: | :------------------------------: |
-| ![](screenshots/monthly_history.png) | ![](screenshots/chat.gif) |
+  Walking session              | Friend's Monthly Summary             |  Live Chat
+| :--------------------------: | :----------------------------------: | :-----------------------: |
+| ![](screenshots/session.gif) | ![](screenshots/monthly_history.png) | ![](screenshots/chat.gif) |
