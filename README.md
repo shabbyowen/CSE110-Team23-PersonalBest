@@ -31,4 +31,4 @@ Daily Summary & Walking Session                 |  Friend List | Weekly Progress
 
 Friend's Monthly Summary                |  Live Chat
 | :----------------------------------: | :------------------------------: |
-| ![](screenshots/monthly_history.png) | ![](screenshots/chat.png) |
+| ![](screenshots/monthly_history.png) | ![](screenshots/chat.gif) |
